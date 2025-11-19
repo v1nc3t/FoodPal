@@ -1,6 +1,6 @@
 package commons;
 
-public class InformalAmount {
+public class InformalAmount extends Amount {
     private String description;
 
     public InformalAmount(String description) {
