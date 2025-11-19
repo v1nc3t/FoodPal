@@ -24,6 +24,10 @@
     <module name="BeforeExecutionExclusionFileFilter">
         <property name="fileNamePattern" value=".*TestClass\.java$"/>
     </module>
+    <module name="SuppressionFilter">
+        <property name="file" value="checkstyle-suppressions.xml"/>
+        <property name="optional" value="false"/>
+    </module>
     <module name="TreeWalker">
         <module name="JavadocMethod">
             <property name="severity" value="warning"/>
@@ -52,7 +56,6 @@
         <module name="VisibilityModifier">
             <property name="severity" value="warning"/>
             <property name="protectedAllowed" value="true"/>
-            <property name="ignoreAnnotationCanonicalNames" value="Entity"/>
         </module>
         <module name="OuterTypeFilename">
             <property name="severity" value="warning"/>
