@@ -3,7 +3,7 @@ package commons;
 import java.util.Objects;
 
 public class Ingredient {
-    
+
     private int id;
     private String name;
     static int ingredientCount = 0;
