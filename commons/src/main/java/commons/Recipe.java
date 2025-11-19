@@ -1,6 +1,7 @@
 package commons;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Recipe {
 
@@ -64,6 +65,6 @@ public class Recipe {
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(id, title, ingredients, steps, servingSize);
+        return Objects.hash(id, title, ingredients, steps, servingSize);
     }
 }
