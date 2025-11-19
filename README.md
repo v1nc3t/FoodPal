@@ -16,3 +16,5 @@ Get the template project running from the command line first to ensure you have 
 
 Once it is working, you can try importing the project into your favorite IDE. Especially the client is a bit more tricky to set up there due to the dependency on a JavaFX SDK.
 To help you get started, you can find additional instructions in the corresponding README of the client project.
+
+Testing Commit
