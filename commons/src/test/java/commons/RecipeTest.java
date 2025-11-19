@@ -36,7 +36,7 @@ public class RecipeTest {
 
     @Test
     public void testGetId() {
-        assertEquals(4, recipe.getId());
+        assertNotNull(recipe.getId());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class RecipeTest {
 
     @Test
     public void testToString() {
-        String expectedString = "Recipe{id=5, title='Cake', ingredients=" + recipe.getIngredients() +
+        String expectedString = "Recipe{id=" + recipe.getId().toString() + ", title='Cake', ingredients=" + recipe.getIngredients() +
                 ", steps='" + recipe.getSteps() + "', servingSize=4}";
         assertEquals(expectedString, recipe.toString());
     }

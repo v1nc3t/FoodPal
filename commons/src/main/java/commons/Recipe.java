@@ -2,10 +2,11 @@ package commons;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Recipe {
 
-    private int id;
+    private UUID id;
     private String title;
     private List<RecipeIngredient> ingredients;
     private List<String> steps;
@@ -13,14 +14,14 @@ public class Recipe {
     static int recipeCount = 0;
     
     public Recipe(String title, List<RecipeIngredient> ingredients, List<String> steps, int servingSize) {
-        this.id = recipeCount++;
+        this.id = UUID.randomUUID();
         this.title = title;
         this.ingredients = ingredients;
         this.steps = steps;
         this.servingSize = servingSize;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 

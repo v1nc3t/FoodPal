@@ -1,17 +1,18 @@
 package commons;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class RecipeIngredient {
-    private int ingredientRef;
+    private UUID ingredientRef;
     private Amount amount;
 
-    public RecipeIngredient(int ingredientRef, Amount amount) {
+    public RecipeIngredient(UUID ingredientRef, Amount amount) {
         this.ingredientRef = ingredientRef;
         this.amount = amount;
     }
 
-    public int getIngredientRef() {
+    public UUID getIngredientRef() {
         return ingredientRef;
     }
 
@@ -22,7 +23,7 @@ public class RecipeIngredient {
     @Override
     public String toString() {
         return "RecipeIngredient{" +
-                "ingredientRef=" + ingredientRef +
+                "ingredientRef=" + getIngredientRef().toString() +
                 ", amount=" + amount +
                 '}';
     }

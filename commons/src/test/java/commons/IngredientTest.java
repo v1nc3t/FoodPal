@@ -18,7 +18,7 @@ public class IngredientTest {
     @Test
     public void testGetId() {
         Ingredient ingredient = new Ingredient("Sugar");
-        assertEquals(2, ingredient.getId());
+        assertNotNull(ingredient.getId());
     }
 
     @Test
@@ -37,7 +37,7 @@ public class IngredientTest {
     @Test
     public void testToString() {
         Ingredient ingredient = new Ingredient("Sugar");
-        int id = ingredient.getId();
+        String id = ingredient.getId().toString();
         String expectedString = "Ingredient{id=" + id + ", name='Sugar'}";
         assertEquals(expectedString, ingredient.toString());
     }

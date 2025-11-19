@@ -1,19 +1,20 @@
 package commons;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class Ingredient {
 
-    private int id;
+    private UUID id;
     private String name;
     static int ingredientCount = 0;
 
     public Ingredient(String name) {
-        this.id = ingredientCount++;
+        this.id = UUID.randomUUID();
         this.name = name;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -28,7 +29,7 @@ public class Ingredient {
     @Override
     public String toString() {
         return "Ingredient{" +
-                "id=" + id +
+                "id=" + getId().toString() +
                 ", name='" + name + '\'' +
                 '}';
     }
