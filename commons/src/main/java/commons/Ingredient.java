@@ -7,7 +7,6 @@ public class Ingredient {
 
     private UUID id;
     private String name;
-    static int ingredientCount = 0;
 
     public Ingredient(String name) {
         this.id = UUID.randomUUID();

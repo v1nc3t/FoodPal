@@ -11,7 +11,6 @@ public class Recipe {
     private List<RecipeIngredient> ingredients;
     private List<String> steps;
     private int servingSize;
-    static int recipeCount = 0;
     
     public Recipe(String title, List<RecipeIngredient> ingredients, List<String> steps, int servingSize) {
         this.id = UUID.randomUUID();
