@@ -8,11 +8,11 @@ public class Recipe {
     private int id;
     private String title;
     private List<RecipeIngredient> ingredients;
-    private String steps;
+    private List<String> steps;
     private int servingSize;
     static int recipeCount = 0;
     
-    public Recipe(String title, List<RecipeIngredient> ingredients, String steps, int servingSize) {
+    public Recipe(String title, List<RecipeIngredient> ingredients, List<String> steps, int servingSize) {
         this.id = recipeCount++;
         this.title = title;
         this.ingredients = ingredients;
@@ -32,7 +32,7 @@ public class Recipe {
         return ingredients;
     }
 
-    public String getSteps() {
+    public List<String> getSteps() {
         return steps;
     }
 
