@@ -9,4 +9,5 @@ public enum Unit {
     TABLESPOON,
     TEASPOON,
     PIECE
+    //Just an example, more units can be added as needed
 }
