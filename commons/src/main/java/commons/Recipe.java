@@ -1,5 +1,7 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,8 +22,15 @@ public class Recipe {
         this.servingSize = servingSize;
     }
 
+    @JsonCreator
+    public Recipe() {}
+
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getTitle() {

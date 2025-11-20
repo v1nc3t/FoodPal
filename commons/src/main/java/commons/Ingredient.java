@@ -1,5 +1,8 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -7,6 +10,13 @@ public class Ingredient {
 
     private UUID id;
     private String name;
+
+    @JsonCreator
+    public Ingredient(@JsonProperty("name") String name,
+                      @JsonProperty("id") UUID id) {
+        this.name = name;
+        this.id = id;
+    }
 
     public Ingredient(String name) {
         this.id = UUID.randomUUID();

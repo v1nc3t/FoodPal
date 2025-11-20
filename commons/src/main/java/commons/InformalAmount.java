@@ -1,9 +1,13 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class InformalAmount extends Amount {
     private String description;
 
-    public InformalAmount(String description) {
+    @JsonCreator
+    public InformalAmount(@JsonProperty("description") String description) {
         this.description = description;
     }
 
