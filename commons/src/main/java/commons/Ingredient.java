@@ -7,10 +7,16 @@ public class Ingredient {
 
     private UUID id;
     private String name;
+    private double proteinPer100g;
+    private double fatPer100g;
+    private double carbsPer100g;
 
-    public Ingredient(String name) {
+    public Ingredient(String name, double proteinPer100g, double fatPer100g, double carbsPer100g) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.proteinPer100g = proteinPer100g;
+        this.fatPer100g = fatPer100g;
+        this.carbsPer100g = carbsPer100g;
     }
 
     public UUID getId() {
@@ -21,8 +27,16 @@ public class Ingredient {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public double getProteinPer100g() {
+        return proteinPer100g;
+    }
+
+    public double getFatPer100g() {
+        return fatPer100g;
+    }
+
+    public double getCarbsPer100g() {
+        return carbsPer100g;
     }
 
     @Override
