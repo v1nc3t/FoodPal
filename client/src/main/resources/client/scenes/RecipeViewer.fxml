@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.Pane?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #8FAD88;" xmlns="http://javafx.com/javafx/25">
+
+   <Button layoutX="548.0" layoutY="360.0" mnemonicParsing="false" style="-fx-background-color: #CBDF90;" text="Edit" textFill="WHITE" />
+   <ListView prefHeight="400.0" prefWidth="233.0" />
+   <Button layoutX="8.0" layoutY="366.0" mnemonicParsing="false" style="-fx-background-color: #CBDF90;" text="+" textFill="WHITE" />
+
+</Pane>

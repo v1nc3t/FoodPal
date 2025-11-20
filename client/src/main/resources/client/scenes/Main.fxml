@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="399.0" prefWidth="349.0" style="-fx-background-color: #8FAD88;" xmlns="http://javafx.com/javafx/25">
+   <Text fill="#cbdf90" layoutX="63.0" layoutY="59.0" stroke="#0a0a0a" strokeType="OUTSIDE" strokeWidth="0.0" text="FoodPal">
+      <font>
+        <Font name="LEMON MILK Bold" size="42.0" />
+      </font>
+   </Text>
+    <Button layoutX="143.0" layoutY="322.0" mnemonicParsing="false" style="-fx-background-color: white;" text="Start" textFill="#8fad88">
+        <font>
+            <Font name="LEMON MILK Bold" size="13.0" />
+        </font>
+   </Button>
+</Pane>
