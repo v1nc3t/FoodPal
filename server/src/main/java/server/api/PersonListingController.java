@@ -1,12 +1,12 @@
 /**
  * Copyright 2024 Sebastian Proksch
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -30,23 +30,23 @@ import commons.Person;
 @RequestMapping("/api/people")
 public class PersonListingController {
 
-	private List<Person> people = new LinkedList<>();
+    private List<Person> people = new LinkedList<>();
 
-	public PersonListingController() {
-		people.add(new Person("Mickey", "Mouse"));
-		people.add(new Person("Donald", "Duck"));
-	}
+    public PersonListingController() {
+        people.add(new Person("Mickey", "Mouse"));
+        people.add(new Person("Donald", "Duck"));
+    }
 
-	@GetMapping("/")
-	public List<Person> list() {
-		return people;
-	}
+    @GetMapping("/")
+    public List<Person> list() {
+        return people;
+    }
 
-	@PostMapping("/")
-	public List<Person> add(@RequestBody Person p) {
-		if (!people.contains(p)) {
-			people.add(p);
-		}
-		return people;
-	}
+    @PostMapping("/")
+    public List<Person> add(@RequestBody Person p) {
+        if (!people.contains(p)) {
+            people.add(p);
+        }
+        return people;
+    }
 }
