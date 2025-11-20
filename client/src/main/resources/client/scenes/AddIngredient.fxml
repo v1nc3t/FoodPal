@@ -3,20 +3,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="294.0" prefWidth="414.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
-    <Label layoutX="28.0" layoutY="37.0" text="Name" />
-    <TextField layoutX="89.0" layoutY="33.0" prefHeight="25.0" prefWidth="299.0" promptText="Enter ingredient name" />
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="280.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <Label layoutX="21.0" layoutY="26.0" text="Name" />
+    <TextField layoutX="82.0" layoutY="22.0" prefHeight="25.0" prefWidth="299.0" promptText="Enter ingredient name" />
 
-    <ComboBox fx:id="ingredientComboBox" layoutX="246.0" layoutY="74.0" prefHeight="25.0" prefWidth="142.0" promptText="Select unit" />
-    <Label layoutX="28.0" layoutY="121.0" text="Protein" />
-    <Label layoutX="28.0" layoutY="165.0" text="Fat" />
-    <Label layoutX="28.0" layoutY="208.0" text="Carbs" />
-    <TextField layoutX="89.0" layoutY="74.0" prefHeight="25.0" prefWidth="142.0" promptText="Amount of ingredient" />
-    <Button layoutX="269.0" layoutY="245.0" mnemonicParsing="false" text="Cancel" />
-    <Button layoutX="343.0" layoutY="245.0" mnemonicParsing="false" text="Done" />
-    <TextField layoutX="89.0" layoutY="117.0" prefHeight="25.0" prefWidth="142.0" promptText="Grams of protein" />
-    <TextField layoutX="89.0" layoutY="203.0" prefHeight="25.0" prefWidth="142.0" promptText="Grams of carbohydrates" />
-    <TextField layoutX="89.0" layoutY="161.0" prefHeight="25.0" prefWidth="142.0" promptText="Grams of fat" />
-    <Label layoutX="28.0" layoutY="78.0" text="Amount" />
+    <ComboBox fx:id="ingredientComboBox" layoutX="239.0" layoutY="63.0" prefHeight="25.0" prefWidth="142.0" promptText="Select unit" />
+    <Label layoutX="21.0" layoutY="110.0" text="Protein" />
+    <Label layoutX="21.0" layoutY="154.0" text="Fat" />
+    <Label layoutX="21.0" layoutY="197.0" text="Carbs" />
+    <TextField layoutX="82.0" layoutY="63.0" prefHeight="25.0" prefWidth="142.0" promptText="Amount of ingredient" />
+    <Button layoutX="266.0" layoutY="235.0" mnemonicParsing="false" text="Cancel" />
+    <Button layoutX="335.0" layoutY="235.0" mnemonicParsing="false" text="Done" />
+    <TextField layoutX="82.0" layoutY="106.0" prefHeight="25.0" prefWidth="142.0" promptText="Grams of protein" />
+    <TextField layoutX="82.0" layoutY="192.0" prefHeight="25.0" prefWidth="142.0" promptText="Grams of carbohydrates" />
+    <TextField layoutX="82.0" layoutY="150.0" prefHeight="25.0" prefWidth="142.0" promptText="Grams of fat" />
+    <Label layoutX="21.0" layoutY="67.0" text="Amount" />
 </AnchorPane>
-
