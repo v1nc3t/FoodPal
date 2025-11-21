@@ -25,7 +25,7 @@ import com.google.inject.Injector;
 import client.scenes.AddQuoteCtrl;
 import client.scenes.MainCtrl;
 import client.scenes.QuoteOverviewCtrl;
-import client.utils.ServerUtils;
+import client.utils.ServerUtilsNONO;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -41,7 +41,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        var serverUtils = INJECTOR.getInstance(ServerUtils.class);
+        var serverUtils = INJECTOR.getInstance(ServerUtilsNONO.class);
         if (!serverUtils.isServerAvailable()) {
             var msg = "Server needs to be started before the client, " +
                     "but it does not seem to be available. Shutting down.";
