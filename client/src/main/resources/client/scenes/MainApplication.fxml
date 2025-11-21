@@ -13,7 +13,8 @@
    <left>
       <Pane prefHeight="350.0" prefWidth="200.0" BorderPane.alignment="CENTER">
           <ListView prefHeight="300.0" prefWidth="200.0" />
-          <Button layoutX="14.0" layoutY="312.0" mnemonicParsing="false" text="+" />
+          <Button layoutX="13.0" layoutY="312.0" mnemonicParsing="false" text="Add" />
+         <Button layoutX="65.0" layoutY="312.0" mnemonicParsing="false" text="Remove" />
       </Pane>
    </left>
 </BorderPane>
