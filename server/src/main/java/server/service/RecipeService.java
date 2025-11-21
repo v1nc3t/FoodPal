@@ -11,17 +11,16 @@ import java.util.UUID;
 /// Service that keeps track of recipes
 /// Temporarily it stores everything in memory
 @Service
-public class RecipeService {
+public class RecipeService implements IRecipeService {
     private final HashMap<UUID, Recipe> recipes =  new HashMap<>();
     private final HashMap<UUID, Ingredient> ingredients = new HashMap<>();
 
-    /// Get a snapshot of the current state of the `RecipeService`,
-    /// the returned value is a record, so it will not be updated.
+    @Override
     public RecipeState getState() {
         return new RecipeState(recipes.values(), ingredients.values());
     }
 
-    /// Note: Setting a recipe with the same id should replace the old version with the new one
+    @Override
     public void setRecipe(Recipe recipe) throws InvalidRecipeError {
         if (recipe == null)
             throw new InvalidRecipeError();
@@ -36,7 +35,7 @@ public class RecipeService {
         recipes.put(recipe.getId(), recipe);
     }
 
-    /// Note: Setting an ingredient with the same id should replace the old version with the new one
+    @Override
     public void setIngredient(Ingredient ingredient) {
         ingredients.put(ingredient.getId(), ingredient);
     }

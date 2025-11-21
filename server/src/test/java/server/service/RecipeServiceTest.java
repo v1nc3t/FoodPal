@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RecipeServiceTest {
     @Test
-    public void testAddIngredient() {
+    public void addIngredient() {
         RecipeService recipeService = new RecipeService();
         recipeService.setIngredient(new Ingredient("Yogurt"));
         assertTrue(recipeService.getState().recipes().isEmpty());
@@ -27,12 +27,12 @@ public class RecipeServiceTest {
 
     }
     @Test
-    public void testRecipeNull() {
+    public void recipeNull() {
         RecipeService recipeService = new RecipeService();
         assertThrows(InvalidRecipeError.class, () -> recipeService.setRecipe(null));
     }
     @Test
-    public void testRecipeInvalidIngredient() {
+    public void recipeInvalidIngredient() {
         RecipeService recipeService = new RecipeService();
         var recipe = new Recipe(
                 "Evil yogurt",
@@ -52,7 +52,7 @@ public class RecipeServiceTest {
         );
     }
     @Test
-    public void testAddRecipe() throws InvalidRecipeError {
+    public void addRecipe() throws InvalidRecipeError {
         RecipeService recipeService = new RecipeService();
         var yogurt = new Ingredient("Yogurt");
         var sugar  = new Ingredient("Sugar");
@@ -101,11 +101,6 @@ public class RecipeServiceTest {
                 .getIngredients()
                 .stream()
                 .anyMatch(v -> v.getIngredientRef() == sugar.getId()));
-        assertEquals(67, firstRecipe.get().getServingSize());
-        assertEquals(List.of(
-                "Get sugar",
-                "Get yogurt",
-                "Mix"
-        ), firstRecipe.get().getSteps());
+        assertEquals(recipe, firstRecipe.get());
     }
 }
