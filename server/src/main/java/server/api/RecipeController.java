@@ -12,6 +12,10 @@ import server.service.IRecipeService;
 @RequestMapping("/api/recipes")
 public class RecipeController {
     private final IRecipeService recipeService;
+    /// Creates a Recipe RestController which uses the provided interface service
+    /// for resolving requests.
+    ///
+    /// In runtime this interface will be injected by spring-boot
     public RecipeController(IRecipeService recipeService) {
         this.recipeService = recipeService;
     }
