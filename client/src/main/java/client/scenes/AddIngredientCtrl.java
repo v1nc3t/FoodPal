@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.utils.ServerUtils;
 import commons.Unit;
+import jakarta.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -30,6 +31,7 @@ public class AddIngredientCtrl {
     private final ServerUtils server;
     // main controller attribute
 
+    @Inject
     public AddIngredientCtrl(ServerUtils server) {
         this.server = server;
         // inject main controller
