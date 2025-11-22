@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12">
+    <Label layoutX="26.0" layoutY="17.0" text="Name" />
+    <Label layoutX="26.0" layoutY="53.0" text="Ingredients" />
+    <Label layoutX="25.0" layoutY="181.0" text="Preparation" />
+    <Button layoutX="345.0" layoutY="313.0" mnemonicParsing="false" text="Done" />
+    <Button layoutX="283.0" layoutY="313.0" mnemonicParsing="false" text="Cancel" />
+    <TextField layoutX="108.0" layoutY="13.0" prefHeight="25.0" prefWidth="240.0" promptText="Recipe name" />
+    <ScrollPane layoutX="108.0" layoutY="84.0" prefHeight="80.0" prefWidth="240.0" />
+    <TextField layoutX="108.0" layoutY="177.0" prefHeight="25.0" prefWidth="240.0" promptText="Add preparation step" />
+    <ScrollPane layoutX="108.0" layoutY="212.0" prefHeight="80.0" prefWidth="240.0" />
+    <Button layoutX="359.0" layoutY="177.0" mnemonicParsing="false" text="+" />
+    <ComboBox layoutX="108.0" layoutY="49.0" prefHeight="25.0" prefWidth="240.0" promptText="Select ingredient" />
+   <Label layoutX="26.0" layoutY="305.0" text="Serving size" />
+   <TextField layoutX="108.0" layoutY="301.0" prefHeight="25.0" prefWidth="142.0" promptText="Recipe name" />
+   <Button layoutX="359.0" layoutY="49.0" mnemonicParsing="false" text="+" />
+</Pane>
