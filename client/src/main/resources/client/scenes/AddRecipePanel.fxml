@@ -9,7 +9,7 @@
     <TextField fx:id="nameField" layoutX="108.0" layoutY="13.0" prefHeight="25.0" prefWidth="240.0" promptText="Recipe name" />
     <Label fx:id="ingredientsLabel" layoutX="26.0" layoutY="53.0" text="Ingredients" />
     <ComboBox fx:id="ingredientsComboBox" layoutX="108.0" layoutY="49.0" prefHeight="25.0" prefWidth="240.0" promptText="Select ingredient" />
-    <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="49.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
+    <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="49.0" mnemonicParsing="false" text="+" />
     <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="84.0" prefHeight="80.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
       <content>
          <VBox fx:id="ingredientsList" prefHeight="80.0" prefWidth="275.0" />
