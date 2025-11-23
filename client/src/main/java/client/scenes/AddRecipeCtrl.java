@@ -45,16 +45,19 @@ public class AddRecipeCtrl {
 
     private final ServerUtils server;
     // main controller attribute
+    private final MainApplicationCtrl mainCtrl;
 
     @Inject
-    public AddRecipeCtrl(ServerUtils server) {
+    public AddRecipeCtrl(ServerUtils server, MainApplicationCtrl mainCtrl) {
         this.server = server;
         // inject main controller
+        this.mainCtrl = mainCtrl;
     }
 
     public void clickCancel() {
         clearFields();
         // show the main view
+        mainCtrl.showMainScreen();
     }
 
     public void clickDone() {
@@ -69,6 +72,7 @@ public class AddRecipeCtrl {
         }
         clearFields();
         // show the main
+        mainCtrl.showMainScreen();
     }
 
     private void clearFields() {
