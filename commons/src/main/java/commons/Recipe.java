@@ -20,6 +20,22 @@ public class Recipe {
         this.servingSize = servingSize;
     }
 
+    /**
+     * Don't use this constructor it's just for testing purposes!!!!!
+     * Constructor for Ingredient class. With id. 
+     * @param id
+     * @param name
+     * @param nutritionValues
+     */
+    public Recipe(UUID id, String title, List<RecipeIngredient> ingredients, List<String> steps, int servingSize) {
+        this.id = id;
+        this.title = title;
+        this.ingredients = ingredients;
+        this.steps = steps;
+        this.servingSize = servingSize;
+    }
+
+
     public UUID getId() {
         return id;
     }
