@@ -77,6 +77,7 @@ public class AmountTest {
         assertEquals(amount1.hashCode(), amount2.hashCode());
     }
 
+    
     // Tests for InformalAmount subclass
     @Test
     public void testAmountSubclassCreation2() {
