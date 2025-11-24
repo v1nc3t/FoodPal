@@ -34,7 +34,9 @@ public class MainApplicationCtrl {
     Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,
         "client", "scenes", "AddRecipePanel.fxml");
 
+    AddRecipeCtrl addRecipeCtrl = pair.getKey();    // injects the main ctrl into the add recipe ctrl
     Parent addRecipeRoot = pair.getValue();
+
     contentPane.getChildren().setAll(addRecipeRoot);
   }
 
