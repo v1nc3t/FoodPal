@@ -52,14 +52,11 @@ public class Main extends Application {
         var pair = FXML.load(client.scenes.MainApplicationCtrl.class,
             "client", "scenes", "MainApplication.fxml");
 
-        MainApplicationCtrl mainCtrl = pair.getKey();
         Parent root = pair.getValue();
 
         primaryStage.setTitle("FoodPal");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
-
-        mainCtrl.initialize(FXML);
 
         /*
         var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
