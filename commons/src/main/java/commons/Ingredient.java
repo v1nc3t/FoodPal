@@ -42,6 +42,10 @@ public class Ingredient {
         return name;
     }
 
+    public NutritionValues getNutritionValues() {
+        return nutritionValues;
+    }
+
     @Override
     public String toString() {
         return "Ingredient{" +

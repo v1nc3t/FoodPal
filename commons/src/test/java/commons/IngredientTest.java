@@ -42,6 +42,11 @@ public class IngredientTest {
     }
 
     @Test
+    public void testGetNutritionValues() {
+        assertEquals(nutritionValues, ingredient.getNutritionValues());
+    }
+
+    @Test
     public void testToString() {
         String id = ingredient.getId().toString();
         String expectedString = "Ingredient{id=" + id + ", name='Sugar'}";
