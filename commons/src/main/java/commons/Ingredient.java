@@ -25,9 +25,9 @@ public class Ingredient {
     /**
      * Don't use this constructor it's just for testing purposes!!!!!
      * Constructor for Ingredient class. With id. 
-     * @param id
-     * @param name
-     * @param nutritionValues
+     * @param id the id of the ingredient
+     * @param name the name of the ingredient
+     * @param nutritionValues the nutrition values of the ingredient
      */
     public Ingredient(UUID id, String name, NutritionValues nutritionValues) {
         this.id = id;
