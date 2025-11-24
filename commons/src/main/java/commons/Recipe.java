@@ -27,6 +27,7 @@ public class Recipe {
      * @param name
      * @param nutritionValues
      */
+    /*
     public Recipe(UUID id, String title, List<RecipeIngredient> ingredients, List<String> steps, int servingSize) {
         this.id = id;
         this.title = title;
@@ -34,6 +35,7 @@ public class Recipe {
         this.steps = steps;
         this.servingSize = servingSize;
     }
+    */
 
 
     public UUID getId() {

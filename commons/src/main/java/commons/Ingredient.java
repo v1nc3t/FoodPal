@@ -21,6 +21,7 @@ public class Ingredient {
         this.nutritionValues = nutritionValues;
     }
 
+
     /**
      * Don't use this constructor it's just for testing purposes!!!!!
      * Constructor for Ingredient class. With id. 
@@ -28,11 +29,13 @@ public class Ingredient {
      * @param name
      * @param nutritionValues
      */
+    /*
     public Ingredient(UUID id, String name, NutritionValues nutritionValues) {
         this.id = id;
         this.name = name;
         this.nutritionValues = nutritionValues;
     }
+    */
 
     public UUID getId() {
         return id;
@@ -66,6 +69,4 @@ public class Ingredient {
     public int hashCode() {
         return Objects.hash(id, name, nutritionValues);
     }
-    
-    
 }
