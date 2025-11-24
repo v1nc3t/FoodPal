@@ -1,8 +1,6 @@
 package commons;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +47,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testEqualsNull() {
-        assertNotEquals(null, recipeIngredient);
+        assertFalse(recipeIngredient.equals(null));
     }
 
     @Test
@@ -74,6 +72,14 @@ public class RecipeIngredientTest {
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient.getId(), amount1);
         RecipeIngredient recipeIngredient2 = new RecipeIngredient(ingredient.getId(), amount2);
         assertNotEquals(recipeIngredient, recipeIngredient2);
+    }
+
+    @Test
+    public void testEqualsSameFieldsAndID() {
+        Amount amount1 = new FormalAmount(500, Unit.GRAM);
+        RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient.getId(), amount1);
+        RecipeIngredient recipeIngredient2 = new RecipeIngredient(ingredient.getId(), amount1);
+        assertEquals(recipeIngredient1, recipeIngredient2);
     }
 
     @Test
