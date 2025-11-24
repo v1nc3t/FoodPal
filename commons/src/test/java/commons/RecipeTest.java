@@ -3,6 +3,7 @@ package commons;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ public class RecipeTest {
     private Recipe recipe;
     private List<RecipeIngredient> ingredients;
     private List<String> steps;
+    private UUID id;
 
     @BeforeEach
     public void setup() {
@@ -31,6 +33,8 @@ public class RecipeTest {
         int servingSize = 4;
 
         recipe = new Recipe("Cake", ingredients, steps, servingSize);
+
+        id = recipe.getId();
     }
 
     @Test
@@ -77,7 +81,7 @@ public class RecipeTest {
 
     @Test
     public void testEqualsNull() {
-        assertNotEquals(null, recipe);
+        assertFalse(recipe.equals(null));
     }
 
     @Test
@@ -88,37 +92,44 @@ public class RecipeTest {
 
     @Test
     public void testEqualsDifferentId() {
-            Recipe differentRecipe = new Recipe("Cake", ingredients, steps, 4);
-            assertNotEquals(recipe, differentRecipe);
-        }
+        Recipe differentRecipe = new Recipe("Cake", ingredients, steps, 4);
+        assertNotEquals(recipe, differentRecipe);
+    }
 
     @Test
-    public void testEqualsSameValues() {
-        Recipe anotherRecipe = new Recipe("Cake", ingredients, steps, 4);
+    public void testEqualsSameIdSameFields() {
+        Recipe anotherRecipe = new Recipe(id, "Cake", ingredients, steps, 4);
+        assertEquals(recipe, anotherRecipe);
+    }
+
+    @Test
+    public void testEqualsSameIdDifferentTitle() {
+        Recipe anotherRecipe = new Recipe(id, "Bread", ingredients, steps, 4);
         assertNotEquals(recipe, anotherRecipe);
     }
 
     @Test
-    public void testNotEqualsDifferentValues() {
-        NutritionValues nutritionValues = new NutritionValues(0.0, 0.0, 76.0);
-        Ingredient ingredient1 = new Ingredient("Flour", nutritionValues);
-        InformalAmount amount1 = new InformalAmount("2 cups");
-        RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
-        List<RecipeIngredient> ingredients = List.of(RecIngredient);
+    public void testEqualsSameIdDifferentIngredients() {
+        List<RecipeIngredient> differentIngredients = List.of(ingredients.get(0)); // Only one ingredient
+        Recipe anotherRecipe = new Recipe(id, "Cake", differentIngredients, steps, 4);
+        assertNotEquals(recipe, anotherRecipe);
+    }
 
-        String step1 = "Mix ingredients.";
-        List<String> steps = List.of(step1);
+    @Test
+    public void testEqualsSameIdDifferentSteps() {
+        List<String> differentSteps = List.of("Just eat it.");
+        Recipe anotherRecipe = new Recipe(id, "Cake", ingredients, differentSteps, 4);
+        assertNotEquals(recipe, anotherRecipe);
+    }
 
-        int servingSize = 2;
-
-        Recipe differentRecipe = new Recipe("Bread", ingredients, steps, servingSize);
-        assertNotEquals(recipe, differentRecipe);
+    @Test
+    public void testEqualsSameIdDifferentServingSize() {
+        Recipe anotherRecipe = new Recipe(id, "Cake", ingredients, steps, 2);
+        assertNotEquals(recipe, anotherRecipe);
     }
 
     @Test
     public void testHashCode() {
         assertEquals(recipe.hashCode(), recipe.hashCode());
     }
-
-
 }
