@@ -28,6 +28,4 @@ public class InformalAmount extends Amount {
     public int hashCode() {
         return description.hashCode();
     }
-    
-    
 }
