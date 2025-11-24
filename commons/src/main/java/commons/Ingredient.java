@@ -29,13 +29,11 @@ public class Ingredient {
      * @param name
      * @param nutritionValues
      */
-    /*
     public Ingredient(UUID id, String name, NutritionValues nutritionValues) {
         this.id = id;
         this.name = name;
         this.nutritionValues = nutritionValues;
     }
-    */
 
     public UUID getId() {
         return id;

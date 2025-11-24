@@ -23,7 +23,6 @@ public class IngredientTest {
         assertNotNull(ingredient);
     }
 
-    /*
     @Test
     public void testIngredientCreationWithId() {
         UUID id = UUID.randomUUID();
@@ -31,7 +30,6 @@ public class IngredientTest {
         assertNotNull(ingredientWithId);
         assertEquals(id, ingredientWithId.getId());
     }
-        */
 
     @Test
     public void testGetId() {
