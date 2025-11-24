@@ -12,8 +12,8 @@ public class RecipeTest {
 
     @BeforeEach
     public void setup() {
-        Ingredient ingredient1 = new Ingredient("Flour");
-        Ingredient ingredient2 = new Ingredient("Eggs"); 
+        Ingredient ingredient1 = new Ingredient("Flour", 0.0, 0.0, 76.0);
+        Ingredient ingredient2 = new Ingredient("Eggs", 13.0, 11.0, 1.1); 
         InformalAmount amount1 = new InformalAmount("2 cups");
         InformalAmount amount2 = new InformalAmount("3 large");
         RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
@@ -84,8 +84,8 @@ public class RecipeTest {
 
     @Test
     public void testEqualsSameValues() {
-        Ingredient ingredient1 = new Ingredient("Flour");
-        Ingredient ingredient2 = new Ingredient("Eggs"); 
+        Ingredient ingredient1 = new Ingredient("Flour", 0.0, 0.0, 76.0);
+        Ingredient ingredient2 = new Ingredient("Eggs", 13.0, 11.0, 1.1); 
         InformalAmount amount1 = new InformalAmount("2 cups");
         InformalAmount amount2 = new InformalAmount("3 large");
         RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
@@ -104,7 +104,7 @@ public class RecipeTest {
 
     @Test
     public void testNotEqualsDifferentValues() {
-        Ingredient ingredient1 = new Ingredient("Flour");
+        Ingredient ingredient1 = new Ingredient("Flour", 0.0, 0.0, 76.0);
         InformalAmount amount1 = new InformalAmount("2 cups");
         RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
         List<RecipeIngredient> ingredients = List.of(RecIngredient);

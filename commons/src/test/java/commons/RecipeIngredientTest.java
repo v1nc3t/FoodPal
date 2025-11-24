@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class RecipeIngredientTest {
     @Test
     public void testRecipeIngredientCreation() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient.getId(), amount);
         assertNotNull(recipeIngredient);
@@ -17,7 +17,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testGetIngredientRef() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient.getId(), amount);
         assertEquals(recipeIngredient.getIngredientRef(), ingredient.getId());
@@ -25,7 +25,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testGetAmount() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient.getId(), amount);
         assertEquals(amount, recipeIngredient.getAmount());
@@ -33,7 +33,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testToString() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient.getId(), amount);
         String expectedString = "RecipeIngredient{ingredientRef=" + ingredient.getId() + ", amount=" + amount + '}';
@@ -42,7 +42,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testEqualsSameObject() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount1 = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient.getId(), amount1);
         assertEquals(recipeIngredient1, recipeIngredient1);
@@ -50,7 +50,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testEqualsNull() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount1 = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient.getId(), amount1);
         assertNotEquals(null, recipeIngredient1);
@@ -58,7 +58,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testEqualsDifferentClass() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount1 = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient.getId(), amount1);
         String notARecipeIngredient = "Not a RecipeIngredient";
@@ -67,8 +67,8 @@ public class RecipeIngredientTest {
 
     @Test
     public void testEqualsDifferentIngredientRef() {
-        Ingredient ingredient1 = new Ingredient("Flour");
-        Ingredient ingredient2 = new Ingredient("Sugar");
+        Ingredient ingredient1 = new Ingredient("Flour", 0.0, 0.0, 76.0);
+        Ingredient ingredient2 = new Ingredient("Sugar", 0.0, 0.0, 100.0);
         Amount amount = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient1.getId(), amount);
         RecipeIngredient recipeIngredient2 = new RecipeIngredient(ingredient2.getId(), amount);
@@ -77,7 +77,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testEqualsDifferentAmount() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount1 = new FormalAmount(500, Unit.GRAM);
         Amount amount2 = new FormalAmount(1, Unit.KILOGRAM);
         RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient.getId(), amount1);
@@ -87,7 +87,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testHashCode() {
-        Ingredient ingredient = new Ingredient("Flour");
+        Ingredient ingredient = new Ingredient("Flour", 0.0, 0.0, 76.0);
         Amount amount = new FormalAmount(500, Unit.GRAM);
         RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient.getId(), amount);
         assertEquals(recipeIngredient.hashCode(), recipeIngredient.hashCode());
