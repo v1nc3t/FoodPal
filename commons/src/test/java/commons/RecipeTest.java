@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 
 public class RecipeTest {
     private Recipe recipe;
+    private List<RecipeIngredient> ingredients;
+    private List<String> steps;
 
     @BeforeEach
     public void setup() {
@@ -20,11 +22,11 @@ public class RecipeTest {
         InformalAmount amount2 = new InformalAmount("3 large");
         RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
         RecipeIngredient RecIngredient2 = new RecipeIngredient(ingredient2.getId(), amount2);
-        List<RecipeIngredient> ingredients = List.of(RecIngredient, RecIngredient2);
+        ingredients = List.of(RecIngredient, RecIngredient2);
 
         String step1 = "Mix ingredients.";
         String step2 = "Bake at 350 degrees for 30 minutes.";
-        List<String> steps = List.of(step1, step2);
+        steps = List.of(step1, step2);
 
         int servingSize = 4;
 
@@ -85,24 +87,14 @@ public class RecipeTest {
     }
 
     @Test
+    public void testEqualsDifferentId() {
+            Recipe differentRecipe = new Recipe("Cake", ingredients, steps, 4);
+            assertNotEquals(recipe, differentRecipe);
+        }
+
+    @Test
     public void testEqualsSameValues() {
-        NutritionValues nutritionValues1 = new NutritionValues(0.0, 0.0, 76.0);
-        NutritionValues nutritionValues2 = new NutritionValues(13.0, 11.0, 1.1);
-        Ingredient ingredient1 = new Ingredient("Flour", nutritionValues1);
-        Ingredient ingredient2 = new Ingredient("Eggs", nutritionValues2); 
-        InformalAmount amount1 = new InformalAmount("2 cups");
-        InformalAmount amount2 = new InformalAmount("3 large");
-        RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
-        RecipeIngredient RecIngredient2 = new RecipeIngredient(ingredient2.getId(), amount2);
-        List<RecipeIngredient> ingredients = List.of(RecIngredient, RecIngredient2);
-
-        String step1 = "Mix ingredients.";
-        String step2 = "Bake at 350 degrees for 30 minutes.";
-        List<String> steps = List.of(step1, step2);
-
-        int servingSize = 4;
-
-        Recipe anotherRecipe = new Recipe("Cake", ingredients, steps, servingSize);
+        Recipe anotherRecipe = new Recipe("Cake", ingredients, steps, 4);
         assertNotEquals(recipe, anotherRecipe);
     }
 
