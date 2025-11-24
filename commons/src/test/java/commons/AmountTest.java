@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 public class AmountTest {
+    // Tests for FormalAmount subclass
     @Test
     public void testAmountSubclassCreation() {
         Amount amount = new FormalAmount(100, Unit.GRAM);
@@ -38,7 +39,7 @@ public class AmountTest {
     @Test
     public void testEqualsNull() {
         FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        assertNotEquals(null, amount1);
+        assertFalse(amount1.equals(null));
     }
 
     @Test
@@ -76,6 +77,7 @@ public class AmountTest {
         assertEquals(amount1.hashCode(), amount2.hashCode());
     }
 
+    // Tests for InformalAmount subclass
     @Test
     public void testAmountSubclassCreation2() {
         Amount amount = new InformalAmount("a pinch");
@@ -103,7 +105,7 @@ public class AmountTest {
     @Test
     public void testEqualsNull2() {
         InformalAmount amount1 = new InformalAmount("a pinch");
-        assertNotEquals(null, amount1);
+        assertFalse(amount1.equals(null));
     }
 
     @Test
