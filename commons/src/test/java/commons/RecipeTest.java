@@ -12,8 +12,10 @@ public class RecipeTest {
 
     @BeforeEach
     public void setup() {
-        Ingredient ingredient1 = new Ingredient("Flour", 0.0, 0.0, 76.0);
-        Ingredient ingredient2 = new Ingredient("Eggs", 13.0, 11.0, 1.1); 
+        NutritionValues nutritionValues1 = new NutritionValues(0.0, 0.0, 76.0);
+        NutritionValues nutritionValues2 = new NutritionValues(13.0, 11.0, 1.1);   
+        Ingredient ingredient1 = new Ingredient("Flour", nutritionValues1);
+        Ingredient ingredient2 = new Ingredient("Eggs", nutritionValues2); 
         InformalAmount amount1 = new InformalAmount("2 cups");
         InformalAmount amount2 = new InformalAmount("3 large");
         RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
@@ -84,8 +86,10 @@ public class RecipeTest {
 
     @Test
     public void testEqualsSameValues() {
-        Ingredient ingredient1 = new Ingredient("Flour", 0.0, 0.0, 76.0);
-        Ingredient ingredient2 = new Ingredient("Eggs", 13.0, 11.0, 1.1); 
+        NutritionValues nutritionValues1 = new NutritionValues(0.0, 0.0, 76.0);
+        NutritionValues nutritionValues2 = new NutritionValues(13.0, 11.0, 1.1);
+        Ingredient ingredient1 = new Ingredient("Flour", nutritionValues1);
+        Ingredient ingredient2 = new Ingredient("Eggs", nutritionValues2); 
         InformalAmount amount1 = new InformalAmount("2 cups");
         InformalAmount amount2 = new InformalAmount("3 large");
         RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
@@ -104,7 +108,8 @@ public class RecipeTest {
 
     @Test
     public void testNotEqualsDifferentValues() {
-        Ingredient ingredient1 = new Ingredient("Flour", 0.0, 0.0, 76.0);
+        NutritionValues nutritionValues = new NutritionValues(0.0, 0.0, 76.0);
+        Ingredient ingredient1 = new Ingredient("Flour", nutritionValues);
         InformalAmount amount1 = new InformalAmount("2 cups");
         RecipeIngredient RecIngredient = new RecipeIngredient(ingredient1.getId(), amount1);
         List<RecipeIngredient> ingredients = List.of(RecIngredient);
