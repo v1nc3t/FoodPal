@@ -96,7 +96,6 @@ public class RecipeTest {
         assertNotEquals(recipe, differentRecipe);
     }
 
-    /*
     @Test
     public void testEqualsSameIdSameFields() {
         Recipe anotherRecipe = new Recipe(id, "Cake", ingredients, steps, 4);
@@ -128,7 +127,6 @@ public class RecipeTest {
         Recipe anotherRecipe = new Recipe(id, "Cake", ingredients, steps, 2);
         assertNotEquals(recipe, anotherRecipe);
     }
-    */
 
     @Test
     public void testHashCode() {
