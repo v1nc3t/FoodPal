@@ -20,6 +20,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import javafx.fxml.FXMLLoader;
@@ -33,6 +34,7 @@ public class MyFXML {
 
     private Injector injector;
 
+    @Inject
     public MyFXML(Injector injector) {
         this.injector = injector;
     }

@@ -21,7 +21,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testRecipeIngredientCreation() {
-       assertNotNull(recipeIngredient);
+        assertNotNull(recipeIngredient);
     }
 
     @Test
@@ -31,7 +31,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testGetAmount() {
-       assertEquals(amount, recipeIngredient.getAmount());
+        assertEquals(amount, recipeIngredient.getAmount());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class RecipeIngredientTest {
 
     @Test
     public void testHashCode() {
-       assertEquals(recipeIngredient.hashCode(), recipeIngredient.hashCode());
+        assertEquals(recipeIngredient.hashCode(), recipeIngredient.hashCode());
     }
-    
+
 }
