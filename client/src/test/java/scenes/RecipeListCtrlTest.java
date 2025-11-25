@@ -10,7 +10,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Full extended tests for RecipeListCtrl.
  * These tests validate adding recipes, clicking behavior,
  * ordering, removal semantics, and internal flags.
  *
