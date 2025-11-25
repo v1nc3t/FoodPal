@@ -52,6 +52,12 @@ public class AddRecipeCtrl {
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
 
+    // callback so MainApplicationCtrl can be notified when a recipe is added
+    private java.util.function.Consumer<Recipe> onRecipeAdded;
+    public void setOnRecipeAdded(java.util.function.Consumer<Recipe> onRecipeAdded) {
+        this.onRecipeAdded = onRecipeAdded;
+    }
+
     @Inject
     public AddRecipeCtrl(ServerUtils server, MainApplicationCtrl mainCtrl, MyFXML fxml) {
         this.server = server;
@@ -89,8 +95,12 @@ public class AddRecipeCtrl {
      */
     public void clickDone() {
         try {
-            server.addRecipe(getRecipe());
-            // update the main controller's recipe list with new name
+
+            Recipe r = getRecipe();
+            server.addRecipe(r); // optional if you still want server call
+            // notify main UI to add recipe to left list
+            mainCtrl.addRecipeToList(r);
+
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);

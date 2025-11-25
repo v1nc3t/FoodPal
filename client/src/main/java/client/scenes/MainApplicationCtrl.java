@@ -7,6 +7,9 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
+import commons.Recipe;
+import client.scenes.RecipeListCtrl;
+import javafx.scene.control.ListView;
 
 public class MainApplicationCtrl {
 
@@ -18,6 +21,14 @@ public class MainApplicationCtrl {
 
     @FXML
     private Button addButton;
+
+    @FXML
+    private ListView<Recipe> recipeListView; // matches fx:id in your FXML
+
+    @FXML
+    private Button removeButton; // matches fx:id in your FXML
+
+    private RecipeListCtrl recipeListCtrl;
 
     private MyFXML fxml;
 
@@ -32,11 +43,11 @@ public class MainApplicationCtrl {
     @FXML
     private void addRecipe() {
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,
-            "client", "scenes", "AddRecipePanel.fxml");
+                "client", "scenes", "AddRecipePanel.fxml");
 
-      /**
-       *  Injects the main ctrl into the add recipe ctrl
-        */
+        /**
+         *  Injects the main ctrl into the add recipe ctrl
+         */
         AddRecipeCtrl addRecipeCtrl = pair.getKey();
         Parent addRecipeRoot = pair.getValue();
 
@@ -49,4 +60,21 @@ public class MainApplicationCtrl {
     public void showMainScreen(){
         contentPane.getChildren().clear();
     }
+
+    @FXML
+    private void initialize() {
+        recipeListCtrl = new RecipeListCtrl();
+        if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
+        if (removeButton != null) removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
+    }
+
+
+    public void addRecipeToList(Recipe r) {
+        if (recipeListCtrl == null) {
+            recipeListCtrl = new RecipeListCtrl();
+            if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
+        }
+        recipeListCtrl.addRecipe(r);
+    }
+
 }

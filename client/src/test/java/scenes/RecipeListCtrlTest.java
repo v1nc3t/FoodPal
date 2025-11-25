@@ -1,5 +1,6 @@
+package scenes;
 
-
+import client.scenes.RecipeListCtrl;
 import commons.Recipe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
