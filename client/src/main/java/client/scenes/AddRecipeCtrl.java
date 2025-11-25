@@ -73,9 +73,8 @@ public class AddRecipeCtrl {
     }
 
     /**
-     * When clicked all fields are cleared
-     * No recipe is added
-     * Main app stops showing add recipe panel
+     * When cancel clicked no recipe is added
+     * Main ctrl stop showing add recipe panel
      */
     public void clickCancel() {
         clearFields();
@@ -135,7 +134,7 @@ public class AddRecipeCtrl {
      * @return string of recipe name
      */
     private String getName() {
-        return nameField.getCharacters().toString();
+        return nameField.getText();
     }
 
     /**
@@ -163,7 +162,20 @@ public class AddRecipeCtrl {
      * @return an int of serving size
      */
     private int getServingSize() {
-        return Integer.parseInt(servingSizeField.getCharacters().toString());
+        String text = servingSizeField.getText();
+
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            var alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText("Serving size must be an integer");
+            alert.showAndWait();
+
+            servingSizeField.clear();
+
+            return -1;
+        }
     }
 
     /**
