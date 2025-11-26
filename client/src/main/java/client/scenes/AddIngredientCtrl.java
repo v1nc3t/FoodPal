@@ -53,7 +53,7 @@ public class AddIngredientCtrl {
     }
 
     /**
-     * Setting the callback
+     * Function gets called when user clicks on Done and new ingredient is created
      * @param callback new ingredient made will be sent
      */
     public void setIngredientAdded(Consumer<RecipeIngredient> callback) {
@@ -77,7 +77,7 @@ public class AddIngredientCtrl {
         RecipeIngredient newIngredient = null;
         try {
             newIngredient = getRecipeIngredient();
-            // server.addIngredient(getIngredient());
+            //TODO server.addIngredient(getIngredient());
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
