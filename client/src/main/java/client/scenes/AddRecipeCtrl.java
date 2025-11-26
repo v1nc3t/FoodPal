@@ -157,13 +157,15 @@ public class AddRecipeCtrl {
 
     /**
      * Gets preparation steps of recipe from user
-     * Go through the vertical box and extract the text from each horiontal box
+     * Go through the vertical box
+     * From each horizontal box we extract the string from the textflow
      * @return list of string - steps
      */
     private List<String> getPreparations() {
         return preparationList.getChildren().stream()
                 .map(b -> (HBox) b)
-                .map(h -> ((Label) h.getChildren().getFirst()).getText())
+                .map(h -> (TextFlow) h.getChildren().getFirst())
+                .map(tf -> ((Text) tf.getChildren().getFirst()).getText())
                 .toList();
     }
 
@@ -203,6 +205,7 @@ public class AddRecipeCtrl {
         item.setMaxWidth(Double.MAX_VALUE);
 
         TextFlow textFlow = new TextFlow(new Text("test"));
+
         textFlow.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(textFlow, Priority.ALWAYS);
 

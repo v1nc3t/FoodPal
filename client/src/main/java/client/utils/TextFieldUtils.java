@@ -12,6 +12,7 @@ public class TextFieldUtils {
      * @param textField user input
      * @param label to customize error message
      * @return a string of user input
+     * @throws IllegalArgumentException when input is null
      */
     public static String getStringFromField(TextField textField, Label label) {
         String text = textField.getText();
@@ -26,6 +27,7 @@ public class TextFieldUtils {
      * @param textField user input
      * @param label to customize error message
      * @return an integer of user input
+     * @throws NumberFormatException when input is null or not integer
      */
     public static int getIntFromField(TextField textField, Label label) {
         String text = textField.getText();
@@ -50,6 +52,7 @@ public class TextFieldUtils {
      * @param textField user input
      * @param label to customize error message
      * @return a double of user input
+     * @throws NumberFormatException when input is null or not double
      */
     public static double getDoubleFromField(TextField textField, Label label) {
         String text = textField.getText();

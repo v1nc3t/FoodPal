@@ -44,8 +44,6 @@ public class AddIngredientCtrl {
         for (Unit unit : Unit.values()) {
             unitComboBox.getItems().add(unit.name().toLowerCase());
         }
-
-        // ignore case ?? for amount??
     }
 
     @Inject
@@ -54,6 +52,10 @@ public class AddIngredientCtrl {
         this.ctrl = ctrl;
     }
 
+    /**
+     * Setting the callback
+     * @param callback new ingredient made will be sent
+     */
     public void setIngredientAdded(Consumer<RecipeIngredient> callback) {
         this.ingredientAdded = callback;
     }
@@ -66,6 +68,11 @@ public class AddIngredientCtrl {
         closeWindow();
     }
 
+    /**
+     * Tries to create a new RecipeIngredient from user input
+     * new ingredient is sent to server ///TODO
+     * @throws WebApplicationException then show alert and stop
+     */
     public void clickDone() {
         RecipeIngredient newIngredient = null;
         try {
@@ -86,6 +93,9 @@ public class AddIngredientCtrl {
         closeWindow();
     }
 
+    /**
+     * Clears all fields and closes the popup
+     */
     private void closeWindow() {
         clearFields();
 
@@ -93,6 +103,9 @@ public class AddIngredientCtrl {
         addIngredientStage.close();
     }
 
+    /**
+     * Clears all fields
+     */
     private void clearFields() {
         nameField.clear();
         amountField.clear();
@@ -103,6 +116,9 @@ public class AddIngredientCtrl {
         unitComboBox.getEditor().clear();
     }
 
+    /**
+     * Creates a new RecipeIngredient with user input
+     */
     private RecipeIngredient getRecipeIngredient() {
         String name = TextFieldUtils.getStringFromField(nameField, nameLabel);
         Amount newAmount = getAmount();
@@ -119,6 +135,10 @@ public class AddIngredientCtrl {
         return new RecipeIngredient(newIngredient.getId(), newAmount);
     }
 
+    /**
+     * Extracts the unit of measuring from the selecting field
+     * @return a new Amount based on input
+     */
     private Amount getAmount() {
         double quantity = TextFieldUtils.getDoubleFromField(amountField, amountLabel);
         String input = unitComboBox.getEditor().getText().trim();
