@@ -12,8 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * These tests validate adding recipes, clicking behavior,
  * ordering, removal semantics, and internal flags.
- *
- * The goal is to ensure the controller logic behaves exactly as specified.
  */
 public class RecipeListCtrlTest {
 
