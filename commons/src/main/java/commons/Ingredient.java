@@ -2,15 +2,18 @@ package commons;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 
 import java.util.Objects;
 import java.util.UUID;
 
+@Entity
 public class Ingredient {
-
-    private UUID id;
-    private String name;
-    private NutritionValues nutritionValues;
+    @Id
+    public UUID id;
+    public String name;
+    @Embedded
+    public NutritionValues nutritionValues;
 
     /**
      * Constructor for Ingredient class. With an already specified id.
@@ -37,6 +40,12 @@ public class Ingredient {
         this.id = UUID.randomUUID();
         this.name = name;
         this.nutritionValues = nutritionValues;
+    }
+
+    /**
+     * Constructor for Ingredient that is used by db-to-object mapping
+     */
+    public Ingredient() {
     }
 
     public UUID getId() {
