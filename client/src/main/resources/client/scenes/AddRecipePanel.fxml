@@ -5,25 +5,28 @@
 <?import javafx.scene.layout.*?>
 
 <Pane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
-    <Label fx:id="nameLabel" layoutX="26.0" layoutY="17.0" text="Name" />
-    <TextField fx:id="nameField" layoutX="108.0" layoutY="13.0" prefHeight="25.0" prefWidth="240.0" promptText="Recipe name" />
-    <Label fx:id="ingredientsLabel" layoutX="26.0" layoutY="53.0" text="Ingredients" />
-    <ComboBox fx:id="ingredientsComboBox" layoutX="108.0" layoutY="49.0" prefHeight="25.0" prefWidth="240.0" promptText="Select ingredient" />
-    <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="49.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
-    <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="84.0" prefHeight="80.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
+    <Label fx:id="nameLabel" layoutX="26.0" layoutY="14.0" text="Name" />
+    <TextField fx:id="nameField" layoutX="108.0" layoutY="10.0" prefHeight="25.0" prefWidth="240.0" promptText="Recipe name" />
+    <Label fx:id="ingredientsLabel" layoutX="26.0" layoutY="48.0" text="Ingredients" />
+    <ComboBox fx:id="ingredientsComboBox" layoutX="108.0" layoutY="44.0" prefHeight="25.0" prefWidth="240.0" promptText="Select ingredient" />
+    <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="44.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
+    <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="78.0" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
       <content>
-         <VBox fx:id="ingredientsList" prefHeight="80.0" prefWidth="275.0" />
+         <VBox fx:id="ingredientsList" prefHeight="90.0" prefWidth="275.0">
+            <padding>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
+            </padding></VBox>
       </content></ScrollPane>
-    <Label fx:id="preparationLabel" layoutX="25.0" layoutY="181.0" text="Preparation" />
-    <TextField fx:id="preparationField" layoutX="108.0" layoutY="177.0" prefHeight="25.0" prefWidth="240.0" promptText="Add preparation step" />
-    <Button fx:id="addPreparationButton" layoutX="359.0" layoutY="177.0" mnemonicParsing="false" onAction="#clickAddPreparation" text="+" />
-    <Label fx:id="servingSizeLabel" layoutX="26.0" layoutY="305.0" text="Serving size" />
-    <TextField fx:id="servingSizeField" layoutX="108.0" layoutY="301.0" prefHeight="25.0" prefWidth="142.0" promptText="Portions" />
+    <Label fx:id="preparationLabel" layoutX="25.0" layoutY="182.0" text="Preparation" />
+    <TextField fx:id="preparationField" layoutX="108.0" layoutY="178.0" prefHeight="25.0" prefWidth="240.0" promptText="Add preparation step" />
+    <Button fx:id="addPreparationButton" layoutX="359.0" layoutY="178.0" mnemonicParsing="false" onAction="#clickAddPreparation" text="+" />
+    <Label fx:id="servingSizeLabel" layoutX="26.0" layoutY="317.0" text="Serving size" />
+    <TextField fx:id="servingSizeField" layoutX="108.0" layoutY="313.0" prefHeight="25.0" prefWidth="142.0" promptText="Portions" />
     <Button fx:id="cancelButton" layoutX="283.0" layoutY="313.0" mnemonicParsing="false" onAction="#clickCancel" text="Cancel" />
     <Button fx:id="doneButton" layoutX="345.0" layoutY="313.0" mnemonicParsing="false" onAction="#clickDone" text="Done" />
-   <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="211.0" prefHeight="80.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
+   <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="212.0" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
       <content>
-          <VBox fx:id="preparationList" prefHeight="80.0" prefWidth="275.0" spacing="2.0">
+          <VBox fx:id="preparationList" prefHeight="90.0" prefWidth="275.0" spacing="2.0">
             <padding>
                <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
             </padding></VBox>

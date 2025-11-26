@@ -12,6 +12,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.junit>5.10.1</version.junit>
 		<version.mockito>5.8.0</version.mockito>
+        <version.jersey>3.1.9</version.jersey>
 	</properties>
 
 	<dependencies>
@@ -25,6 +26,21 @@
 			<artifactId>jakarta.persistence-api</artifactId>
 			<version>3.1.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
 
 		<!-- test -->
 		<dependency>

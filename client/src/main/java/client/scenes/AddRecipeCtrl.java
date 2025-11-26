@@ -3,6 +3,7 @@ package client.scenes;
 import client.MyFXML;
 import client.utils.ServerUtils;
 
+import client.utils.TextFieldUtils;
 import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
@@ -10,6 +11,7 @@ import commons.RecipeIngredient;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -17,13 +19,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AddRecipeCtrl {
 
@@ -76,6 +82,14 @@ public class AddRecipeCtrl {
                 addPreparationButton.fire();
             }
         });
+
+        preparationScrollPane.setFitToWidth(true);
+
+        preparationList.setSpacing(5);
+
+        ingredientsScrollPane.setFitToWidth(true);
+
+        ingredientsList.setSpacing(5);
     }
 
     /**
@@ -83,8 +97,7 @@ public class AddRecipeCtrl {
      * Main ctrl stop showing add recipe panel
      */
     public void clickCancel() {
-        clearFields();
-        mainCtrl.showMainScreen();
+        closeView();
     }
 
     /**
@@ -108,7 +121,12 @@ public class AddRecipeCtrl {
             alert.showAndWait();
             return;
         }
+        closeView();
+    }
+
+    private void closeView() {
         clearFields();
+
         mainCtrl.showMainScreen();
     }
 
@@ -131,20 +149,12 @@ public class AddRecipeCtrl {
      * @return a new Recipe with user input
      */
     private Recipe getRecipe() {
-        return new Recipe(
-                getName(),
-                getIngredients(),
-                getPreparations(),
-                getServingSize()
-        );
-    }
+        String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
+        List <RecipeIngredient> ingredients = new ArrayList<>();
+        List<String> preparations = getPreparations();
+        int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
 
-    /**
-     * Gets name from user
-     * @return string of recipe name
-     */
-    private String getName() {
-        return nameField.getText();
+        return new Recipe(name, ingredients, preparations, servingSize);
     }
 
     /**
@@ -152,40 +162,21 @@ public class AddRecipeCtrl {
      * @return list of RecipeIngredient
      */
     private List<RecipeIngredient> getIngredients() {
-        return new ArrayList<>(); // from input of user
+        return new ArrayList<>(); //TODO get ingredients from list
     }
 
     /**
      * Gets preparation steps of recipe from user
-     * Go through the vertical box and extract the text from each horiontal box
+     * Go through the vertical box
+     * From each horizontal box we extract the string from the textflow
      * @return list of string - steps
      */
     private List<String> getPreparations() {
         return preparationList.getChildren().stream()
                 .map(b -> (HBox) b)
-                .map(h -> ((Label) h.getChildren().getFirst()).getText())
+                .map(h -> (TextFlow) h.getChildren().getFirst())
+                .map(tf -> ((Text) tf.getChildren().getFirst()).getText())
                 .toList();
-    }
-
-    /**
-     * Gets how many servings is the recipe from user
-     * @return an int of serving size
-     */
-    private int getServingSize() {
-        String text = servingSizeField.getText();
-
-        try {
-            return Integer.parseInt(text);
-        } catch (NumberFormatException e) {
-            var alert = new Alert(Alert.AlertType.ERROR);
-            alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setContentText("Serving size must be an integer");
-            alert.showAndWait();
-
-            servingSizeField.clear();
-
-            return -1;
-        }
     }
 
     /**
@@ -199,15 +190,51 @@ public class AddRecipeCtrl {
         AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
         Parent addIngredientRoot = addIngredientPair.getValue();
 
+        // waits for new ingredient to be made in popup
+        addIngredientCtrl.setIngredientAdded(newIngredient -> {
+            Platform.runLater(() -> {
+                ingredientsList.getChildren().add(createIngredientItem(newIngredient));
+            });
+        });
+
         Stage addIngredientStage = new Stage();
         addIngredientStage.setTitle("Add Ingredient");
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
         addIngredientStage.setScene(new Scene(addIngredientRoot));
         addIngredientStage.setResizable(false);
-
         addIngredientStage.showAndWait();
+    }
 
-        // add ingredient to combobox
+    /**
+     * A new item which consist of the name of an ingredient and a delete button:
+     * @param newRecipeIngredient user input of ingredient
+     * @return a horizontal box with the ingredient name and delete button
+     */
+    private HBox createIngredientItem(RecipeIngredient newRecipeIngredient) {
+        UUID id = newRecipeIngredient.getIngredientRef();
+
+        //TODO find newIngredient based on id
+
+        HBox item = new HBox(5);
+        item.setAlignment(Pos.CENTER_LEFT);
+        item.setMaxWidth(Double.MAX_VALUE);
+
+        TextFlow textFlow = new TextFlow(new Text("test"));
+
+        textFlow.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(textFlow, Priority.ALWAYS);
+
+        Button delete = new Button("-");
+
+        HBox buttonGroup = new HBox(5, delete);
+        buttonGroup.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(buttonGroup, Priority.NEVER);
+
+        item.getChildren().addAll(textFlow, buttonGroup);
+
+        delete.setOnAction(e -> ingredientsList.getChildren().remove(item));
+
+        return item;
     }
 
     /**
@@ -228,7 +255,7 @@ public class AddRecipeCtrl {
     }
 
     /**
-     * A new item wich consist of a text and three buttons:
+     * A new item which consist of a text and three buttons:
      * move up, move down, remove
      * @param text user input of preparation step
      * @return a horizontal box with the text and three buttons
@@ -236,11 +263,11 @@ public class AddRecipeCtrl {
     private HBox createPreparationItem(String text) {
         HBox item = new HBox(5);
         item.setAlignment(Pos.CENTER_LEFT);
+        item.setMaxWidth(Double.MAX_VALUE);
 
-        Label label = new Label(text);
-        label.setWrapText(true);
-
-        label.prefWidthProperty().bind(item.widthProperty().subtract(80));
+        TextFlow textFlow = new TextFlow(new Text(text));
+        textFlow.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(textFlow, Priority.ALWAYS);
 
         Button up = new Button("↑");
         Button down = new Button("↓");
@@ -248,8 +275,9 @@ public class AddRecipeCtrl {
 
         HBox buttonGroup = new HBox(5, up, down, delete);
         buttonGroup.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(buttonGroup, Priority.NEVER);
 
-        item.getChildren().addAll(label, buttonGroup);
+        item.getChildren().addAll(textFlow, buttonGroup);
 
         up.setOnAction(e -> moveUp(item));
         down.setOnAction(e -> moveDown(item));
