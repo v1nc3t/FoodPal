@@ -14,8 +14,8 @@ import java.util.UUID;
 public class RecipeControllerTest {
     RecipeController recipeController;
     TestRecipeService testRecipeService;
-    Ingredient yogurt = new Ingredient("Yogurt");
-    Ingredient sugar  = new Ingredient("Sugar");
+    Ingredient yogurt = new Ingredient("Yogurt", new NutritionValues(1, 2, 3));
+    Ingredient sugar  = new Ingredient("Sugar", new NutritionValues(1, 2, 3));
     List<String> preparationSteps = List.of("Melt sugar", "Freeze yogurt", "Blend");
     Recipe recipe = new Recipe("Sugared Yogurt",
             List.of(

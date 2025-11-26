@@ -11,7 +11,8 @@ public class RecipeServiceTest {
     @Test
     public void addIngredient() {
         RecipeService recipeService = new RecipeService();
-        recipeService.setIngredient(new Ingredient("Yogurt"));
+        var yogurt = new Ingredient("Yogurt", new NutritionValues(1, 2, 3));
+        recipeService.setIngredient(yogurt);
         assertTrue(recipeService.getState().recipes().isEmpty());
         assertEquals(1, recipeService.getState().ingredients().size());
         var firstIngredient = recipeService
@@ -20,10 +21,7 @@ public class RecipeServiceTest {
                 .stream()
                 .findFirst();
         assertTrue(firstIngredient.isPresent());
-        assertEquals("Yogurt",
-                firstIngredient
-                        .get()
-                        .getName());
+        assertEquals(yogurt, firstIngredient.get());
 
     }
     @Test
@@ -54,8 +52,8 @@ public class RecipeServiceTest {
     @Test
     public void addRecipe() throws InvalidRecipeError {
         RecipeService recipeService = new RecipeService();
-        var yogurt = new Ingredient("Yogurt");
-        var sugar  = new Ingredient("Sugar");
+        var yogurt = new Ingredient("Yogurt", new NutritionValues(1, 2, 3));
+        var sugar  = new Ingredient("Sugar", new NutritionValues(1, 2, 3));
         recipeService.setIngredient(yogurt);
         recipeService.setIngredient(sugar);
         var recipe =  new Recipe(
