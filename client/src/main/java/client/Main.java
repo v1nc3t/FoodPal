@@ -19,8 +19,9 @@ import static com.google.inject.Guice.createInjector;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
-import client.scenes.MainApplicationCtrl;
 import com.google.inject.Injector;
 
 import client.utils.ServerUtils;
@@ -31,6 +32,9 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    public static final String BUNDLE_NAME = "client.language";
+    public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
+
     private static final Injector INJECTOR = createInjector(new MyModule());
     private static final MyFXML FXML = new MyFXML(INJECTOR);
 
@@ -40,6 +44,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
@@ -49,7 +54,7 @@ public class Main extends Application {
             return;
         }
 
-        var pair = FXML.load(client.scenes.MainApplicationCtrl.class,
+        var pair = FXML.load(client.scenes.MainApplicationCtrl.class, bundle,
             "client", "scenes", "MainApplication.fxml");
 
         Parent root = pair.getValue();

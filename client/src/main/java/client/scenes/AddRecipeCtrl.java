@@ -24,6 +24,10 @@ import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
+
+import static client.Main.BUNDLE_NAME;
+import static client.Main.DEFAULT_LOCALE;
 
 public class AddRecipeCtrl {
 
@@ -183,8 +187,9 @@ public class AddRecipeCtrl {
      * Open pop up window for adding a new Ingredient
      */
     public void clickAddIngredient() {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
         Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
-                "client", "scenes", "AddIngredient.fxml");
+                bundle,"client", "scenes", "AddIngredient.fxml");
 
         AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
         Parent addIngredientRoot = addIngredientPair.getValue();

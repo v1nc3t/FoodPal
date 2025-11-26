@@ -8,6 +8,11 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
 
+import java.util.ResourceBundle;
+
+import static client.Main.BUNDLE_NAME;
+import static client.Main.DEFAULT_LOCALE;
+
 public class MainApplicationCtrl {
 
     /**
@@ -31,7 +36,8 @@ public class MainApplicationCtrl {
      */
     @FXML
     private void addRecipe() {
-        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
             "client", "scenes", "AddRecipePanel.fxml");
 
       /**
