@@ -103,7 +103,7 @@ public class AddRecipeCtrl {
     public void clickDone() {
         try {
             server.addRecipe(getRecipe());
-            // update the main controller's recipe list with new name
+            //TODO update the main controller's recipe list
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -152,7 +152,7 @@ public class AddRecipeCtrl {
      * @return list of RecipeIngredient
      */
     private List<RecipeIngredient> getIngredients() {
-        return new ArrayList<>(); // from input of user
+        return new ArrayList<>(); //TODO get ingredients from list
     }
 
     /**
@@ -180,6 +180,7 @@ public class AddRecipeCtrl {
         AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
         Parent addIngredientRoot = addIngredientPair.getValue();
 
+        // waits for new ingredient to be made in popup
         addIngredientCtrl.setIngredientAdded(newIngredient -> {
             Platform.runLater(() -> {
                 ingredientsList.getChildren().add(createIngredientItem(newIngredient));
@@ -192,13 +193,17 @@ public class AddRecipeCtrl {
         addIngredientStage.setScene(new Scene(addIngredientRoot));
         addIngredientStage.setResizable(false);
         addIngredientStage.showAndWait();
-
     }
 
+    /**
+     * A new item which consist of the name of an ingredient and a delete button:
+     * @param newRecipeIngredient user input of ingredient
+     * @return a horizontal box with the ingredient name and delete button
+     */
     private HBox createIngredientItem(RecipeIngredient newRecipeIngredient) {
         UUID id = newRecipeIngredient.getIngredientRef();
 
-        // find newIngredient based on id
+        //TODO find newIngredient based on id
 
         HBox item = new HBox(5);
         item.setAlignment(Pos.CENTER_LEFT);
@@ -240,7 +245,7 @@ public class AddRecipeCtrl {
     }
 
     /**
-     * A new item wich consist of a text and three buttons:
+     * A new item which consist of a text and three buttons:
      * move up, move down, remove
      * @param text user input of preparation step
      * @return a horizontal box with the text and three buttons
