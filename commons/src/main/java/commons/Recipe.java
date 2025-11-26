@@ -1,6 +1,7 @@
 package commons;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,8 +23,27 @@ public class Recipe {
         this.servingSize = servingSize;
     }
 
+    /**
+     * Constructor for Recipe class. With an already specified id.
+     * @param id the id of the recipe
+     * @param title the name of the recipe
+     * @param ingredients the ingredients of the recipe
+     * @param steps the steps of the recipe
+     * @param servingSize the serving size of the recipe
+     */
     @JsonCreator
-    public Recipe() {}
+    public Recipe(@JsonProperty("id") UUID id,
+                  @JsonProperty("title") String title,
+                  @JsonProperty("ingredients") List<RecipeIngredient> ingredients,
+                  @JsonProperty("steps") List<String> steps,
+                  @JsonProperty("servingSize") int servingSize) {
+        this.id = id;
+        this.title = title;
+        this.ingredients = ingredients;
+        this.steps = steps;
+        this.servingSize = servingSize;
+    }
+
 
     public UUID getId() {
         return id;
