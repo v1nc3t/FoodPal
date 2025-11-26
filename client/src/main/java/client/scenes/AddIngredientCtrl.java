@@ -10,6 +10,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.util.function.Consumer;
+
 public class AddIngredientCtrl {
 
     @FXML private Label nameLabel;
@@ -34,6 +36,7 @@ public class AddIngredientCtrl {
 
     private final ServerUtils server;
     private final AddRecipeCtrl ctrl;
+    private Consumer<RecipeIngredient> ingredientAdded;
 
     @FXML
     private void initialize() {
@@ -50,21 +53,23 @@ public class AddIngredientCtrl {
         this.ctrl = ctrl;
     }
 
+    public void setIngredientAdded(Consumer<RecipeIngredient> callback) {
+        this.ingredientAdded = callback;
+    }
+
     /**
      * When cancel button clicked no ingredient is added
      * Add ingredient pop up is closed
      */
     public void clickCancel() {
-        clearFields();
-
-        Stage addIngredientStage = (Stage) cancelButton.getScene().getWindow();
-        addIngredientStage.close();
+        closeWindow();
     }
 
     public void clickDone() {
+        RecipeIngredient newIngredient = null;
         try {
+            newIngredient = getRecipeIngredient();
             // server.addIngredient(getIngredient());
-            // update the combo box in add recipe ctrl
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -72,6 +77,15 @@ public class AddIngredientCtrl {
             alert.showAndWait();
             return;
         }
+
+        if(ingredientAdded != null && newIngredient != null) {
+            ingredientAdded.accept(newIngredient);
+        }
+
+        closeWindow();
+    }
+
+    private void closeWindow() {
         clearFields();
 
         Stage addIngredientStage = (Stage) cancelButton.getScene().getWindow();
@@ -95,6 +109,7 @@ public class AddIngredientCtrl {
                 getDoubleFromField(carbsField)
         );
 
+        // put the new ingredient in the database
         Ingredient newIngredient = new Ingredient(getName(), newValues);
 
         Amount newAmount = getAmount();
@@ -104,7 +119,11 @@ public class AddIngredientCtrl {
 
 
     private String getName() {
-        return nameField.getText();
+        String name = nameField.getText();
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty");
+        }
+        return name;
     }
 
     private Amount getAmount() {
@@ -112,7 +131,8 @@ public class AddIngredientCtrl {
         String input = unitComboBox.getEditor().getText().trim();
 
         if (input.isEmpty()) {
-            return new InformalAmount("");
+            return null;
+            //return new InformalAmount(quantity, "");
         }
 
         Unit unit = null;
@@ -126,7 +146,8 @@ public class AddIngredientCtrl {
         if (unit != null) {
             return new FormalAmount(quantity, unit);
         } else {
-            return new InformalAmount(input);
+            return null;
+            // return new InformalAmount(quantity, input);
         }
     }
 
@@ -136,14 +157,14 @@ public class AddIngredientCtrl {
         try {
             return Double.parseDouble(text);
         } catch (NumberFormatException e) {
+            String message = textField.getId() + " must be a number, with or without decimal point";
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setContentText(textField + " must be an number, with or without decimal point");
+            alert.setContentText(message);
             alert.showAndWait();
 
             textField.clear();
-
-            return -1;
+            throw new NumberFormatException(message);
         }
     }
 

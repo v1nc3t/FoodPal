@@ -12,7 +12,10 @@
     <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="49.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
     <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="84.0" prefHeight="80.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
       <content>
-         <VBox fx:id="ingredientsList" prefHeight="80.0" prefWidth="275.0" />
+         <VBox fx:id="ingredientsList" prefHeight="80.0" prefWidth="275.0">
+            <padding>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
+            </padding></VBox>
       </content></ScrollPane>
     <Label fx:id="preparationLabel" layoutX="25.0" layoutY="181.0" text="Preparation" />
     <TextField fx:id="preparationField" layoutX="108.0" layoutY="177.0" prefHeight="25.0" prefWidth="240.0" promptText="Add preparation step" />

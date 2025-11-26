@@ -10,6 +10,7 @@ import commons.RecipeIngredient;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -27,6 +28,7 @@ import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AddRecipeCtrl {
 
@@ -77,6 +79,10 @@ public class AddRecipeCtrl {
         preparationScrollPane.setFitToWidth(true);
 
         preparationList.setSpacing(5);
+
+        ingredientsScrollPane.setFitToWidth(true);
+
+        ingredientsList.setSpacing(5);
     }
 
     /**
@@ -200,14 +206,45 @@ public class AddRecipeCtrl {
         AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
         Parent addIngredientRoot = addIngredientPair.getValue();
 
+        addIngredientCtrl.setIngredientAdded(newIngredient -> {
+            Platform.runLater(() -> {
+                ingredientsList.getChildren().add(createIngredientItem(newIngredient));
+            });
+        });
+
         Stage addIngredientStage = new Stage();
         addIngredientStage.setTitle("Add Ingredient");
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
         addIngredientStage.setScene(new Scene(addIngredientRoot));
         addIngredientStage.setResizable(false);
-
         addIngredientStage.showAndWait();
 
+    }
+
+    private HBox createIngredientItem(RecipeIngredient newRecipeIngredient) {
+        UUID id = newRecipeIngredient.getIngredientRef();
+
+        // find newIngredient based on id
+
+        HBox item = new HBox(5);
+        item.setAlignment(Pos.CENTER_LEFT);
+        item.setMaxWidth(Double.MAX_VALUE);
+
+        TextFlow textFlow = new TextFlow(new Text("test"));
+        textFlow.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(textFlow, Priority.ALWAYS);
+
+        Button delete = new Button("-");
+
+        HBox buttonGroup = new HBox(5, delete);
+        buttonGroup.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(buttonGroup, Priority.NEVER);
+
+        item.getChildren().addAll(textFlow, buttonGroup);
+
+        delete.setOnAction(e -> ingredientsList.getChildren().remove(item));
+
+        return item;
     }
 
     /**
