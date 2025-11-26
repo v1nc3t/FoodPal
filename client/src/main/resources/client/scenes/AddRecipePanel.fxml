@@ -4,18 +4,18 @@
 <?import javafx.scene.layout.*?>
 
 <Pane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12">
-    <Label layoutX="26.0" layoutY="17.0" text="Name" />
-    <Label layoutX="26.0" layoutY="53.0" text="Ingredients" />
-    <Label layoutX="25.0" layoutY="181.0" text="Preparation" />
-    <Button layoutX="345.0" layoutY="313.0" mnemonicParsing="false" text="Done" />
-    <Button layoutX="283.0" layoutY="313.0" mnemonicParsing="false" text="Cancel" />
-    <TextField layoutX="108.0" layoutY="13.0" prefHeight="25.0" prefWidth="240.0" promptText="Recipe name" />
+    <Label layoutX="26.0" layoutY="17.0" text="%txt.name" />
+    <Label layoutX="26.0" layoutY="53.0" text="%txt.ingredients" />
+    <Label layoutX="25.0" layoutY="181.0" text="%txt.preparation" />
+    <Button layoutX="345.0" layoutY="313.0" mnemonicParsing="false" text="%txt.done" />
+    <Button layoutX="283.0" layoutY="313.0" mnemonicParsing="false" text="%txt.cancel" />
+    <TextField layoutX="108.0" layoutY="13.0" prefHeight="25.0" prefWidth="240.0" promptText="%txt.recipe_name" />
     <ScrollPane layoutX="108.0" layoutY="84.0" prefHeight="80.0" prefWidth="240.0" />
-    <TextField layoutX="108.0" layoutY="177.0" prefHeight="25.0" prefWidth="240.0" promptText="Add preparation step" />
+    <TextField layoutX="108.0" layoutY="177.0" prefHeight="25.0" prefWidth="240.0" promptText="%txt.add_preparation_step" />
     <ScrollPane layoutX="108.0" layoutY="212.0" prefHeight="80.0" prefWidth="240.0" />
     <Button layoutX="359.0" layoutY="177.0" mnemonicParsing="false" text="+" />
-    <ComboBox layoutX="108.0" layoutY="49.0" prefHeight="25.0" prefWidth="240.0" promptText="Select ingredient" />
-   <Label layoutX="26.0" layoutY="305.0" text="Serving size" />
-   <TextField layoutX="108.0" layoutY="301.0" prefHeight="25.0" prefWidth="142.0" promptText="Recipe name" />
+    <ComboBox layoutX="108.0" layoutY="49.0" prefHeight="25.0" prefWidth="240.0" promptText="%txt.select_ingredient" />
+   <Label layoutX="26.0" layoutY="305.0" text="%txt.serving_size" />
+   <TextField layoutX="108.0" layoutY="301.0" prefHeight="25.0" prefWidth="142.0" promptText="%txt.recipe_name" />
    <Button layoutX="359.0" layoutY="49.0" mnemonicParsing="false" text="+" />
 </Pane>

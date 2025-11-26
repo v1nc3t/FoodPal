@@ -13,9 +13,9 @@
    <left>
       <Pane prefHeight="350.0" prefWidth="200.0" BorderPane.alignment="CENTER">
           <ListView prefHeight="300.0" prefWidth="200.0" />
-          <Button layoutX="14.0" layoutY="312.0" mnemonicParsing="false" text="Add" />
-         <Button layoutX="62.0" layoutY="312.0" mnemonicParsing="false" text="Remove" />
-         <Button layoutX="131.0" layoutY="312.0" mnemonicParsing="false" text="Refresh" />
+          <Button layoutX="14.0" layoutY="312.0" mnemonicParsing="false" text="%txt.add" />
+         <Button layoutX="62.0" layoutY="312.0" mnemonicParsing="false" text="%txt.remove" />
+         <Button layoutX="131.0" layoutY="312.0" mnemonicParsing="false" text="%txt.refresh" />
       </Pane>
    </left>
 </BorderPane>
