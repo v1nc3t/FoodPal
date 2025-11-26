@@ -7,14 +7,26 @@ import javafx.stage.Modality;
 
 public class TextFieldUtils {
 
+    /**
+     * Extracts a non-empty string from a field
+     * @param textField user input
+     * @param label to customize error message
+     * @return a string of user input
+     */
     public static String getStringFromField(TextField textField, Label label) {
-        String name = textField.getText();
-        if (name.isEmpty()) {
+        String text = textField.getText();
+        if (text.isEmpty()) {
             throw new IllegalArgumentException(label.getText() + " cannot be empty");
         }
-        return name;
+        return text;
     }
 
+    /**
+     * Extracts a non-null integer from a field
+     * @param textField user input
+     * @param label to customize error message
+     * @return an integer of user input
+     */
     public static int getIntFromField(TextField textField, Label label) {
         String text = textField.getText();
 
@@ -33,6 +45,12 @@ public class TextFieldUtils {
         }
     }
 
+    /**
+     * Extract a non-null double from a field
+     * @param textField user input
+     * @param label to customize error message
+     * @return a double of user input
+     */
     public static double getDoubleFromField(TextField textField, Label label) {
         String text = textField.getText();
 
