@@ -17,7 +17,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -70,6 +73,10 @@ public class AddRecipeCtrl {
                 addPreparationButton.fire();
             }
         });
+
+        preparationScrollPane.setFitToWidth(true);
+
+        preparationList.setSpacing(5);
     }
 
     /**
@@ -77,8 +84,7 @@ public class AddRecipeCtrl {
      * Main ctrl stop showing add recipe panel
      */
     public void clickCancel() {
-        clearFields();
-        mainCtrl.showMainScreen();
+        closeView();
     }
 
     /**
@@ -98,7 +104,12 @@ public class AddRecipeCtrl {
             alert.showAndWait();
             return;
         }
+        closeView();
+    }
+
+    private void closeView() {
         clearFields();
+
         mainCtrl.showMainScreen();
     }
 
@@ -197,7 +208,6 @@ public class AddRecipeCtrl {
 
         addIngredientStage.showAndWait();
 
-        // add ingredient to combobox
     }
 
     /**
@@ -226,11 +236,11 @@ public class AddRecipeCtrl {
     private HBox createPreparationItem(String text) {
         HBox item = new HBox(5);
         item.setAlignment(Pos.CENTER_LEFT);
+        item.setMaxWidth(Double.MAX_VALUE);
 
-        Label label = new Label(text);
-        label.setWrapText(true);
-
-        label.prefWidthProperty().bind(item.widthProperty().subtract(80));
+        TextFlow textFlow = new TextFlow(new Text(text));
+        textFlow.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(textFlow, Priority.ALWAYS);
 
         Button up = new Button("↑");
         Button down = new Button("↓");
@@ -238,8 +248,9 @@ public class AddRecipeCtrl {
 
         HBox buttonGroup = new HBox(5, up, down, delete);
         buttonGroup.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(buttonGroup, Priority.NEVER);
 
-        item.getChildren().addAll(label, buttonGroup);
+        item.getChildren().addAll(textFlow, buttonGroup);
 
         up.setOnAction(e -> moveUp(item));
         down.setOnAction(e -> moveDown(item));
