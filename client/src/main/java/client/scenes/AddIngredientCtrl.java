@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.utils.ServerUtils;
+import client.utils.TextFieldUtils;
 import commons.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -103,31 +104,23 @@ public class AddIngredientCtrl {
     }
 
     private RecipeIngredient getRecipeIngredient() {
-        NutritionValues newValues = new NutritionValues(
-                getDoubleFromField(proteinField),
-                getDoubleFromField(fatField),
-                getDoubleFromField(carbsField)
-        );
+        String name = TextFieldUtils.getStringFromField(nameField, nameLabel);
+        Amount newAmount = getAmount();
+        double protein = TextFieldUtils.getDoubleFromField(proteinField, proteinLabel);
+        double fat = TextFieldUtils.getDoubleFromField(fatField, fatLabel);
+        double carbs = TextFieldUtils.getDoubleFromField(carbsField, carbsLabel);
+
+        NutritionValues newValues = new NutritionValues(protein, fat, carbs);
 
         // put the new ingredient in the database
-        Ingredient newIngredient = new Ingredient(getName(), newValues);
+        Ingredient newIngredient = new Ingredient(name, newValues);
 
-        Amount newAmount = getAmount();
 
         return new RecipeIngredient(newIngredient.getId(), newAmount);
     }
 
-
-    private String getName() {
-        String name = nameField.getText();
-        if (name.isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-        return name;
-    }
-
     private Amount getAmount() {
-        double quantity = getDoubleFromField(amountField);
+        double quantity = TextFieldUtils.getDoubleFromField(amountField, amountLabel);
         String input = unitComboBox.getEditor().getText().trim();
 
         if (input.isEmpty()) {
@@ -136,7 +129,6 @@ public class AddIngredientCtrl {
         }
 
         Unit unit = null;
-
         try {
             unit = Unit.valueOf(input.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -148,23 +140,6 @@ public class AddIngredientCtrl {
         } else {
             return null;
             // return new InformalAmount(quantity, input);
-        }
-    }
-
-    private double getDoubleFromField(TextField textField) {
-        String text = textField.getText();
-
-        try {
-            return Double.parseDouble(text);
-        } catch (NumberFormatException e) {
-            String message = textField.getId() + " must be a number, with or without decimal point";
-            var alert = new Alert(Alert.AlertType.ERROR);
-            alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setContentText(message);
-            alert.showAndWait();
-
-            textField.clear();
-            throw new NumberFormatException(message);
         }
     }
 

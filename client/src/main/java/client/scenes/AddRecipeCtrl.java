@@ -3,6 +3,7 @@ package client.scenes;
 import client.MyFXML;
 import client.utils.ServerUtils;
 
+import client.utils.TextFieldUtils;
 import commons.Ingredient;
 import commons.Recipe;
 import commons.RecipeIngredient;
@@ -138,20 +139,12 @@ public class AddRecipeCtrl {
      * @return a new Recipe with user input
      */
     private Recipe getRecipe() {
-        return new Recipe(
-                getName(),
-                getIngredients(),
-                getPreparations(),
-                getServingSize()
-        );
-    }
+        String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
+        List <RecipeIngredient> ingredients = new ArrayList<>();
+        List<String> preparations = getPreparations();
+        int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
 
-    /**
-     * Gets name from user
-     * @return string of recipe name
-     */
-    private String getName() {
-        return nameField.getText();
+        return new Recipe(name, ingredients, preparations, servingSize);
     }
 
     /**
@@ -172,27 +165,6 @@ public class AddRecipeCtrl {
                 .map(b -> (HBox) b)
                 .map(h -> ((Label) h.getChildren().getFirst()).getText())
                 .toList();
-    }
-
-    /**
-     * Gets how many servings is the recipe from user
-     * @return an int of serving size
-     */
-    private int getServingSize() {
-        String text = servingSizeField.getText();
-
-        try {
-            return Integer.parseInt(text);
-        } catch (NumberFormatException e) {
-            var alert = new Alert(Alert.AlertType.ERROR);
-            alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setContentText("Serving size must be an integer");
-            alert.showAndWait();
-
-            servingSizeField.clear();
-
-            return -1;
-        }
     }
 
     /**
