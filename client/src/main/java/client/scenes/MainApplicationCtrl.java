@@ -9,6 +9,9 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
+import commons.Recipe;
+import client.scenes.RecipeListCtrl;
+import javafx.scene.control.ListView;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -36,29 +39,16 @@ public class MainApplicationCtrl {
     @FXML
     private Button refreshButton;
 
+    @FXML
+    private ListView<Recipe> recipeListView;
+
+    private RecipeListCtrl recipeListCtrl;
+
     private MyFXML fxml;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml){
         this.fxml =fxml;
-    }
-
-    /**
-     * Initializes UI functionality
-     */
-    @FXML
-    private void initialize(){
-        bindElementsProperties();
-
-        /* For UI testing purposes, since we don't have a button
-         for language selection just yet, change this line
-         if you want to visualize language changes.
-         Parameter choices:
-         EN: DEFAULT_LOCALE
-         DE: Locale.GERMAN
-         NL: Locale.forLanguageTag("nl-NL")
-        */
-        setLocale(DEFAULT_LOCALE);
     }
 
     /**
@@ -109,4 +99,55 @@ public class MainApplicationCtrl {
     public void showMainScreen(){
         contentPane.getChildren().clear();
     }
+
+    /**
+     * Initializes the main application UI components related to the recipe list.
+     * This method is automatically called by the JavaFX runtime after FXML loading.
+     * It performs the following:
+     *     Creates a new {@link RecipeListCtrl} instance, which manages the list of recipes.
+     *     Binds the existing FXML {@code ListView} to the controller
+     *     so recipe titles can be displayed.
+     *     Configures the Remove button so that clicking it puts the list into "remove mode",
+     *         meaning the next click on a recipe name will remove that specific recipe.
+     * Only listing and remove-on-click behavior are implemented at this stage.
+     */
+    @FXML
+    private void initialize() {
+        bindElementsProperties();
+
+        /* For UI testing purposes, since we don't have a button
+         for language selection just yet, change this line
+         if you want to visualize language changes.
+         Parameter choices:
+         EN: DEFAULT_LOCALE
+         DE: Locale.GERMAN
+         NL: Locale.forLanguageTag("nl-NL")
+        */
+        setLocale(DEFAULT_LOCALE);
+
+        recipeListCtrl = new RecipeListCtrl();
+        if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
+        if (removeButton != null) removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
+    }
+
+    /**
+     * Adds a newly created recipe to the left-hand recipe list.
+     * This method is called by {@link AddRecipeCtrl} after the user completes the
+     * Add Recipe form and presses the Done button. It ensures that:
+     *     The recipe appears immediately in the list displayed in the left rectangle.
+     *     If the {@link RecipeListCtrl} was not initialized yet,
+     *         it will be created and linked to the FXML {@code ListView}.
+     * This method performs an in-memory update only; no server or database
+     * persistence is involved at this stage.
+     *
+     * @param r the newly created {@link Recipe} to add to the UI list
+     */
+    public void addRecipeToList(Recipe r) {
+        if (recipeListCtrl == null) {
+            recipeListCtrl = new RecipeListCtrl();
+            if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
+        }
+        recipeListCtrl.addRecipe(r);
+    }
+
 }

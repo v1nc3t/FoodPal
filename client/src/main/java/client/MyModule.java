@@ -18,6 +18,7 @@ package client;
 import client.scenes.AddIngredientCtrl;
 import client.scenes.AddRecipeCtrl;
 import client.scenes.MainApplicationCtrl;
+import client.scenes.RecipeListCtrl;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -29,5 +30,7 @@ public class MyModule implements Module {
         binder.bind(MainApplicationCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddRecipeCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddIngredientCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(RecipeListCtrl.class).in(Scopes.SINGLETON);
+
     }
 }

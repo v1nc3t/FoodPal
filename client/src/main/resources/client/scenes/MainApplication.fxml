@@ -14,10 +14,12 @@
    </top>
    <left>
       <Pane prefHeight="350.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-          <ListView prefHeight="300.0" prefWidth="200.0" />
-          <Button fx:id="addButton" layoutX="14.0" layoutY="312.0" mnemonicParsing="false" onAction="#addRecipe" text="${controller.addProperty}" />
-         <Button fx:id="removeButton" layoutX="62.0" layoutY="312.0" mnemonicParsing="false" text="${controller.removeProperty}" />
-         <Button fx:id="refreshButton" layoutX="131.0" layoutY="312.0" mnemonicParsing="false" text="${controller.refreshProperty}" />
+          <Pane prefHeight="350.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+              <ListView fx:id="recipeListView" prefHeight="300.0" prefWidth="200.0" />
+              <Button fx:id="addButton" layoutX="14.0" layoutY="312.0" mnemonicParsing="false" onAction="#addRecipe" text="${controller.addProperty}" />
+              <Button fx:id="removeButton" layoutX="62.0" layoutY="312.0" mnemonicParsing="false" text="${controller.removeProperty}" />
+              <Button fx:id="refreshButton" layoutX="131.0" layoutY="312.0" mnemonicParsing="false" text="${controller.refreshProperty}" />
+          </Pane>
       </Pane>
    </left>
 </BorderPane>
