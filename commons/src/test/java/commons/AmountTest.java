@@ -27,20 +27,20 @@ public class AmountTest {
 
     @Test
     public void testGetQuantity() {
-        assertEquals(2.0, formalAmount.getQuantity());
-        assertEquals(1.0, informalAmount.getQuantity());
+        assertEquals(2.0, formalAmount.quantity());
+        assertEquals(1.0, informalAmount.quantity());
     }
 
     @Test
     public void testGetUnit() {
-        assertEquals(Unit.CUP, formalAmount.getUnit());
-        assertNull(informalAmount.getUnit());
+        assertEquals(Unit.CUP, formalAmount.unit());
+        assertNull(informalAmount.unit());
     }
 
     @Test
     public void testGetDescription() {
-        assertNull(formalAmount.getDescription());
-        assertEquals("a pinch", informalAmount.getDescription());
+        assertNull(formalAmount.description());
+        assertEquals("a pinch", informalAmount.description());
     }
 
     @Test

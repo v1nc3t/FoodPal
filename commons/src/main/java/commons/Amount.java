@@ -1,30 +1,11 @@
 package commons;
 
+import jakarta.persistence.Embeddable;
 
-/* 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "type")
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = InformalAmount.class, name = "informalAmount"),
-    @JsonSubTypes.Type(value = FormalAmount.class, name = "formalAmount")
-})
-        */
-
-public class Amount {
-    private double quantity;
-    private Unit unit;
-    private String description;
-
-    public Amount(double quantity, Unit unit, String description) {
-        this.quantity = quantity;
-        this.unit = unit;
-        this.description = description;
-    }
+@Embeddable
+public record Amount( double quantity,
+                      Unit unit,
+                      String description) {
 
     /**
      * Constructor for InformalAmount
@@ -42,18 +23,6 @@ public class Amount {
      */
     public Amount(double quantity, Unit unit) {
         this(quantity, unit, null);
-    }
-
-    public double getQuantity() {
-        return quantity;
-    }
-
-    public Unit getUnit() {
-        return unit;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     @Override
