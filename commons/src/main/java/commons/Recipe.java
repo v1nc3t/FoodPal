@@ -2,6 +2,7 @@ package commons;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -14,6 +15,7 @@ public class Recipe {
     @Id
     public UUID id;
     public String title;
+    @ElementCollection
     public List<RecipeIngredient> ingredients;
     public List<String> steps;
     public int servingSize;
