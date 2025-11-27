@@ -156,7 +156,7 @@ public class AddIngredientCtrl {
         }
 
         if (unit != null) {
-            return new FormalAmount(quantity, unit);
+            return new Amount(quantity, unit);
         } else {
             return null;
             // return new InformalAmount(quantity, input);

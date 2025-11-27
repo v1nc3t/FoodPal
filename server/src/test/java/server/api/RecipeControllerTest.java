@@ -19,8 +19,8 @@ public class RecipeControllerTest {
     List<String> preparationSteps = List.of("Melt sugar", "Freeze yogurt", "Blend");
     Recipe recipe = new Recipe("Sugared Yogurt",
             List.of(
-                    new RecipeIngredient(yogurt.getId(), new FormalAmount(1, Unit.CUP)),
-                    new RecipeIngredient(sugar.getId(), new FormalAmount(1, Unit.KILOGRAM))
+                    new RecipeIngredient(yogurt.getId(), new Amount(1, Unit.CUP)),
+                    new RecipeIngredient(sugar.getId(), new Amount(1, Unit.KILOGRAM))
             ),
             preparationSteps,
             1);
