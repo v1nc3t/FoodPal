@@ -5,6 +5,7 @@ import client.utils.TextFieldUtils;
 import commons.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -127,6 +128,12 @@ public class AddIngredientCtrl {
         selectUnitProperty.set(resourceBundle.getString("txt.select_unit"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+
+        // Try to change the title only once initialization is done
+        Platform.runLater(()->{
+            String title = resourceBundle.getString("txt.title");
+            ((Stage) cancelButton.getScene().getWindow()).setTitle(title);
+        });
     }
 
     @Inject
