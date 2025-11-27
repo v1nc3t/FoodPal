@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.utils.ServerUtils;
+import client.utils.TextFieldUtils;
 import commons.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -17,6 +18,8 @@ import java.util.ResourceBundle;
 
 import static client.Main.BUNDLE_NAME;
 import static client.Main.DEFAULT_LOCALE;
+
+import java.util.function.Consumer;
 
 public class AddIngredientCtrl {
 
@@ -61,6 +64,7 @@ public class AddIngredientCtrl {
 
     private final ServerUtils server;
     private final AddRecipeCtrl ctrl;
+    private Consumer<RecipeIngredient> ingredientAdded;
 
     @FXML
     private void initialize() {
@@ -79,8 +83,6 @@ public class AddIngredientCtrl {
         for (Unit unit : Unit.values()) {
             unitComboBox.getItems().add(unit.name().toLowerCase());
         }
-
-        // ignore case ?? for amount??
     }
 
     /**
@@ -134,20 +136,31 @@ public class AddIngredientCtrl {
     }
 
     /**
+     * Function gets called when user clicks on Done and new ingredient is created
+     * @param callback new ingredient made will be sent
+     */
+    public void setIngredientAdded(Consumer<RecipeIngredient> callback) {
+        this.ingredientAdded = callback;
+    }
+
+    /**
      * When cancel button clicked no ingredient is added
      * Add ingredient pop up is closed
      */
     public void clickCancel() {
-        clearFields();
-
-        Stage addIngredientStage = (Stage) cancelButton.getScene().getWindow();
-        addIngredientStage.close();
+        closeWindow();
     }
 
+    /**
+     * Tries to create a new RecipeIngredient from user input
+     * new ingredient is sent to server ///TODO
+     * @throws WebApplicationException then show alert and stop
+     */
     public void clickDone() {
+        RecipeIngredient newIngredient = null;
         try {
-            // server.addIngredient(getIngredient());
-            // update the combo box in add recipe ctrl
+            newIngredient = getRecipeIngredient();
+            //TODO server.addIngredient(getIngredient());
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -155,12 +168,27 @@ public class AddIngredientCtrl {
             alert.showAndWait();
             return;
         }
+
+        if(ingredientAdded != null && newIngredient != null) {
+            ingredientAdded.accept(newIngredient);
+        }
+
+        closeWindow();
+    }
+
+    /**
+     * Clears all fields and closes the popup
+     */
+    private void closeWindow() {
         clearFields();
 
         Stage addIngredientStage = (Stage) cancelButton.getScene().getWindow();
         addIngredientStage.close();
     }
 
+    /**
+     * Clears all fields
+     */
     private void clearFields() {
         nameField.clear();
         amountField.clear();
@@ -171,35 +199,39 @@ public class AddIngredientCtrl {
         unitComboBox.getEditor().clear();
     }
 
+    /**
+     * Creates a new RecipeIngredient with user input
+     */
     private RecipeIngredient getRecipeIngredient() {
-        NutritionValues newValues = new NutritionValues(
-                getDoubleFromField(proteinField),
-                getDoubleFromField(fatField),
-                getDoubleFromField(carbsField)
-        );
-
-        Ingredient newIngredient = new Ingredient(getName(), newValues);
-
+        String name = TextFieldUtils.getStringFromField(nameField, nameLabel);
         Amount newAmount = getAmount();
+        double protein = TextFieldUtils.getDoubleFromField(proteinField, proteinLabel);
+        double fat = TextFieldUtils.getDoubleFromField(fatField, fatLabel);
+        double carbs = TextFieldUtils.getDoubleFromField(carbsField, carbsLabel);
+
+        NutritionValues newValues = new NutritionValues(protein, fat, carbs);
+
+        // put the new ingredient in the database
+        Ingredient newIngredient = new Ingredient(name, newValues);
+
 
         return new RecipeIngredient(newIngredient.getId(), newAmount);
     }
 
-
-    private String getName() {
-        return nameField.getText();
-    }
-
+    /**
+     * Extracts the unit of measuring from the selecting field
+     * @return a new Amount based on input
+     */
     private Amount getAmount() {
-        double quantity = getDoubleFromField(amountField);
+        double quantity = TextFieldUtils.getDoubleFromField(amountField, amountLabel);
         String input = unitComboBox.getEditor().getText().trim();
 
         if (input.isEmpty()) {
-            return new InformalAmount("");
+            return null;
+            //return new InformalAmount(quantity, "");
         }
 
         Unit unit = null;
-
         try {
             unit = Unit.valueOf(input.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -209,24 +241,8 @@ public class AddIngredientCtrl {
         if (unit != null) {
             return new FormalAmount(quantity, unit);
         } else {
-            return new InformalAmount(input);
-        }
-    }
-
-    private double getDoubleFromField(TextField textField) {
-        String text = textField.getText();
-
-        try {
-            return Double.parseDouble(text);
-        } catch (NumberFormatException e) {
-            var alert = new Alert(Alert.AlertType.ERROR);
-            alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setContentText(textField + " must be an number, with or without decimal point");
-            alert.showAndWait();
-
-            textField.clear();
-
-            return -1;
+            return null;
+            // return new InformalAmount(quantity, input);
         }
     }
 
