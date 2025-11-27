@@ -143,6 +143,7 @@ public class RecipeManager {
             t.printStackTrace();
         }
     }
+
     /** Clears internal state for unit tests only. */
     public void clearForTests() {
         recipesMap.clear();
