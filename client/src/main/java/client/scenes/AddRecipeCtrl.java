@@ -55,6 +55,8 @@ public class AddRecipeCtrl {
     @FXML private Button doneButton;
     @FXML private Button cancelButton;
 
+    private Recipe editingRecipe;
+
     private final ServerUtils server;
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
@@ -108,22 +110,23 @@ public class AddRecipeCtrl {
      * And after clear all fields and main app stops showing add recipe panel
      */
     public void clickDone() {
+        Recipe r;
         try {
-            Recipe r = getRecipe();
-
-            // Optimistic local add so UI updates immediately
+            r = getRecipe();
             RecipeManager mgr = RecipeManager.getInstance();
-            mgr.addRecipeOptimistic(r);
 
+            if (editingRecipe == null) {
+                mgr.addRecipeOptimistic(r);
 
-            if (onRecipeAdded != null) onRecipeAdded.accept(r);
-            mainCtrl.addRecipeToList(r);
+                if (onRecipeAdded != null) onRecipeAdded.accept(r);
 
-
-            try {
-                server.addRecipe(r); // current project signature is void;
-            } catch (Exception e) {
-                // Server not available / failed: keep optimistic copy.
+                try {
+                    server.addRecipe(r); // current project signature is void;
+                } catch (Exception e) {
+                    // Server not available / failed: keep optimistic copy.
+                }
+            } else {
+                mgr.setRecipe(r);
             }
 
         } catch (WebApplicationException e) {
@@ -133,14 +136,22 @@ public class AddRecipeCtrl {
             alert.showAndWait();
             return;
         }
-        closeView();
+
+        clearFields();
+        editingRecipe = null;
+        mainCtrl.showRecipeViewer(r);
     }
 
 
     private void closeView() {
+        Recipe justSaved = editingRecipe;
         clearFields();
 
-        mainCtrl.showMainScreen();
+        if (justSaved != null) {
+            mainCtrl.editRecipe(justSaved);
+        } else {
+            mainCtrl.showMainScreen();
+        }
     }
 
     /**
@@ -155,6 +166,7 @@ public class AddRecipeCtrl {
         ingredientsComboBox.getItems().clear();
 
         preparationList.getChildren().clear();
+        editingRecipe = null;
     }
 
     /**
@@ -167,7 +179,13 @@ public class AddRecipeCtrl {
         List<String> preparations = getPreparations();
         int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
 
-        return new Recipe(name, ingredients, preparations, servingSize);
+        if(editingRecipe == null){
+            // new recipe
+            return new Recipe(name, ingredients, preparations, servingSize);
+        }else{
+            // Editing one
+            return new Recipe(editingRecipe.getId(), name, ingredients, preparations, servingSize);
+        }
     }
 
     /**
@@ -297,6 +315,31 @@ public class AddRecipeCtrl {
         delete.setOnAction(e -> preparationList.getChildren().remove(item));
 
         return item;
+    }
+
+    /**
+     * Loads an existing recipe into the Add Recipe form for editing.
+     * @param recipe the recipe to edit
+     */
+    public void loadRecipe(Recipe recipe) {
+        if (recipe == null) return;
+
+        this.editingRecipe = recipe;
+
+        nameField.setText(recipe.getTitle());
+        servingSizeField.setText(String.valueOf(recipe.getServingSize()));
+
+        //needs to be changed once server side is done.
+        ingredientsList.getChildren().clear();
+        for (RecipeIngredient ri : recipe.getIngredients()) {
+            ingredientsList.getChildren().add(createIngredientItem(ri));
+        }
+
+        preparationList.getChildren().clear();
+        for (String step : recipe.getSteps()) {
+            HBox item = createPreparationItem(step);
+            preparationList.getChildren().add(item);
+        }
     }
 
     /**

@@ -4,10 +4,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipeViewerCtrl">
 
-   <Button layoutX="348.0" layoutY="310.0" mnemonicParsing="false" text="Edit" />
-   <Label alignment="CENTER" contentDisplay="CENTER" layoutY="15.0" prefHeight="17.0" prefWidth="400.0" text="Recipe name">
+   <Button fx:id="editButton" layoutX="348.0" layoutY="310.0" mnemonicParsing="false" onAction="#editRecipe" text="Edit" />
+   <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" layoutY="15.0" prefHeight="17.0" prefWidth="400.0" text="Recipe name">
       <font>
          <Font size="18.0" />
       </font></Label>
@@ -17,7 +17,7 @@
       </font>
    </Label>
    <ScrollPane layoutY="49.0" prefHeight="105.0" prefWidth="400.0">
-      <ListView prefHeight="101.0" prefWidth="398.0" />
+      <ListView fx:id="ingredientsList" prefHeight="101.0" prefWidth="398.0" />
    </ScrollPane>
    <Label alignment="CENTER" contentDisplay="CENTER" layoutX="-2.0" layoutY="155.0" prefHeight="23.0" prefWidth="103.0" text="Preparation">
       <font>
@@ -25,7 +25,7 @@
       </font>
    </Label>
    <ScrollPane layoutY="178.0" prefHeight="106.0" prefWidth="400.0">
-      <ListView prefHeight="104.0" prefWidth="396.0" />
+      <ListView fx:id="preparationList" prefHeight="104.0" prefWidth="396.0" />
    </ScrollPane>
 
 </Pane>
