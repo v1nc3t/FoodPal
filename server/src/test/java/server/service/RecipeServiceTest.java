@@ -37,7 +37,7 @@ public class RecipeServiceTest {
                 List.of(
                         new RecipeIngredient(
                                 UUID.randomUUID(),
-                                new FormalAmount(
+                                new Amount(
                                         10,
                                         Unit.GRAM)
                         )
@@ -61,13 +61,13 @@ public class RecipeServiceTest {
                 List.of(
                         new RecipeIngredient(
                                 yogurt.getId(),
-                                new FormalAmount(
+                                new Amount(
                                         10,
                                         Unit.GRAM)
                         ),
                         new RecipeIngredient(
                                 sugar.getId(),
-                                new InformalAmount(
+                                new Amount(1,
                                         "A bucket"
                                 )
                         )
