@@ -4,6 +4,8 @@ import client.MyFXML;
 import jakarta.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
@@ -18,9 +20,14 @@ public class MainApplicationCtrl {
      */
     @FXML
     private Pane contentPane;
-
     @FXML
     private Button addButton;
+    @FXML
+    private Button refresh;
+    @FXML
+    private ChoiceBox<String> searchChoice;
+    @FXML
+    private TextField searchField;
 
     @FXML
     private ListView<Recipe> recipeListView;
@@ -38,20 +45,56 @@ public class MainApplicationCtrl {
     }
 
     /**
+     * Initialize ui components.
+     */
+    public void initialize(){
+        // Temp searchChoice.
+        searchChoice.getItems().setAll("test1", "test2", "test3");
+        searchChoice.setValue("test1");
+    }
+
+    /**
      *   Loads Recipe panel
      */
     @FXML
     private void addRecipe() {
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,
                 "client", "scenes", "AddRecipePanel.fxml");
-
-        /**
-         *  Injects the main ctrl into the add recipe ctrl
-         */
+    /**
+     *  Injects the main ctrl into the add recipe ctrl
+     */
         AddRecipeCtrl addRecipeCtrl = pair.getKey();
         Parent addRecipeRoot = pair.getValue();
 
         contentPane.getChildren().setAll(addRecipeRoot);
+    }
+
+    /**
+     * Refreshes db to get latest data
+     */
+    public void refresh(){
+        // Temp. Rewriting this once server side is done
+        System.out.println("Refresh pressed (Server logic not implemented yet)");
+
+        showMainScreen();
+    }
+
+    /**
+     * Search field for users to search up items/recipes from ist
+     */
+    public void search(){
+        String query = searchField.getText();
+        String mode  = searchChoice.getValue();
+
+        // To be implemented once server side is done.
+        System.out.println("Searching for '" + query + "' by " + mode);
+    }
+
+    /**
+     * This is used after the server is refreshed.
+     */
+    public  void showCurrentScreen(){
+        // to be implemented so when you refresh it shows the current scene instead of going back to main
     }
 
     /**

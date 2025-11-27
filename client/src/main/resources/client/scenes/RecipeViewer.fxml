@@ -4,10 +4,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
 
    <Button layoutX="348.0" layoutY="310.0" mnemonicParsing="false" text="Edit" />
-   <Label alignment="CENTER" contentDisplay="CENTER" layoutX="1.0" layoutY="14.0" prefHeight="17.0" prefWidth="400.0" text="Recipe name">
+   <Label alignment="CENTER" contentDisplay="CENTER" layoutY="15.0" prefHeight="17.0" prefWidth="400.0" text="Recipe name">
       <font>
          <Font size="18.0" />
       </font></Label>
