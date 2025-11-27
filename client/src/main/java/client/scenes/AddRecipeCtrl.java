@@ -30,6 +30,7 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import client.services.RecipeManager;
 
 public class AddRecipeCtrl {
 
@@ -108,11 +109,22 @@ public class AddRecipeCtrl {
      */
     public void clickDone() {
         try {
-
             Recipe r = getRecipe();
-            server.addRecipe(r); // optional if you still want server call
-            // notify main UI to add recipe to left list
+
+            // Optimistic local add so UI updates immediately
+            RecipeManager mgr = RecipeManager.getInstance();
+            mgr.addRecipeOptimistic(r);
+
+
+            if (onRecipeAdded != null) onRecipeAdded.accept(r);
             mainCtrl.addRecipeToList(r);
+
+
+            try {
+                server.addRecipe(r); // current project signature is void;
+            } catch (Exception e) {
+                // Server not available / failed: keep optimistic copy.
+            }
 
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
@@ -123,6 +135,7 @@ public class AddRecipeCtrl {
         }
         closeView();
     }
+
 
     private void closeView() {
         clearFields();

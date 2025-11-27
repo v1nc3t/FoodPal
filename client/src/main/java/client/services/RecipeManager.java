@@ -10,7 +10,14 @@ import javafx.collections.ObservableList;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+/**
+ * Client-side manager that mirrors server.service.RecipeService.
+ * - Keeps maps for fast lookup and validation.
+ * - Exposes an ObservableList for JavaFX views.
+ * - Marshals UI updates onto the JavaFX thread.
+ *
+ * Use RecipeManager.getInstance() to access the singleton.
+ */
 public class RecipeManager {
 
     private final Map<UUID, Recipe> recipesMap = new ConcurrentHashMap<>();
@@ -21,14 +28,17 @@ public class RecipeManager {
 
     private static RecipeManager instance;
 
-    private RecipeManager() {}
+    private RecipeManager() {
+        // Seed a test recipe so ListView shows something immediately during manual testing.
+        seedSampleRecipe();
+    }
 
     public static synchronized RecipeManager getInstance() {
         if (instance == null) instance = new RecipeManager();
         return instance;
     }
 
-    /* ---------- Observables / Snapshots ---------- */
+
 
     /** Observable list for binding to ListView (mutated on FX thread). */
     public ObservableList<Recipe> getObservableRecipes() {
@@ -40,24 +50,28 @@ public class RecipeManager {
         return new ArrayList<>(recipes);
     }
 
-    /** Return a snapshot state  */
+    /** Return a snapshot state (defensive copies). */
     public RecipeState getStateSnapshot() {
         Collection<Recipe> rc = List.copyOf(recipesMap.values());
         Collection<Ingredient> ic = List.copyOf(ingredientsMap.values());
         return new RecipeState(rc, ic);
     }
 
-    /* ---------- Mutators (safe to call from any thread) ---------- */
 
 
+    /**
+     Returns true if stored, false if invalid input.
+     */
     public boolean setRecipe(Recipe recipe) {
-        if (recipe == null || recipe.getId() == null) return false;
+        if (recipe == null) return false;
 
         boolean allRefsExist = recipe.getIngredients().stream()
                 .allMatch(ri -> ingredientsMap.containsKey(ri.getIngredientRef()));
         if (!allRefsExist) return false;
 
-        recipesMap.put(recipe.getId(), recipe);
+        // store
+        if (recipe.getId() != null) recipesMap.put(recipe.getId(), recipe);
+
         runOnFx(() -> {
             int idx = indexOfRecipe(recipe.getId());
             if (idx >= 0) recipes.set(idx, recipe);
@@ -66,20 +80,21 @@ public class RecipeManager {
         return true;
     }
 
-    /** Add recipe without strict ingredient validation */
+    /** Add recipe without strict ingredient validation (useful for optimistic UI). */
     public void addRecipeOptimistic(Recipe recipe) {
-        if (recipe == null || recipe.getId() == null) return;
-        recipesMap.put(recipe.getId(), recipe);
+        if (recipe == null) return;
+        if (recipe.getId() != null) recipesMap.put(recipe.getId(), recipe);
         runOnFx(() -> {
             if (!recipes.contains(recipe)) recipes.add(recipe);
         });
     }
 
     public boolean removeRecipe(UUID recipeId) {
+        if (recipeId == null) return false;
         Recipe removed = recipesMap.remove(recipeId);
-        if (removed == null) return false;
+        // still remove from observable list
         runOnFx(() -> recipes.removeIf(r -> Objects.equals(r.getId(), recipeId)));
-        return true;
+        return removed != null;
     }
 
     public boolean setIngredient(Ingredient ingredient) {
@@ -88,9 +103,10 @@ public class RecipeManager {
         return true;
     }
 
-    /* ---------- Helpers ---------- */
+
 
     private int indexOfRecipe(UUID id) {
+        if (id == null) return -1;
         for (int i = 0; i < recipes.size(); i++) {
             if (Objects.equals(recipes.get(i).getId(), id)) return i;
         }
@@ -101,4 +117,37 @@ public class RecipeManager {
         if (Platform.isFxApplicationThread()) r.run();
         else Platform.runLater(r);
     }
+
+
+
+    /** Adds a single in-memory test recipe so the ListView shows an entry at startup. */
+    private void seedSampleRecipe() {
+        try {
+            String title = "Test Pancakes";
+            // empty ingredient list for quick seed
+            List recipesIngredients = new ArrayList<>();
+            List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
+            int servingSize = 2;
+
+
+            Recipe sample = new Recipe(title, recipesIngredients, preparations, servingSize);
+
+            // store in maps if id exists
+            if (sample.getId() != null) recipesMap.put(sample.getId(), sample);
+
+            runOnFx(() -> {
+                if (!recipes.contains(sample)) recipes.add(sample);
+            });
+        } catch (Throwable t) {
+            // do not block startup on a test seed failure
+            t.printStackTrace();
+        }
+    }
+    /** Clears internal state for unit tests only. */
+    public void clearForTests() {
+        recipesMap.clear();
+        ingredientsMap.clear();
+        runOnFx(() -> recipes.clear());
+    }
+
 }
