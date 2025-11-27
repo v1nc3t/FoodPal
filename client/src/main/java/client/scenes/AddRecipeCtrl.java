@@ -12,6 +12,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -27,35 +29,49 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static client.Main.BUNDLE_NAME;
 import static client.Main.DEFAULT_LOCALE;
-import java.util.UUID;
 
 public class AddRecipeCtrl {
 
+    private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML private Label nameLabel;
+
+    private final StringProperty recipeNameFieldProperty = new SimpleStringProperty();
     @FXML private TextField nameField;
 
+    private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML private Label ingredientsLabel;
+
+    private final StringProperty selectIngredientProperty = new SimpleStringProperty();
     @FXML private ComboBox<Ingredient> ingredientsComboBox;
+
     @FXML private Button addIngredientButton;
     @FXML private ScrollPane ingredientsScrollPane;
     @FXML private VBox ingredientsList;
 
+    private final StringProperty preparationProperty = new SimpleStringProperty();
     @FXML private Label preparationLabel;
+
+    private final StringProperty addPreparationStepProperty = new SimpleStringProperty();
     @FXML private TextField preparationField;
+
     @FXML private Button addPreparationButton;
     @FXML private ScrollPane preparationScrollPane;
     @FXML private VBox preparationList;
 
+    private final StringProperty servingSizeProperty = new SimpleStringProperty();
     @FXML private Label servingSizeLabel;
+
+    private final StringProperty portionsProperty = new SimpleStringProperty();
     @FXML private TextField servingSizeField;
 
+    private final StringProperty doneProperty = new SimpleStringProperty();
     @FXML private Button doneButton;
+
+    private final StringProperty cancelProperty = new SimpleStringProperty();
     @FXML private Button cancelButton;
 
     private final ServerUtils server;
@@ -74,6 +90,18 @@ public class AddRecipeCtrl {
      */
     @FXML
     private void initialize() {
+        bindElementsProperties();
+
+        /* For UI testing purposes, since we don't have a button
+         for language selection just yet, change this line
+         if you want to visualize language changes.
+         Parameter choices:
+         EN: DEFAULT_LOCALE
+         DE: Locale.GERMAN
+         NL: Locale.forLanguageTag("nl-NL")
+        */
+        setLocale(DEFAULT_LOCALE);
+
         // when user entered a prep step, clicking enter will add it to the list
         preparationField.setOnAction(e -> {
             if(!preparationField.getText().isBlank()) {
@@ -88,6 +116,44 @@ public class AddRecipeCtrl {
         ingredientsScrollPane.setFitToWidth(true);
 
         ingredientsList.setSpacing(5);
+    }
+
+    /**
+     * Binds the elements of the UI to StringProperties,
+     * allowing dynamic updates, i.e. instant propagation,
+     * of the language of buttons, labels, etc.
+     * Should only be called once when initializing the controller.
+     */
+    private void bindElementsProperties() {
+        nameLabel.textProperty().bind(nameProperty);
+        nameField.promptTextProperty().bind(recipeNameFieldProperty);
+        ingredientsLabel.textProperty().bind(ingredientsProperty);
+        ingredientsComboBox.promptTextProperty().bind(selectIngredientProperty);
+        preparationLabel.textProperty().bind(preparationProperty);
+        preparationField.promptTextProperty().bind(addPreparationStepProperty);
+        servingSizeLabel.textProperty().bind(servingSizeProperty);
+        servingSizeField.promptTextProperty().bind(portionsProperty);
+        doneButton.textProperty().bind(doneProperty);
+        cancelButton.textProperty().bind(cancelProperty);
+    }
+
+    /**
+     * Dynamically updates properties of UI elements to the language
+     * of a corresponding locale
+     * @param locale provided locale/language for UI elements
+     */
+    private void setLocale(Locale locale) {
+        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+        nameProperty.set(resourceBundle.getString("txt.name"));
+        recipeNameFieldProperty.set(resourceBundle.getString("txt.recipe_name"));
+        ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
+        selectIngredientProperty.set(resourceBundle.getString("txt.select_ingredient"));
+        preparationProperty.set(resourceBundle.getString("txt.preparation"));
+        addPreparationStepProperty.set(resourceBundle.getString("txt.add_preparation_step"));
+        servingSizeProperty.set(resourceBundle.getString("txt.serving_size"));
+        portionsProperty.set(resourceBundle.getString("txt.portions"));
+        doneProperty.set(resourceBundle.getString("txt.done"));
+        cancelProperty.set(resourceBundle.getString("txt.cancel"));
     }
 
     /**
@@ -144,7 +210,7 @@ public class AddRecipeCtrl {
      */
     private Recipe getRecipe() {
         String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
-        List <RecipeIngredient> ingredients = new ArrayList<>();
+        List<RecipeIngredient> ingredients = new ArrayList<>();
         List<String> preparations = getPreparations();
         int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
 
