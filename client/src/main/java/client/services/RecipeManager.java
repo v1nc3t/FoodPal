@@ -11,11 +11,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Client-side manager that mirrors server.service.RecipeService.
  * - Keeps maps for fast lookup and validation.
  * - Exposes an ObservableList for JavaFX views.
  * - Marshals UI updates onto the JavaFX thread.
- *
  * Use RecipeManager.getInstance() to access the singleton.
  */
 public class RecipeManager {
