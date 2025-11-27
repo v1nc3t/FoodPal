@@ -15,7 +15,7 @@ public class RecipeIngredientTest {
     public void setUp() {
         nutritionValues = new NutritionValues(0.0, 0.0, 76.0);
         ingredient = new Ingredient("Flour", nutritionValues);
-        amount = new Amount(500, Unit.GRAM);
+        amount = new FormalAmount(500, Unit.GRAM);
         recipeIngredient = new RecipeIngredient(ingredient.getId(), amount);
     }
 
@@ -25,8 +25,8 @@ public class RecipeIngredientTest {
     }
 
     @Test
-    public void testGetIngredientId() {
-        assertEquals(ingredient.getId(), recipeIngredient.getIngredientRef());
+    public void testGetIngredientRef() {
+        assertEquals(recipeIngredient.getIngredientRef(), ingredient.getId());
     }
 
     @Test
@@ -35,8 +35,56 @@ public class RecipeIngredientTest {
     }
 
     @Test
+    public void testToString() {
+        String expectedString = "RecipeIngredient{ingredientRef=" + ingredient.getId() + ", amount=" + amount + '}';
+        assertEquals(expectedString, recipeIngredient.toString());
+    }
+
+    @Test
     public void testEqualsSameObject() {
         assertEquals(recipeIngredient, recipeIngredient);
+    }
+
+    @Test
+    public void testEqualsNull() {
+        assertFalse(recipeIngredient.equals(null));
+    }
+
+    @Test
+    public void testEqualsDifferentClass() {
+        String notARecipeIngredient = "Not a RecipeIngredient";
+        assertNotEquals(recipeIngredient, notARecipeIngredient);
+    }
+
+    @Test
+    public void testEqualsDifferentIngredientRef() {
+        NutritionValues nutritionValues1 = new NutritionValues(0.0, 0.0, 100.0);
+        Ingredient ingredient2 = new Ingredient("Sugar", nutritionValues1);
+        Amount amount1 = new FormalAmount(500, Unit.GRAM);
+        RecipeIngredient recipeIngredient2 = new RecipeIngredient(ingredient2.getId(), amount1);
+        assertNotEquals(recipeIngredient, recipeIngredient2);
+    }
+
+    @Test
+    public void testEqualsDifferentAmount() {
+        Amount amount1 = new FormalAmount(500, Unit.GRAM);
+        Amount amount2 = new FormalAmount(1, Unit.KILOGRAM);
+        RecipeIngredient recipeIngredient = new RecipeIngredient(ingredient.getId(), amount1);
+        RecipeIngredient recipeIngredient2 = new RecipeIngredient(ingredient.getId(), amount2);
+        assertNotEquals(recipeIngredient, recipeIngredient2);
+    }
+
+    @Test
+    public void testEqualsSameFieldsAndID() {
+        Amount amount1 = new FormalAmount(500, Unit.GRAM);
+        RecipeIngredient recipeIngredient1 = new RecipeIngredient(ingredient.getId(), amount1);
+        RecipeIngredient recipeIngredient2 = new RecipeIngredient(ingredient.getId(), amount1);
+        assertEquals(recipeIngredient1, recipeIngredient2);
+    }
+
+    @Test
+    public void testHashCode() {
+        assertEquals(recipeIngredient.hashCode(), recipeIngredient.hashCode());
     }
 
 }
