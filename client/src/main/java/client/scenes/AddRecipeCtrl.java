@@ -30,6 +30,7 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import client.services.RecipeManager;
 
 public class AddRecipeCtrl {
 
@@ -57,6 +58,12 @@ public class AddRecipeCtrl {
     private final ServerUtils server;
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
+
+    // callback so MainApplicationCtrl can be notified when a recipe is added
+    private java.util.function.Consumer<Recipe> onRecipeAdded;
+    public void setOnRecipeAdded(java.util.function.Consumer<Recipe> onRecipeAdded) {
+        this.onRecipeAdded = onRecipeAdded;
+    }
 
     @Inject
     public AddRecipeCtrl(ServerUtils server, MainApplicationCtrl mainCtrl, MyFXML fxml) {
@@ -102,8 +109,23 @@ public class AddRecipeCtrl {
      */
     public void clickDone() {
         try {
-            server.addRecipe(getRecipe());
-            //TODO update the main controller's recipe list
+            Recipe r = getRecipe();
+
+            // Optimistic local add so UI updates immediately
+            RecipeManager mgr = RecipeManager.getInstance();
+            mgr.addRecipeOptimistic(r);
+
+
+            if (onRecipeAdded != null) onRecipeAdded.accept(r);
+            mainCtrl.addRecipeToList(r);
+
+
+            try {
+                server.addRecipe(r); // current project signature is void;
+            } catch (Exception e) {
+                // Server not available / failed: keep optimistic copy.
+            }
+
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -113,6 +135,7 @@ public class AddRecipeCtrl {
         }
         closeView();
     }
+
 
     private void closeView() {
         clearFields();
