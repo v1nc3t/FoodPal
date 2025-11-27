@@ -144,22 +144,18 @@ public class AddIngredientCtrl {
         String input = unitComboBox.getEditor().getText().trim();
 
         if (input.isEmpty()) {
-            return null;
+            throw new WebApplicationException("Unit or description cannot be empty.");
+            //return null;
             //return new InformalAmount(quantity, "");
         }
 
-        Unit unit = null;
+        //Unit unit = null;
+        // try to interpret input as a Unit
         try {
-            unit = Unit.valueOf(input.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            // unit remains null
-        }
-
-        if (unit != null) {
+            Unit unit = Unit.valueOf(input.toUpperCase());
             return new Amount(quantity, unit);
-        } else {
-            return null;
-            // return new InformalAmount(quantity, input);
+        } catch (IllegalArgumentException ignored) {
+            return new Amount(quantity, input);
         }
     }
 
