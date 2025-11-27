@@ -23,10 +23,10 @@ public class MainApplicationCtrl {
     private Button addButton;
 
     @FXML
-    private ListView<Recipe> recipeListView; // matches fx:id in your FXML
+    private ListView<Recipe> recipeListView;
 
     @FXML
-    private Button removeButton; // matches fx:id in your FXML
+    private Button removeButton;
 
     private RecipeListCtrl recipeListCtrl;
 
