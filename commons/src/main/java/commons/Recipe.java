@@ -2,18 +2,23 @@ package commons;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+@Entity
 public class Recipe {
-
-    private UUID id;
-    private String title;
-    private List<RecipeIngredient> ingredients;
-    private List<String> steps;
-    private int servingSize;
+    @Id
+    public UUID id;
+    public String title;
+    @ElementCollection
+    public List<RecipeIngredient> ingredients;
+    public List<String> steps;
+    public int servingSize;
     
     public Recipe(String title, List<RecipeIngredient> ingredients, List<String> steps, int servingSize) {
         this.id = UUID.randomUUID();
@@ -42,6 +47,10 @@ public class Recipe {
         this.ingredients = ingredients;
         this.steps = steps;
         this.servingSize = servingSize;
+    }
+
+    // an empty constructor for object mapper
+    public Recipe() {
     }
 
 
