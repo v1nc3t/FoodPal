@@ -2,13 +2,20 @@ package commons;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Embeddable;
 
 import java.util.Objects;
 import java.util.UUID;
 
+@Embeddable
 public class RecipeIngredient {
-    private UUID ingredientRef;
-    private Amount amount;
+    public UUID ingredientRef;
+    public Amount amount;
+
+    // an empty constructor for object mappers
+    public RecipeIngredient() {
+
+    }
 
     @JsonCreator
     public RecipeIngredient(@JsonProperty("ingredientRef") UUID ingredientRef,

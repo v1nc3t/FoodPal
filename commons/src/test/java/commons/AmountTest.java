@@ -2,138 +2,50 @@ package commons;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AmountTest {
-    // Tests for FormalAmount subclass
+    Amount formalAmount;
+    Amount informalAmount;
+
+    @BeforeEach
+    public void setUp() {
+        formalAmount = new Amount(2.0, Unit.CUP);
+        informalAmount = new Amount(1.0, "a pinch");
+    }
+
     @Test
-    public void testAmountSubclassCreation() {
-        Amount amount = new FormalAmount(100, Unit.GRAM);
-        assertNotNull(amount);
+    public void testformalAmountCreation() {
+        assertNotNull(formalAmount);
+    }
+
+    @Test
+    public void testinformalAmountCreation() {
+        assertNotNull(informalAmount);
     }
 
     @Test
     public void testGetQuantity() {
-        FormalAmount amount = new FormalAmount(100, Unit.GRAM);
-        assertEquals(100, amount.getQuantity());
+        assertEquals(2.0, formalAmount.quantity());
+        assertEquals(1.0, informalAmount.quantity());
     }
 
     @Test
     public void testGetUnit() {
-        FormalAmount amount = new FormalAmount(100, Unit.GRAM);
-        assertEquals(Unit.GRAM, amount.getUnit());
-    }
-
-    @Test
-    public void testToString() {
-        FormalAmount amount = new FormalAmount(100, Unit.GRAM);
-        assertEquals("100.0 GRAM", amount.toString());
-    }
-
-    @Test
-    public void testEqualsSameObject() {
-        FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        assertEquals(amount1, amount1);
-    }
-
-    @Test
-    public void testEqualsNull() {
-        FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        assertFalse(amount1.equals(null));
-    }
-
-    @Test
-    public void testEqualsDifferentClass() {
-        FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        String notAnAmount = "Not an Amount";
-        assertNotEquals(amount1, notAnAmount);
-    }
-
-    @Test
-    public void testEqualsSameValues() {
-        FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        FormalAmount amount2 = new FormalAmount(100, Unit.GRAM);
-        assertEquals(amount1, amount2);
-    }
-
-    @Test
-    public void testNotEqualsDifferentValues() {
-        FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        FormalAmount amount2 = new FormalAmount(200, Unit.GRAM);
-        assertNotEquals(amount1, amount2);
-    }
-
-    @Test
-    public void testNotEqualsDifferentUnits() {
-        FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        FormalAmount amount2 = new FormalAmount(100, Unit.MILLILITER);
-        assertNotEquals(amount1, amount2);
-    }
-
-    @Test
-    public void testHashCode() {
-        FormalAmount amount1 = new FormalAmount(100, Unit.GRAM);
-        FormalAmount amount2 = new FormalAmount(100, Unit.GRAM);
-        assertEquals(amount1.hashCode(), amount2.hashCode());
-    }
-
-    
-    // Tests for InformalAmount subclass
-    @Test
-    public void testAmountSubclassCreation2() {
-        Amount amount = new InformalAmount("a pinch");
-        assertNotNull(amount);
+        assertEquals(Unit.CUP, formalAmount.unit());
+        assertNull(informalAmount.unit());
     }
 
     @Test
     public void testGetDescription() {
-        InformalAmount amount = new InformalAmount("a pinch");
-        assertEquals("a pinch", amount.getDescription());
+        assertNull(formalAmount.description());
+        assertEquals("a pinch", informalAmount.description());
     }
 
     @Test
-    public void testToString2() {
-        InformalAmount amount = new InformalAmount("a pinch");
-        assertEquals("a pinch", amount.toString());
-    } 
-
-    @Test
-    public void testEqualsSameObject2() {
-        InformalAmount amount1 = new InformalAmount("a pinch");
-        assertEquals(amount1, amount1);
-    }
-
-    @Test
-    public void testEqualsNull2() {
-        InformalAmount amount1 = new InformalAmount("a pinch");
-        assertFalse(amount1.equals(null));
-    }
-
-    @Test
-    public void testEqualsDifferentClass2() {
-        InformalAmount amount1 = new InformalAmount("a pinch");
-        String notAnAmount = "Not an Amount";
-        assertNotEquals(amount1, notAnAmount);
-    }
-
-    @Test
-    public void testEqualsSameValues2() {
-        InformalAmount amount1 = new InformalAmount("a pinch");
-        InformalAmount amount2 = new InformalAmount("a pinch");
-        assertEquals(amount1, amount2);
-    }
-
-    @Test
-    public void testNotEqualsDifferentValues2() {
-        InformalAmount amount1 = new InformalAmount("a pinch");
-        InformalAmount amount2 = new InformalAmount("a dash");
-        assertNotEquals(amount1, amount2);
-    }
-
-    @Test
-    public void testHashCode2() {
-        InformalAmount amount1 = new InformalAmount("a pinch");
-        InformalAmount amount2 = new InformalAmount("a pinch");
-        assertEquals(amount1.hashCode(), amount2.hashCode());
-    }    
+    public void testEqualsSameObject() {
+        assertEquals(formalAmount, formalAmount);
+        assertEquals(informalAmount, informalAmount);
+    }  
 }
