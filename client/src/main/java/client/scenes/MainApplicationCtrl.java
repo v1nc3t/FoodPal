@@ -6,11 +6,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
 import commons.Recipe;
-import client.scenes.RecipeListCtrl;
 import javafx.scene.control.ListView;
 
 import java.util.Locale;
@@ -30,6 +31,10 @@ public class MainApplicationCtrl {
     private final StringProperty addProperty = new SimpleStringProperty();
     @FXML
     private Button addButton;
+    @FXML
+    private ChoiceBox<String> searchChoice;
+    @FXML
+    private TextField searchField;
 
     private final StringProperty removeProperty = new SimpleStringProperty();
     @FXML
@@ -44,7 +49,7 @@ public class MainApplicationCtrl {
 
     private RecipeListCtrl recipeListCtrl;
 
-    private MyFXML fxml;
+    private final MyFXML fxml;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml){
@@ -73,24 +78,6 @@ public class MainApplicationCtrl {
         addProperty.set(resourceBundle.getString("txt.add"));
         removeProperty.set(resourceBundle.getString("txt.remove"));
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
-    }
-
-    /**
-     *   Loads Recipe panel
-     */
-    @FXML
-    private void addRecipe() {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
-        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
-            "client", "scenes", "AddRecipePanel.fxml");
-
-        /*
-        Injects the main ctrl into the add recipe ctrl
-        */
-        AddRecipeCtrl addRecipeCtrl = pair.getKey();
-        Parent addRecipeRoot = pair.getValue();
-
-        contentPane.getChildren().setAll(addRecipeRoot);
     }
 
     /**
@@ -125,9 +112,75 @@ public class MainApplicationCtrl {
         */
         setLocale(DEFAULT_LOCALE);
 
+        searchChoice.getItems().setAll("test1", "test2", "test3");
+        searchChoice.setValue("test1");
+
         recipeListCtrl = new RecipeListCtrl();
-        if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
-        if (removeButton != null) removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
+        if (recipeListView != null) {
+            recipeListCtrl.setListView(recipeListView);
+
+            recipeListView.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldRecipe, newRecipe) -> {
+                    if (newRecipe != null) {
+                        showRecipe(newRecipe);
+                    }
+                }
+            );
+        }
+        if (removeButton != null) {
+            removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
+        }
+    }
+
+    /**
+     *   Loads Recipe panel
+     */
+    @FXML
+    private void addRecipe() {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,bundle,
+                "client", "scenes", "AddRecipePanel.fxml");
+
+        AddRecipeCtrl addRecipeCtrl = pair.getKey();
+        Parent addRecipeRoot = pair.getValue();
+
+        contentPane.getChildren().setAll(addRecipeRoot);
+    }
+
+    private void showRecipe(Recipe recipe) {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        if (recipe == null) {
+            showMainScreen();
+            return;
+        }
+
+        Pair<RecipeViewerCtrl, Parent> pair = fxml.load(RecipeViewerCtrl.class, bundle,
+            "client", "scenes", "RecipeViewer.fxml");
+
+        RecipeViewerCtrl viewerCtrl = pair.getKey();
+        Parent viewerRoot = pair.getValue();
+
+        viewerCtrl.setMainCtrl(this);
+        viewerCtrl.setRecipe(recipe);
+
+        contentPane.getChildren().setAll(viewerRoot);
+    }
+
+    public void showRecipeViewer(Recipe recipe) {
+        showRecipe(recipe);   // reuse your existing private method
+    }
+
+
+
+    /**
+     * Search field for users to search up items/recipes from ist
+     */
+    public void search(){
+        String query = searchField.getText();
+        String mode  = searchChoice.getValue();
+
+        // To be implemented once server side is done.
+        System.out.println("Searching for '" + query + "' by " + mode);
     }
 
     /**
@@ -150,4 +203,28 @@ public class MainApplicationCtrl {
         recipeListCtrl.addRecipe(r);
     }
 
+    public void editRecipe(Recipe recipe) {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        if (recipe == null) return;
+
+        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
+            "client", "scenes", "AddRecipePanel.fxml");
+
+        AddRecipeCtrl addRecipeCtrl = pair.getKey();
+        Parent addRecipeRoot = pair.getValue();
+
+        addRecipeCtrl.loadRecipe(recipe);
+
+        contentPane.getChildren().setAll(addRecipeRoot);
+    }
+
+    /**
+     * Refreshes db to get latest data
+     */
+    public void refresh(){
+        // Temp. Rewriting this once server side is done
+        System.out.println("Refresh pressed (Server logic not implemented yet)");
+
+        showMainScreen();
+    }
 }

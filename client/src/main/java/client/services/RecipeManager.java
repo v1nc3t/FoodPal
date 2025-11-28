@@ -1,8 +1,6 @@
 package client.services;
 
-import commons.Ingredient;
-import commons.Recipe;
-import commons.RecipeState;
+import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -115,8 +113,6 @@ public class RecipeManager {
         if (Platform.isFxApplicationThread()) r.run();
         else Platform.runLater(r);
     }
-
-
 
     /** Adds a single in-memory test recipe so the ListView shows an entry at startup. */
     private void seedSampleRecipe() {
