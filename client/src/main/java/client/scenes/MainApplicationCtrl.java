@@ -32,8 +32,6 @@ public class MainApplicationCtrl {
     @FXML
     private Button addButton;
     @FXML
-    private Button refreshButton;
-    @FXML
     private ChoiceBox<String> searchChoice;
     @FXML
     private TextField searchField;
@@ -49,12 +47,9 @@ public class MainApplicationCtrl {
     @FXML
     private ListView<Recipe> recipeListView;
 
-    @FXML
-    private Button removeButton;
-
     private RecipeListCtrl recipeListCtrl;
 
-    private MyFXML fxml;
+    private final MyFXML fxml;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml){
@@ -83,24 +78,6 @@ public class MainApplicationCtrl {
         addProperty.set(resourceBundle.getString("txt.add"));
         removeProperty.set(resourceBundle.getString("txt.remove"));
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
-    }
-
-    /**
-     *   Loads Recipe panel
-     */
-    @FXML
-    private void addRecipe() {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
-        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
-            "client", "scenes", "AddRecipePanel.fxml");
-
-        /*
-        Injects the main ctrl into the add recipe ctrl
-        */
-        AddRecipeCtrl addRecipeCtrl = pair.getKey();
-        Parent addRecipeRoot = pair.getValue();
-
-        contentPane.getChildren().setAll(addRecipeRoot);
     }
 
     /**
@@ -160,7 +137,8 @@ public class MainApplicationCtrl {
      */
     @FXML
     private void addRecipe() {
-        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,bundle,
                 "client", "scenes", "AddRecipePanel.fxml");
 
         AddRecipeCtrl addRecipeCtrl = pair.getKey();
@@ -170,12 +148,13 @@ public class MainApplicationCtrl {
     }
 
     private void showRecipe(Recipe recipe) {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
         if (recipe == null) {
             showMainScreen();
             return;
         }
 
-        Pair<RecipeViewerCtrl, Parent> pair = fxml.load(RecipeViewerCtrl.class,
+        Pair<RecipeViewerCtrl, Parent> pair = fxml.load(RecipeViewerCtrl.class, bundle,
             "client", "scenes", "RecipeViewer.fxml");
 
         RecipeViewerCtrl viewerCtrl = pair.getKey();
@@ -225,9 +204,10 @@ public class MainApplicationCtrl {
     }
 
     public void editRecipe(Recipe recipe) {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
         if (recipe == null) return;
 
-        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,
+        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
             "client", "scenes", "AddRecipePanel.fxml");
 
         AddRecipeCtrl addRecipeCtrl = pair.getKey();
