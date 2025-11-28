@@ -5,15 +5,35 @@ import commons.InvalidRecipeError;
 import commons.Recipe;
 import commons.RecipeState;
 import org.springframework.stereotype.Service;
+import server.database.IngredientRepository;
+import server.database.RecipeRepository;
+
 import java.util.HashMap;
 import java.util.UUID;
 
 /// Service that keeps track of recipes
-/// Temporarily it stores everything in memory
 @Service
 public class RecipeService implements IRecipeService {
     private final HashMap<UUID, Recipe> recipes =  new HashMap<>();
     private final HashMap<UUID, Ingredient> ingredients = new HashMap<>();
+
+    private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
+
+    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
+        this.recipeRepository = recipeRepository;
+        this.ingredientRepository = ingredientRepository;
+
+        for (Ingredient ingredient : ingredientRepository.findAll()) {
+            ingredients.put(ingredient.getId(), ingredient);
+        }
+        System.out.println("Loaded " + ingredients.size() + " ingredients");
+
+        for (Recipe recipe : recipeRepository.findAll()) {
+            recipes.put(recipe.getId(), recipe);
+        }
+        System.out.println("Loaded " + recipes.size() + " recipes");
+    }
 
     @Override
     public RecipeState getState() {
@@ -33,10 +53,12 @@ public class RecipeService implements IRecipeService {
         )
             throw new InvalidRecipeError();
         recipes.put(recipe.getId(), recipe);
+        recipeRepository.save(recipe);
     }
 
     @Override
     public void setIngredient(Ingredient ingredient) {
         ingredients.put(ingredient.getId(), ingredient);
+        ingredientRepository.save(ingredient);
     }
 }

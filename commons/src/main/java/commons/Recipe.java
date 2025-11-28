@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public class Recipe {
     @Id
     public UUID id;
     public String title;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     public List<RecipeIngredient> ingredients;
     public List<String> steps;
     public int servingSize;
