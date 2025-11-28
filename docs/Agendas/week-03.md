@@ -11,8 +11,9 @@
 - Check of approval of the agenda (does everyone accept the agenda) (1 min)  
 - TA Announcements (10 min)  
 - Compare expected work and work done (2 mins x 6 = 12 mins)  
-- TA questions (5 mins)  
-- Use of GitLab issues, overview (4 mins)  
+- TA questions (5 mins) 
+- Use of Gitlab issues, overview, milestones (4 mins) 
+- Talk about MRs (2 mins)
 - Show UI demo (1 mins)  
 - Division of tasks before the next private meeting (10-15 min)  
 - Summary of meeting (5 mins)  
@@ -20,5 +21,6 @@
 
 # TA question:
 - Do we make custom milestones or use weeks as milestones?  
+- Do have to use points for issues?
 - Does the person who creates the MR have to merge or can the person who accepts the MR merge?  
 - When are the buddy checks?
