@@ -2,6 +2,8 @@ package client.scenes;
 
 import client.MyFXML;
 import jakarta.inject.Inject;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -11,6 +13,12 @@ import commons.Recipe;
 import client.scenes.RecipeListCtrl;
 import javafx.scene.control.ListView;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import static client.Main.BUNDLE_NAME;
+import static client.Main.DEFAULT_LOCALE;
+
 public class MainApplicationCtrl {
 
     /**
@@ -19,14 +27,20 @@ public class MainApplicationCtrl {
     @FXML
     private Pane contentPane;
 
+    private final StringProperty addProperty = new SimpleStringProperty();
     @FXML
     private Button addButton;
 
-    @FXML
-    private ListView<Recipe> recipeListView;
-
+    private final StringProperty removeProperty = new SimpleStringProperty();
     @FXML
     private Button removeButton;
+
+    private final StringProperty refreshProperty = new SimpleStringProperty();
+    @FXML
+    private Button refreshButton;
+
+    @FXML
+    private ListView<Recipe> recipeListView;
 
     private RecipeListCtrl recipeListCtrl;
 
@@ -38,16 +52,41 @@ public class MainApplicationCtrl {
     }
 
     /**
+     * Binds the elements of the UI to StringProperties,
+     * allowing dynamic updates, i.e. instant propagation,
+     * of the language of buttons, labels, etc.
+     * Should only be called once when initializing the controller.
+     */
+    private void bindElementsProperties() {
+        addButton.textProperty().bind(addProperty);
+        removeButton.textProperty().bind(removeProperty);
+        refreshButton.textProperty().bind(refreshProperty);
+    }
+
+    /**
+     * Dynamically updates properties of UI elements to the language
+     * of a corresponding locale
+     * @param locale provided locale/language for UI elements
+     */
+    private void setLocale(Locale locale) {
+        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+        addProperty.set(resourceBundle.getString("txt.add"));
+        removeProperty.set(resourceBundle.getString("txt.remove"));
+        refreshProperty.set(resourceBundle.getString("txt.refresh"));
+    }
+
+    /**
      *   Loads Recipe panel
      */
     @FXML
     private void addRecipe() {
-        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,
-                "client", "scenes", "AddRecipePanel.fxml");
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
+            "client", "scenes", "AddRecipePanel.fxml");
 
-        /**
-         *  Injects the main ctrl into the add recipe ctrl
-         */
+        /*
+        Injects the main ctrl into the add recipe ctrl
+        */
         AddRecipeCtrl addRecipeCtrl = pair.getKey();
         Parent addRecipeRoot = pair.getValue();
 
@@ -60,18 +99,32 @@ public class MainApplicationCtrl {
     public void showMainScreen(){
         contentPane.getChildren().clear();
     }
+
     /**
      * Initializes the main application UI components related to the recipe list.
      * This method is automatically called by the JavaFX runtime after FXML loading.
      * It performs the following:
      *     Creates a new {@link RecipeListCtrl} instance, which manages the list of recipes.
-     *     Binds the existing FXML {@code ListView} to the controller so recipe titles can be displayed.
+     *     Binds the existing FXML {@code ListView} to the controller
+     *     so recipe titles can be displayed.
      *     Configures the Remove button so that clicking it puts the list into "remove mode",
      *         meaning the next click on a recipe name will remove that specific recipe.
      * Only listing and remove-on-click behavior are implemented at this stage.
      */
     @FXML
     private void initialize() {
+        bindElementsProperties();
+
+        /* For UI testing purposes, since we don't have a button
+         for language selection just yet, change this line
+         if you want to visualize language changes.
+         Parameter choices:
+         EN: DEFAULT_LOCALE
+         DE: Locale.GERMAN
+         NL: Locale.forLanguageTag("nl-NL")
+        */
+        setLocale(DEFAULT_LOCALE);
+
         recipeListCtrl = new RecipeListCtrl();
         if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
         if (removeButton != null) removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
