@@ -9,6 +9,7 @@ import client.utils.IServerUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import commons.Unit;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -62,7 +63,6 @@ public class AddIngredientCtrlTest {
     private Button cancelButton;
 
     private AddIngredientCtrl ctrl;
-    private MyFXML fxml;
     private ResourceBundle resourceBundle;
 
     @Start
@@ -167,6 +167,17 @@ public class AddIngredientCtrlTest {
     }
 
     @Test
+    public void testUnitSelected(FxRobot robot) {
+        assertNotNull(unitComboBox);
+
+        robot.clickOn(unitComboBox);
+
+        unitComboBox.setValue(unitComboBox.getItems().get(0));
+
+        assertEquals(unitComboBox.getItems().get(0), unitComboBox.getValue());
+    }
+
+    @Test
     public void testClickCancelCloseWindow(FxRobot robot) {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         assertTrue(stage.isShowing());
@@ -184,5 +195,15 @@ public class AddIngredientCtrlTest {
         robot.press(KeyCode.ESCAPE).release(KeyCode.ESCAPE);
 
         assertFalse(stage.isShowing());
+    }
+
+    @Test
+    public void testNameFieldInput(FxRobot robot) {
+        assertNotNull(nameField);
+
+        robot.clickOn(nameField);
+        robot.write("test");
+
+        assertEquals("test", nameField.getText());
     }
 }
