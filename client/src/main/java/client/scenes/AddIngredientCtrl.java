@@ -63,14 +63,42 @@ public class AddIngredientCtrl {
     private final StringProperty cancelProperty = new SimpleStringProperty();
     @FXML private Button cancelButton;
 
-    private final ServerUtils server;
-    private final AddRecipeCtrl ctrl;
+    private ServerUtils server;
+    private AddRecipeCtrl ctrl;
     private Consumer<RecipeIngredient> ingredientAdded;
+
+    @Inject
+    public AddIngredientCtrl(ServerUtils server, AddRecipeCtrl ctrl) {
+        this.server = server;
+        this.ctrl = ctrl;
+    }
+
+    /**
+     * For test purposes
+     */
+    public AddIngredientCtrl() {
+    }
 
     @FXML
     private void initialize() {
-        bindElementsProperties();
+        initializeBindings();
 
+        initializeLocale();
+
+        initializeCombobox();
+    }
+
+    private void initializeBindings() {
+        bindElementsProperties();
+    }
+
+    private void initializeCombobox() {
+        for (Unit unit : Unit.values()) {
+            unitComboBox.getItems().add(unit.name().toLowerCase());
+        }
+    }
+
+    private void initializeLocale() {
         /* For UI testing purposes, since we don't have a button
          for language selection just yet, change this line
          if you want to visualize language changes.
@@ -80,10 +108,6 @@ public class AddIngredientCtrl {
          NL: Locale.forLanguageTag("nl-NL")
         */
         setLocale(DEFAULT_LOCALE);
-
-        for (Unit unit : Unit.values()) {
-            unitComboBox.getItems().add(unit.name().toLowerCase());
-        }
     }
 
     /**
@@ -134,12 +158,6 @@ public class AddIngredientCtrl {
             String title = resourceBundle.getString("txt.title");
             ((Stage) cancelButton.getScene().getWindow()).setTitle(title);
         });
-    }
-
-    @Inject
-    public AddIngredientCtrl(ServerUtils server, AddRecipeCtrl ctrl) {
-        this.server = server;
-        this.ctrl = ctrl;
     }
 
     /**
