@@ -1,6 +1,7 @@
 package scenes;
 
 import client.scenes.RecipeListCtrl;
+import client.services.RecipeManager;
 import commons.Recipe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,18 +20,13 @@ public class RecipeListCtrlTest {
 
     @BeforeEach
     public void setup() {
+        RecipeManager.getInstance().clearForTests();
         ctrl = new RecipeListCtrl();
     }
 
     private Recipe makeRecipe(String title) {
         return new Recipe(title, List.of(), List.of(), 1);
     }
-
-
-
-
-
-
 
     @Test
     public void testEnterAndExitRemoveMode() {
@@ -39,17 +35,10 @@ public class RecipeListCtrlTest {
         assertNotNull(ctrl); // just ensure it doesn't throw
     }
 
-
-
-
-
     @Test
     public void testAddNullRecipeDoesNothing() {
         ctrl.addRecipe(null);
         assertEquals(0, ctrl.getRecipesSnapshot().size());
     }
-
-
-
 
 }
