@@ -27,5 +27,6 @@
    <ScrollPane layoutY="178.0" prefHeight="106.0" prefWidth="400.0">
       <ListView fx:id="preparationList" prefHeight="104.0" prefWidth="396.0" />
    </ScrollPane>
+   <Button fx:id="printButton" layoutX="338.0" layoutY="14.0" mnemonicParsing="false" onAction="#printRecipe" text="Print" />
 
 </Pane>
