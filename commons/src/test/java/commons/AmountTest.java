@@ -6,13 +6,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AmountTest {
+    Unit unit;
+    double quantity;
+    String description;
     Amount formalAmount;
     Amount informalAmount;
+    Amount fullAmount;
 
     @BeforeEach
     public void setUp() {
-        formalAmount = new Amount(2.0, Unit.CUP);
-        informalAmount = new Amount(1.0, "a pinch");
+        unit = Unit.CUP;
+        quantity = 2.0;
+        description = "a cup of sugar";
+        formalAmount = new Amount(quantity, unit);
+        informalAmount = new Amount(quantity, description);
+        fullAmount = new Amount(quantity, unit, description);
     }
 
     @Test
@@ -26,22 +34,55 @@ public class AmountTest {
     }
 
     @Test
-    public void testGetQuantity() {
-        assertEquals(2.0, formalAmount.quantity());
-        assertEquals(1.0, informalAmount.quantity());
+    public void testFullAmountCreation() {
+        assertNotNull(fullAmount);
     }
 
     @Test
-    public void testGetUnit() {
-        assertEquals(Unit.CUP, formalAmount.unit());
-        assertNull(informalAmount.unit());
+    public void testFormalAmountGetQuantity() {
+        assertEquals(quantity, formalAmount.quantity());
     }
 
     @Test
-    public void testGetDescription() {
-        assertNull(formalAmount.description());
-        assertEquals("a pinch", informalAmount.description());
+    public void testInformalAmountGetQuantity() {
+        assertEquals(quantity, informalAmount.quantity());
     }
+
+    @Test
+    public void testFullAmountGetQuantity() {
+        assertEquals(quantity, fullAmount.quantity());
+    }
+
+    @Test
+    public void testFormalAmountGetUnit () {
+        assertEquals(unit, formalAmount.unit());
+    }
+
+    @Test
+    public void testInformalAmountGetUnit () {
+        assertEquals(unit, informalAmount.unit());
+    }
+
+    @Test
+    public void testFullAmountGetUnit () {
+        assertEquals(unit, fullAmount.unit());
+    }
+
+    @Test
+    public void testFormalAmountGetdescription() {
+        assertEquals(description, formalAmount.description());
+    }
+
+    @Test
+    public void testInformalAmountGetdescription() {
+        assertEquals(description, informalAmount.description());
+    }
+
+    @Test
+    public void testFullAmountGetdescription() {
+        assertEquals(description, fullAmount.description());
+    }
+
 
     @Test
     public void testEqualsSameObject() {
