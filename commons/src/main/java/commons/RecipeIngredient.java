@@ -45,7 +45,7 @@ public class RecipeIngredient {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         RecipeIngredient that = (RecipeIngredient) obj;
-        return ingredientRef == that.ingredientRef && amount.equals(that.amount);
+        return ingredientRef.equals(that.ingredientRef) && amount.equals(that.amount);
     }
 
     @Override
