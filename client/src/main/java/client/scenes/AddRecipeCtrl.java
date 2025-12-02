@@ -77,9 +77,9 @@ public class AddRecipeCtrl {
 
     private Recipe editingRecipe;
 
-    private final ServerUtils server;
-    private final MainApplicationCtrl mainCtrl;
-    private final MyFXML fxml;
+    private ServerUtils server;
+    private MainApplicationCtrl mainCtrl;
+    private MyFXML fxml;
 
     // callback so MainApplicationCtrl can be notified when a recipe is added
     private java.util.function.Consumer<Recipe> onRecipeAdded;
@@ -92,6 +92,13 @@ public class AddRecipeCtrl {
         this.server = server;
         this.mainCtrl = mainCtrl;
         this.fxml = fxml;
+    }
+
+    /**
+     * For test purposes
+     */
+    public AddRecipeCtrl() {
+
     }
 
     /**
@@ -297,11 +304,13 @@ public class AddRecipeCtrl {
                 ingredientsList.getChildren().add(createIngredientItem(newIngredient));
             });
         });
+        var scene = new Scene(addIngredientRoot);
+        scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
 
         Stage addIngredientStage = new Stage();
         addIngredientStage.setTitle("Add Ingredient");
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
-        addIngredientStage.setScene(new Scene(addIngredientRoot));
+        addIngredientStage.setScene(scene);
         addIngredientStage.setResizable(false);
         addIngredientStage.showAndWait();
     }
