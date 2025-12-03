@@ -71,7 +71,7 @@ public class RecipePrinter {
 
         Label title = getTitle(recipe, contentWidth);
         Label ingredientsTitle = getIngredientsTitle(contentWidth);
-        VBox ingredientsBox = getIngredientsBox(recipe, pageLayout);
+        VBox ingredientsBox = getIngredientsBox(recipe, contentWidth);
         Label preparationTitle = getPreparationTitle(contentWidth);
         VBox preparationBox = getPreparationBox(recipe, contentWidth);
 
@@ -117,15 +117,15 @@ public class RecipePrinter {
     /**
      * This gets us the ingredients for the current recipe in formatted way
      * @param recipe recipe
-     * @param pageLayout page layout
+     * @param contentWidth max width for the label.
      * @return returns ingredients in formatted way
      */
-    private static VBox getIngredientsBox(Recipe recipe, PageLayout pageLayout) {
+    private static VBox getIngredientsBox(Recipe recipe, double contentWidth) {
         VBox ingredientsBox = new VBox(4);
         if (recipe.getIngredients() != null) {
             for (Object ingredient : recipe.getIngredients()) {
                 Text text = new Text("- " + ingredient);
-                text.setWrappingWidth(pageLayout.getPrintableWidth());
+                text.setWrappingWidth(contentWidth);
                 ingredientsBox.getChildren().add(text);
             }
         }
