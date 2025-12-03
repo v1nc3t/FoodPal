@@ -10,18 +10,18 @@
    <top>
       <Pane prefHeight="50.0" prefWidth="700.0" BorderPane.alignment="CENTER">
          <children>
-            <ChoiceBox fx:id="searchChoice" layoutX="10.0" layoutY="13.0" prefHeight="26.0" prefWidth="60.0" />
-            <TextField fx:id="searchField" layoutX="79.0" layoutY="13.0" onAction="#search" prefHeight="26.0" prefWidth="120.0" promptText="Search" />
+            <ChoiceBox fx:id="searchChoice" layoutX="150.0" layoutY="12.0" prefHeight="25.0" prefWidth="50.0" />
+            <TextField fx:id="searchField" layoutX="10.0" layoutY="12.0" onAction="#search" prefHeight="25.0" prefWidth="130.0" promptText="Search" />
          </children></Pane>
    </top>
    <left>
       <Pane prefHeight="400.0" prefWidth="200.0" BorderPane.alignment="CENTER">
           <Pane prefHeight="400.0" prefWidth="200.0" BorderPane.alignment="CENTER">
               <ListView fx:id="recipeListView" prefHeight="350.0" prefWidth="200.0" />
+              <Button fx:id="refreshButton" layoutX="89.0" layoutY="362.0" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="100.0" text="${controller.refreshProperty}" />
           </Pane>
-           <Button fx:id="addButton" layoutX="27.0" layoutY="361.0" mnemonicParsing="false" onAction="#addRecipe" />
-           <Button fx:id="removeButton" layoutX="75.0" layoutY="361.0" mnemonicParsing="false" />
-           <Button fx:id="refreshButton" layoutX="125.0" layoutY="361.0" mnemonicParsing="false" onAction="#refresh" text="${controller.refreshProperty}" />
+           <Button fx:id="addButton" layoutX="13.0" layoutY="362.0" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" />
+           <Button fx:id="removeButton" layoutX="51.0" layoutY="362.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
       </Pane>
    </left>
 </BorderPane>
