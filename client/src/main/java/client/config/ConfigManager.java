@@ -48,7 +48,8 @@ public class ConfigManager {
             String json  = Files.readString(configPath, StandardCharsets.UTF_8);
             this.config = mapper.readValue(json, Config.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load config: " + e.getMessage(), e);
+            createDefaultConfig();       // If loading fails, create a default config
+            // throw new RuntimeException("Failed to load config: " + e.getMessage(), e);
         }
     }
 
