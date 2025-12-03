@@ -12,7 +12,6 @@ public class ConfigManager {
 
     // Default config directory and file name
     // It creates a ".foodpal" directory in the user's home folder
-    private static final String DEFAULT_DIR = System.getProperty("user.home") + "/.foodpal";
     private static final String CONFIG_FILE = "config.json";
 
     private final ObjectMapper mapper;
@@ -21,13 +20,15 @@ public class ConfigManager {
     private Config config;
 
     public ConfigManager(String customCfgPath) {
-        this.mapper = new ObjectMapper().
-            enable(SerializationFeature.INDENT_OUTPUT);
+        this.mapper = new ObjectMapper()
+                        .enable(SerializationFeature.INDENT_OUTPUT);
 
         if (customCfgPath != null) {
             this.configPath = Path.of(customCfgPath);
         } else {
-            Path dirPath = Path.of(DEFAULT_DIR);
+            String userHome = System.getProperty("user.home");
+            Path dirPath = Path.of(userHome, ".foodpal");
+            
             if (!Files.exists(dirPath)) {
                 try {
                     Files.createDirectories(dirPath);
