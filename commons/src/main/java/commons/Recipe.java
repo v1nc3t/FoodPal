@@ -59,10 +59,6 @@ public class Recipe {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -95,7 +91,7 @@ public class Recipe {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Recipe that = (Recipe) obj;
-        return id == that.id &&
+        return id.equals(that.id) &&
                servingSize == that.servingSize &&
                title.equals(that.title) &&
                ingredients.equals(that.ingredients) &&

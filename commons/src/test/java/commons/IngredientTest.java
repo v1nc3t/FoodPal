@@ -69,13 +69,11 @@ public class IngredientTest {
         assertNotEquals(ingredient, notAnIngredient);
     }
 
-    /*
     @Test
     public void testEqualsSameValues() {
         Ingredient ingredient2 = new Ingredient(ingredient.getId(), "Sugar", nutritionValues);
         assertEquals(ingredient, ingredient2);
     }
-    */
 
     @Test
     public void testNotEqualsDifferentValues() {
@@ -90,7 +88,7 @@ public class IngredientTest {
         assertNotEquals(ingredient, ingredient2);
     }
 
-    /*
+    
     @Test
     public void testNotEqualsDifferentName() {
         Ingredient ingredient2 = new Ingredient(ingredient.getId(),"Salt", nutritionValues);
@@ -103,11 +101,29 @@ public class IngredientTest {
         Ingredient ingredient2 = new Ingredient(ingredient.getId(), "Sugar", differentNutritionValues);
         assertNotEquals(ingredient, ingredient2);
     }
-    */
+    
     
     @Test
     public void testHashCode() {
         assertEquals(ingredient.hashCode(), ingredient.hashCode());
+    }
+
+    @Test
+    public void testDefaultConstructor() {
+        Ingredient ing = new Ingredient();
+        assertNotNull(ing);            
+        assertNull(ing.getId());       
+        assertNull(ing.getName());     
+        assertNull(ing.getNutritionValues()); 
+    }
+
+    @Test
+    public void testConstructorWithGeneratedUUID() {
+        Ingredient ing = new Ingredient("Flour", nutritionValues);
+        assertNotNull(ing);           
+        assertNotNull(ing.getId());   
+        assertEquals("Flour", ing.getName());
+        assertEquals(nutritionValues, ing.getNutritionValues());
     }
 
 }
