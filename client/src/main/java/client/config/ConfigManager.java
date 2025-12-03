@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class ConfigManager {
 
+    // Default config directory and file name
+    // It creates a ".foodpal" directory in the user's home folder
     private static final String DEFAULT_DIR = System.getProperty("user.home") + "/.foodpal";
     private static final String CONFIG_FILE = "config.json";
 
