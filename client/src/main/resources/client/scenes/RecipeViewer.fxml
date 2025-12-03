@@ -6,26 +6,19 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipeViewerCtrl">
 
-   <Button fx:id="editButton" layoutX="420.0" layoutY="366.0" mnemonicParsing="false" onAction="#editRecipe" prefHeight="25.0" prefWidth="70.0" text="%txt.edit" />
-   <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" layoutY="10.0" prefHeight="30.0" prefWidth="500.0" text="%txt.recipe_name">
-      <font>
-         <Font size="18.0" />
-      </font></Label>
-   <Label alignment="CENTER" contentDisplay="CENTER" layoutX="6.0" layoutY="37.0" prefHeight="27.0" prefWidth="200.0" text="%txt.ingredients">
-      <font>
-         <Font size="18.0" />
-      </font>
-   </Label>
-   <ScrollPane hbarPolicy="NEVER" layoutY="73.0" prefHeight="120.0" prefWidth="500.0" vbarPolicy="NEVER">
-      <ListView fx:id="ingredientsList" prefHeight="120.0" prefWidth="500.0" />
-   </ScrollPane>
-   <Label alignment="CENTER" contentDisplay="CENTER" layoutX="7.0" layoutY="203.0" prefHeight="27.0" prefWidth="200.0" text="%txt.preparation">
-      <font>
-         <Font size="18.0" />
-      </font>
-   </Label>
-   <ScrollPane hbarPolicy="NEVER" layoutY="238.0" prefHeight="120.0" prefWidth="500.0" vbarPolicy="NEVER">
-      <ListView fx:id="preparationList" prefHeight="120.0" prefWidth="500.0" />
-   </ScrollPane>
+    <Button fx:id="editButton" layoutX="409.0" layoutY="364.0" mnemonicParsing="false" onAction="#editRecipe" prefHeight="25.0" prefWidth="80.0" text="%txt.edit" />
+    <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="150.0" layoutY="12.0" prefHeight="20.0" prefWidth="200.0" text="%txt.recipe_name">
+        <font>
+            <Font size="14.0" />
+        </font>
+    </Label>
+    <Label fx:id="ingredientsLabel" layoutX="20.0" layoutY="42.0" prefHeight="17.0" prefWidth="200.0" text="${controller.ingredientsProperty}" />
+    <ScrollPane hbarPolicy="NEVER" layoutX="20.0" layoutY="69.0" prefHeight="120.0" prefWidth="460.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
+        <ListView fx:id="ingredientsList" prefHeight="120.0" prefWidth="460.0" />
+    </ScrollPane>
+    <Label fx:id="preparationLabel" layoutX="20.0" layoutY="200.0" prefHeight="17.0" prefWidth="200.0" text="${controller.preparationProperty}" />
+    <ScrollPane hbarPolicy="NEVER" layoutX="20.0" layoutY="226.0" prefHeight="120.0" prefWidth="460.0" style="-fx-border-width: 0.5; -fx-border-color: black;" vbarPolicy="NEVER">
+        <ListView fx:id="preparationList" prefHeight="120.0" prefWidth="460.0" />
+    </ScrollPane>
 
 </Pane>
