@@ -146,7 +146,6 @@ public class MainApplicationCtrl {
         SingleSelectionModel<String> selectionModel = orderBy.getSelectionModel();
         selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) ->
         {
-            System.out.println(oldValue + " -> " + newValue);
             recipeListCtrl.setSortMethod(newValue);
         });
     }
