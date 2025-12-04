@@ -17,6 +17,8 @@ public class RecipeListCtrl {
     private final RecipeManager manager = RecipeManager.getInstance();
     private ListView<Recipe> listView;
     private boolean removeMode = false;
+    private boolean cloneMode = false;
+    private java.util.function.Consumer<Recipe> onCloneRequest;
 
     /**
      * Connects this controller to the UI ListView. Also applies:
@@ -40,16 +42,49 @@ public class RecipeListCtrl {
             }
         });
 
-        // When in remove mode, clicking an item removes it through the manager
+        // Handle remove-mode and clone-mode clicks in a single event filter.
+// Remove mode has priority (so a remove click never triggers a clone).
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
-            if (!removeMode) return;
-            Recipe sel = listView.getSelectionModel().getSelectedItem();
-            if (sel != null) {
-                manager.removeRecipe(sel.getId());
+
+            // --- REMOVE MODE (highest priority) ---
+            if (removeMode) {
+                Recipe sel = listView.getSelectionModel().getSelectedItem();
+                if (sel == null) {
+                    exitRemoveMode();
+                    ev.consume();
+                    return;
+                }
+
+                boolean removed = manager.removeRecipe(sel.getId());
+                // exit remove mode regardless of success to avoid stuck state
+                exitRemoveMode();
+                // clear selection so the UI doesn't remain highlighted or retrigger listeners
+                listView.getSelectionModel().clearSelection();
+
+                // consume so no other handler (e.g. selection listener) opens viewer
+                ev.consume();
+                return;
             }
-            removeMode = false;
-            ev.consume();
+
+            // --- CLONE MODE ---
+            if (cloneMode) {
+                Recipe sel = listView.getSelectionModel().getSelectedItem();
+                if (sel != null && onCloneRequest != null) {
+                    // delegate actual popup/clone logic to whoever registered the callback
+                    onCloneRequest.accept(sel);
+                }
+                // exit clone mode and clear selection to avoid visual flicker
+                exitCloneMode();
+                listView.getSelectionModel().clearSelection();
+
+                ev.consume();
+                return;
+            }
+
+            // If neither mode is active, do nothing here; normal click/double-click handlers run.
         });
+
+
     }
 
     /**
@@ -81,6 +116,12 @@ public class RecipeListCtrl {
         removeMode = true;
         if (listView != null) listView.requestFocus();
     }
+    /**
+     * Returns true if the controller is currently in remove mode.
+     */
+    public boolean isInRemoveMode() {
+        return removeMode;
+    }
 
     /**
      * Disables remove mode without removing anything.
@@ -98,4 +139,21 @@ public class RecipeListCtrl {
     public List<Recipe> getRecipesSnapshot() {
         return manager.getRecipesSnapshot();
     }
+    public void enterCloneMode() {
+        cloneMode = true;
+        if (listView != null) listView.requestFocus();
+    }
+
+    public void exitCloneMode() {
+        cloneMode = false;
+    }
+
+    public boolean isInCloneMode() {
+        return cloneMode;
+    }
+
+    public void setOnCloneRequest(java.util.function.Consumer<Recipe> callback) {
+        this.onCloneRequest = callback;
+    }
+
 }
