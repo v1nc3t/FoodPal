@@ -3,19 +3,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="280.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddIngredientCtrl">
-    <Label fx:id="nameLabel" layoutX="21.0" layoutY="26.0" text="${controller.nameProperty}" />
-    <TextField fx:id="nameField" layoutX="82.0" layoutY="22.0" prefHeight="25.0" prefWidth="299.0" promptText="${controller.enterIngredientNameProperty}" />
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="330.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddIngredientCtrl">
+    <Label fx:id="nameLabel" layoutX="10.0" layoutY="24.0" prefHeight="17.0" prefWidth="100.0" text="${controller.nameProperty}" />
+    <TextField fx:id="nameField" layoutX="100.0" layoutY="20.0" prefHeight="25.0" prefWidth="210.0" promptText="${controller.enterIngredientNameProperty}" />
 
-    <ComboBox fx:id="unitComboBox" editable="true" layoutX="239.0" layoutY="63.0" prefHeight="25.0" prefWidth="142.0" promptText="${controller.selectUnitProperty}" />
-    <Label fx:id="proteinLabel" layoutX="21.0" layoutY="110.0" text="${controller.proteinProperty}" />
-    <Label fx:id="fatLabel" layoutX="21.0" layoutY="154.0" text="${controller.fatProperty}" />
-    <Label fx:id="carbsLabel" layoutX="21.0" layoutY="197.0" text="${controller.carbsProperty}" />
-    <TextField fx:id="amountField" layoutX="82.0" layoutY="63.0" prefHeight="25.0" prefWidth="142.0" promptText="${controller.amountIngredientProperty}" />
-    <Button fx:id="cancelButton" layoutX="266.0" layoutY="235.0" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
-    <Button fx:id="doneButton" layoutX="335.0" layoutY="235.0" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
-    <TextField fx:id="proteinField" layoutX="82.0" layoutY="106.0" prefHeight="25.0" prefWidth="142.0" promptText="${controller.gramsProteinProperty}" />
-    <TextField fx:id="carbsField" layoutX="82.0" layoutY="192.0" prefHeight="25.0" prefWidth="142.0" promptText="${controller.gramsCarbsProperty}" />
-    <TextField fx:id="fatField" layoutX="82.0" layoutY="150.0" prefHeight="25.0" prefWidth="142.0" promptText="${controller.gramsFatProperty}" />
-    <Label fx:id="amountLabel" layoutX="21.0" layoutY="67.0" text="${controller.amountProperty}" />
+    <ComboBox fx:id="unitComboBox" editable="true" layoutX="100.0" layoutY="101.0" prefHeight="25.0" prefWidth="210.0" promptText="${controller.selectUnitProperty}" />
+    <Label fx:id="proteinLabel" layoutX="10.0" layoutY="145.0" prefHeight="17.0" prefWidth="100.0" text="${controller.proteinProperty}" />
+    <Label fx:id="fatLabel" layoutX="10.0" layoutY="183.0" prefHeight="17.0" prefWidth="100.0" text="${controller.fatProperty}" />
+    <Label fx:id="carbsLabel" layoutX="10.0" layoutY="223.0" prefHeight="17.0" prefWidth="100.0" text="${controller.carbsProperty}" />
+    <TextField fx:id="amountField" layoutX="100.0" layoutY="61.0" prefHeight="25.0" prefWidth="210.0" promptText="${controller.amountIngredientProperty}" />
+    <Button fx:id="cancelButton" layoutX="100.0" layoutY="263.0" mnemonicParsing="false" onAction="#clickCancel" prefHeight="25.0" prefWidth="95.0" text="${controller.cancelProperty}" />
+    <Button fx:id="doneButton" layoutX="215.0" layoutY="263.0" mnemonicParsing="false" onAction="#clickDone" prefHeight="25.0" prefWidth="95.0" text="${controller.doneProperty}" />
+    <TextField fx:id="proteinField" layoutX="100.0" layoutY="141.0" prefHeight="25.0" prefWidth="210.0" promptText="${controller.gramsProteinProperty}" />
+    <TextField fx:id="carbsField" layoutX="100.0" layoutY="219.0" prefHeight="25.0" prefWidth="210.0" promptText="${controller.gramsCarbsProperty}" />
+    <TextField fx:id="fatField" layoutX="100.0" layoutY="179.0" prefHeight="25.0" prefWidth="210.0" promptText="${controller.gramsFatProperty}" />
+    <Label fx:id="amountLabel" layoutX="10.0" layoutY="65.0" prefHeight="17.0" prefWidth="100.0" text="${controller.amountProperty}" />
 </AnchorPane>
