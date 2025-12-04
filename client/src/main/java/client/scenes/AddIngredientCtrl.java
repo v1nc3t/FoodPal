@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.services.RecipeManager;
 import client.utils.ServerUtils;
 import client.utils.TextFieldUtils;
 import commons.*;
@@ -23,6 +24,7 @@ import static client.Main.DEFAULT_LOCALE;
 import java.util.function.Consumer;
 
 public class AddIngredientCtrl {
+    RecipeManager recipeManager = RecipeManager.getInstance();
 
     private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML private Label nameLabel;

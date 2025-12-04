@@ -1,5 +1,7 @@
 package client.scenes;
 
+import client.services.RecipeManager;
+import commons.Ingredient;
 import commons.Recipe;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -49,7 +51,7 @@ public class RecipeViewerCtrl {
 
         titleLabel.setText(recipe.getTitle());
         setIngredientsList(recipe);
-        setPraparationList(recipe);
+        setPreparationList(recipe);
     }
 
   /**
@@ -58,10 +60,11 @@ public class RecipeViewerCtrl {
    */
     private void setIngredientsList(Recipe recipe) {
         ingredientsList.getItems().clear();
-        List<?> ingredients = recipe.getIngredients();
+        var ingredients = recipe.getIngredients();
         if (ingredients != null) {
-            for (Object ingredient : ingredients) {
-                ingredientsList.getItems().add(String.valueOf(ingredient));
+            for (var recipeIngredient : ingredients) {
+                Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+                ingredientsList.getItems().add(ingredient.getName() + " | " + recipeIngredient.getAmount().toPrettyString());
             }
         }
     }
@@ -70,7 +73,7 @@ public class RecipeViewerCtrl {
    * This sets the steps
    * @param recipe the recipe
    */
-    private void setPraparationList(Recipe recipe) {
+    private void setPreparationList(Recipe recipe) {
         preparationList.getItems().clear();
         List<String> steps = recipe.getSteps();
         if (steps != null) {

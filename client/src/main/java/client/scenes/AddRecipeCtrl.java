@@ -265,14 +265,6 @@ public class AddRecipeCtrl {
     }
 
     /**
-     * Gets ingredients used in recipe from user
-     * @return list of RecipeIngredient
-     */
-    private List<RecipeIngredient> getIngredients() {
-        return new ArrayList<>(); //TODO get ingredients from list
-    }
-
-    /**
      * Gets preparation steps of recipe from user
      * Go through the vertical box
      * From each horizontal box we extract the string from the textflow

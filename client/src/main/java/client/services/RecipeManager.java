@@ -53,6 +53,11 @@ public class RecipeManager {
         return new RecipeState(rc, ic);
     }
 
+    /** Get the ingredient by ingredient reference */
+    public Ingredient getIngredient(RecipeIngredient recipeIngredient) {
+        return ingredientsMap.get(recipeIngredient.getIngredientRef());
+    }
+
 
 
     /**
@@ -117,21 +122,27 @@ public class RecipeManager {
     /** Adds a single in-memory test recipe so the ListView shows an entry at startup. */
     private void seedSampleRecipe() {
         try {
-            String title = "Test Pancakes";
+            Ingredient sampleIngredient = new Ingredient("Honey Tester", new NutritionValues(1,1,1));
+            ingredientsMap.put(sampleIngredient.getId(), sampleIngredient);
+
             // empty ingredient list for quick seed
-            List recipesIngredients = new ArrayList<>();
             List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
             int servingSize = 2;
 
 
-            Recipe sample = new Recipe(title, recipesIngredients, preparations, servingSize);
+            Recipe sampleRecipe = new Recipe("Test Pancakes",
+                    List.of(
+                            new RecipeIngredient(
+                                    sampleIngredient.getId(),
+                                    new Amount(10, "doll hairs")
+                            )
+                    ),
+                    preparations,
+                    servingSize);
 
             // store in maps if id exists
-            if (sample.getId() != null) recipesMap.put(sample.getId(), sample);
-
-            runOnFx(() -> {
-                if (!recipes.contains(sample)) recipes.add(sample);
-            });
+            if (sampleRecipe.getId() != null) recipesMap.put(sampleRecipe.getId(), sampleRecipe);
+            recipes.add(sampleRecipe);
         } catch (Throwable t) {
             // do not block startup on a test seed failure
             t.printStackTrace();
