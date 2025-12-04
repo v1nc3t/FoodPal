@@ -86,7 +86,9 @@ public class RecipeManager {
         if (recipe == null) return;
         if (recipe.getId() != null) recipesMap.put(recipe.getId(), recipe);
         runOnFx(() -> {
-            if (!recipes.contains(recipe)) recipes.add(recipe);
+            int idx = indexOfRecipe(recipe.getId());
+            if (idx >= 0) recipes.set(idx, recipe);
+            else recipes.add(recipe);
         });
     }
 

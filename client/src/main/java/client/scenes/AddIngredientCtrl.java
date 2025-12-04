@@ -211,7 +211,7 @@ public class AddIngredientCtrl {
      * @param recipeIngredient - the ingredient to edit
      */
     public void setIngredient(RecipeIngredient recipeIngredient) {
-        Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+        Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
         ingredientId = ingredient.getId();
         nameField.setText(ingredient.getName());
         var nv = ingredient.getNutritionValues();
@@ -266,7 +266,7 @@ public class AddIngredientCtrl {
         NutritionValues newValues = new NutritionValues(protein, fat, carbs);
 
         Ingredient newIngredient = new Ingredient(ingredientId, name, newValues);
-        RecipeManager.getInstance().setIngredient(newIngredient);
+        recipeManager.setIngredient(newIngredient);
         // TODO: put the new ingredient in the database
 
 

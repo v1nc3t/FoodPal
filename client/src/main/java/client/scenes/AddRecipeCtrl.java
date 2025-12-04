@@ -77,6 +77,7 @@ public class AddRecipeCtrl {
 
     private Recipe editingRecipe;
 
+    private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
     private ServerUtils server;
     private MainApplicationCtrl mainCtrl;
     private MyFXML fxml;
@@ -203,7 +204,9 @@ public class AddRecipeCtrl {
                     // Server not available / failed: keep optimistic copy.
                 }
             } else {
-                mgr.setRecipe(r);
+                if (!mgr.setRecipe(r)) {
+                    System.out.println("Failed to add recipe " + r);
+                }
             }
 
         } catch (WebApplicationException e) {
@@ -237,6 +240,7 @@ public class AddRecipeCtrl {
         nameField.clear();
         servingSizeField.clear();
         preparationField.clear();
+        ingredients = new ArrayList<>();
 
         ingredientsComboBox.getSelectionModel().clearSelection();
         ingredientsComboBox.getItems().clear();
@@ -251,14 +255,12 @@ public class AddRecipeCtrl {
      */
     private Recipe getRecipe() {
         String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
-        List<RecipeIngredient> ingredients = editingRecipe.ingredients;
         List<String> preparations = getPreparations();
         int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
-
         if(editingRecipe == null){
             // new recipe
             return new Recipe(name, ingredients, preparations, servingSize);
-        }else{
+        } else {
             // Editing one
             return new Recipe(editingRecipe.getId(), name, ingredients, preparations, servingSize);
         }
@@ -294,6 +296,7 @@ public class AddRecipeCtrl {
         addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
             Platform.runLater(() -> {
                 ingredientsList.getChildren().add(createIngredientItem(newIngredient));
+                ingredients.add(newIngredient);
             });
         });
         var scene = new Scene(addIngredientRoot);
@@ -324,14 +327,14 @@ public class AddRecipeCtrl {
         addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
             Platform.runLater(() -> {
                 ingredientsList.getChildren().add(createIngredientItem(newIngredient));
-                editingRecipe.ingredients.add(newIngredient);
+                ingredients.add(newIngredient);
             });
         });
         var scene = new Scene(addIngredientRoot);
         scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
 
         Stage addIngredientStage = new Stage();
-        addIngredientStage.setTitle("Add Ingredient");
+        addIngredientStage.setTitle("Edit Ingredient");
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
         addIngredientStage.setScene(scene);
         addIngredientStage.setResizable(false);
@@ -435,8 +438,10 @@ public class AddRecipeCtrl {
 
         //needs to be changed once server side is done.
         ingredientsList.getChildren().clear();
+        ingredients.clear();
         for (RecipeIngredient ri : recipe.getIngredients()) {
             ingredientsList.getChildren().add(createIngredientItem(ri));
+            ingredients.add(ri);
         }
 
         preparationList.getChildren().clear();
