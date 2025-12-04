@@ -78,9 +78,9 @@ public class AddRecipeCtrl {
     private Recipe editingRecipe;
 
     private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
-    private ServerUtils server;
-    private MainApplicationCtrl mainCtrl;
-    private MyFXML fxml;
+    private final ServerUtils server;
+    private final MainApplicationCtrl mainCtrl;
+    private final MyFXML fxml;
 
     // callback so MainApplicationCtrl can be notified when a recipe is added
     private java.util.function.Consumer<Recipe> onRecipeAdded;
@@ -93,13 +93,6 @@ public class AddRecipeCtrl {
         this.server = server;
         this.mainCtrl = mainCtrl;
         this.fxml = fxml;
-    }
-
-    /**
-     * For test purposes
-     */
-    public AddRecipeCtrl() {
-
     }
 
     /**
