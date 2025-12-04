@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+import org.testfx.util.WaitForAsyncUtils;
 
 import javax.swing.*;
 
@@ -86,6 +87,7 @@ public class AddIngredientCtrlTest {
         stage.setTitle("Add Ingredient Test");
         stage.setScene(scene);
         stage.show();
+        stage.requestFocus();
 
         lookupAll(scene);
     }
@@ -183,6 +185,7 @@ public class AddIngredientCtrlTest {
         assertTrue(stage.isShowing());
 
         robot.clickOn(cancelButton);
+        WaitForAsyncUtils.waitForFxEvents();
 
         assertFalse(stage.isShowing());
     }
@@ -193,6 +196,7 @@ public class AddIngredientCtrlTest {
         assertTrue(stage.isShowing());
 
         robot.press(KeyCode.ESCAPE).release(KeyCode.ESCAPE);
+        WaitForAsyncUtils.waitForFxEvents();
 
         assertFalse(stage.isShowing());
     }

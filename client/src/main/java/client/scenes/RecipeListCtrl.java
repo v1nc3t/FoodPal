@@ -1,7 +1,9 @@
 package client.scenes;
 
 import client.services.RecipeManager;
+import client.utils.SortUtils;
 import commons.Recipe;
+import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
@@ -15,23 +17,47 @@ import java.util.List;
 public class RecipeListCtrl {
 
     private final RecipeManager manager = RecipeManager.getInstance();
+    private SortUtils sortUtils;
     private ListView<Recipe> listView;
     private boolean removeMode = false;
 
     /**
-     * Connects this controller to the UI ListView. Also applies:
-     * <ul>
-     *   <li>Binding of the ListView items to the RecipeManager's ObservableList</li>
-     *   <li>A cell factory that displays each recipe's title</li>
-     *   <li>A remove-on-click handler when in remove mode</li>
-     * </ul>
-     *
+     * Initializes RecipeList controller
+     */
+    @FXML
+    public void initialize() {
+        if (sortUtils == null) {
+            initializeSortUtils();
+        }
+    }
+
+    /**
+     * Initializes SortUtils for sorting and filtering
+     */
+    private void initializeSortUtils() {
+        sortUtils = new SortUtils(manager);
+    }
+
+    /**
+     * Connects this controller to the UI ListView, and binds it to a sorted list of recipes.
      * @param lv the ListView defined in FXML
      */
     public void setListView(ListView<Recipe> lv) {
         this.listView = lv;
-        listView.setItems(manager.getObservableRecipes());
 
+        setListViewSorted();
+
+        loadListViewProperties();
+    }
+
+    /**
+     * Applies functional properties to the UI ListView:
+     * <ul>
+     *  <li>A cell factory that displays each recipe's title.</li>
+     *  <li>A remove on-click handler when in remove mode.</li>
+     * </ul>
+     */
+    private void loadListViewProperties() {
         listView.setCellFactory(lvv -> new ListCell<>() {
             @Override
             protected void updateItem(Recipe item, boolean empty) {
@@ -50,6 +76,30 @@ public class RecipeListCtrl {
             removeMode = false;
             ev.consume();
         });
+    }
+
+    /**
+     * Binds the current list view items to the RecipeManager's ObservableList
+     * (in a sorted manner through SortUtils)
+     */
+    private void setListViewSorted() {
+        if (sortUtils == null) {
+            initializeSortUtils();
+        }
+        listView.setItems(sortUtils.applyFilters());
+    }
+
+    /**
+     * Sets SortUtils to use the specified ordering
+     * @param sortMethod provided ordering manner
+     */
+    public void setSortMethod(String sortMethod) {
+        if (sortUtils == null) {
+            initializeSortUtils();
+        }
+
+        sortUtils.setSortMethod(sortMethod);
+        setListViewSorted();
     }
 
     /**

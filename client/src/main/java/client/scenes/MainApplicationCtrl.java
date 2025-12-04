@@ -6,13 +6,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
 import commons.Recipe;
-import javafx.scene.control.ListView;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -29,7 +26,7 @@ public class MainApplicationCtrl {
 
     @FXML private TextField searchField;
 
-    @FXML private ChoiceBox<String> searchChoice;
+    @FXML private ChoiceBox<String> orderBy;
 
     @FXML private Button addButton;
 
@@ -102,10 +99,10 @@ public class MainApplicationCtrl {
         */
         setLocale(DEFAULT_LOCALE);
 
-        searchChoice.getItems().setAll("test1", "test2", "test3");
-        searchChoice.setValue("test1");
-
+        prepareSortBy();
         recipeListCtrl = new RecipeListCtrl();
+        recipeListCtrl.initialize();
+
         if (recipeListView != null) {
             recipeListCtrl.setListView(recipeListView);
 
@@ -120,6 +117,31 @@ public class MainApplicationCtrl {
         if (removeButton != null) {
             removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
         }
+
+        sortUponSelection(recipeListCtrl);
+    }
+
+    /**
+     * Prepares the sort-by choice box, by default sorting alphabetically.
+     * TODO: enable internationalization
+     */
+    private void prepareSortBy() {
+        orderBy.getItems().setAll("Alphabetical", "Most recent");
+        orderBy.setValue("Alphabetical");
+    }
+
+    /**
+     * Adds a listener for changes to sort-by choice box,
+     * so recipe list viewer can get sorted after a selection.
+     * @param recipeListCtrl the recipe list controller which is responsible for the recipe list
+     */
+    private void sortUponSelection(RecipeListCtrl recipeListCtrl) {
+        SingleSelectionModel<String> selectionModel = orderBy.getSelectionModel();
+        selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) ->
+        {
+            System.out.println(oldValue + " -> " + newValue);
+            recipeListCtrl.setSortMethod(newValue);
+        });
     }
 
     /**
@@ -167,10 +189,9 @@ public class MainApplicationCtrl {
      */
     public void search(){
         String query = searchField.getText();
-        String mode  = searchChoice.getValue();
 
         // To be implemented once server side is done.
-        System.out.println("Searching for '" + query + "' by " + mode);
+        System.out.println("Searching for '" + query);
     }
 
     /**
@@ -188,6 +209,7 @@ public class MainApplicationCtrl {
     public void addRecipeToList(Recipe r) {
         if (recipeListCtrl == null) {
             recipeListCtrl = new RecipeListCtrl();
+            recipeListCtrl.initialize();
             if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
         }
         recipeListCtrl.addRecipe(r);

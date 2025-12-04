@@ -10,7 +10,7 @@
    <top>
       <Pane prefHeight="50.0" prefWidth="700.0" BorderPane.alignment="CENTER">
          <children>
-            <ChoiceBox fx:id="searchChoice" layoutX="150.0" layoutY="12.0" prefHeight="25.0" prefWidth="50.0" />
+            <ChoiceBox fx:id="orderBy" layoutX="150.0" layoutY="12.0" prefHeight="25.0" prefWidth="50.0" />
             <TextField fx:id="searchField" layoutX="10.0" layoutY="12.0" onAction="#search" prefHeight="25.0" prefWidth="130.0" promptText="Search" />
          </children></Pane>
    </top>

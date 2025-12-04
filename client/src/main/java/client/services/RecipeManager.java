@@ -142,7 +142,7 @@ public class RecipeManager {
     public void clearForTests() {
         recipesMap.clear();
         ingredientsMap.clear();
-        runOnFx(() -> recipes.clear());
+        runOnFx(recipes::clear);
     }
 
 }
