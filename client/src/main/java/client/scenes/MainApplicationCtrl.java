@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
 import commons.Recipe;
+import javafx.scene.control.ListView;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -22,21 +23,27 @@ public class MainApplicationCtrl {
     /**
      *   This is the right pane(This pane will load different screens)
      */
-    @FXML private Pane contentPane;
+    @FXML
+    private Pane contentPane;
 
-    @FXML private TextField searchField;
+    @FXML
+    private ChoiceBox<String> orderBy;
 
-    @FXML private ChoiceBox<String> orderBy;
+    @FXML
+    private Button addButton;
 
-    @FXML private Button addButton;
+    @FXML
+    private TextField searchField;
 
-    @FXML private Button removeButton;
+    @FXML
+    private Button removeButton;
 
     private final StringProperty refreshProperty = new SimpleStringProperty();
     @FXML
     private Button refreshButton;
 
-    @FXML private ListView<Recipe> recipeListView;
+    @FXML
+    private ListView<Recipe> recipeListView;
 
     private RecipeListCtrl recipeListCtrl;
 

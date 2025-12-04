@@ -20,5 +20,6 @@
     <ScrollPane hbarPolicy="NEVER" layoutX="20.0" layoutY="226.0" prefHeight="120.0" prefWidth="460.0" style="-fx-border-width: 0.5; -fx-border-color: black;" vbarPolicy="NEVER">
         <ListView fx:id="preparationList" prefHeight="120.0" prefWidth="460.0" />
     </ScrollPane>
+   <Button fx:id="printButton" layoutX="338.0" layoutY="14.0" mnemonicParsing="false" onAction="#printRecipe" text="Print" />
 
 </Pane>

@@ -4,8 +4,10 @@ import client.MyFXML;
 import client.MyModule;
 import client.scenes.AddIngredientCtrl;
 import client.scenes.AddRecipeCtrl;
+import client.scenes.MainApplicationCtrl;
 import client.utils.IServerUtils;
 
+import client.utils.ServerUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import commons.Unit;
@@ -44,7 +46,11 @@ public class AddIngredientCtrlTest {
 
     private static class StubServer implements IServerUtils {}
 
-    private static class StubParentCtrl extends AddRecipeCtrl {}
+    private static class StubParentCtrl extends AddRecipeCtrl {
+        public StubParentCtrl(ServerUtils server, MainApplicationCtrl mainCtrl, MyFXML fxml) {
+            super(server, mainCtrl, fxml);
+        }
+    }
 
     private Label nameLabel;
     private Label amountLabel;
