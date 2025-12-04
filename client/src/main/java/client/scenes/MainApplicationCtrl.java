@@ -19,6 +19,8 @@ import static client.Main.DEFAULT_LOCALE;
 import javafx.collections.ListChangeListener;
 import client.services.RecipeManager;
 import java.util.Objects;
+import client.utils.RecipeUtils;
+
 
 
 
@@ -284,25 +286,8 @@ public class MainApplicationCtrl {
 
         String newName = result.get();
 
-        // --- Perform clone ---
-        Recipe clone = new Recipe(
-                newName,
-                new java.util.ArrayList<>(original.getIngredients()),   // shallow copy
-                new java.util.ArrayList<>(original.getSteps()),
-                original.getServingSize()
-        );
-
-        // Give the clone a new ID (if Recipe uses UUIDs)
-        try {
-            var idField = Recipe.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(clone, java.util.UUID.randomUUID());
-        } catch (Exception ignored) {}
-
-        // Add to list
+        Recipe clone = RecipeUtils.cloneWithTitle(original, newName);
         client.services.RecipeManager.getInstance().addRecipeOptimistic(clone);
-
-        // Show the viewer for the new recipe
         showRecipe(clone);
     }
 

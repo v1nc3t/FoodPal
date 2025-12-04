@@ -43,10 +43,9 @@ public class RecipeListCtrl {
         });
 
         // Handle remove-mode and clone-mode clicks in a single event filter.
-// Remove mode has priority (so a remove click never triggers a clone).
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
 
-            // --- REMOVE MODE (highest priority) ---
+
             if (removeMode) {
                 Recipe sel = listView.getSelectionModel().getSelectedItem();
                 if (sel == null) {
@@ -56,24 +55,24 @@ public class RecipeListCtrl {
                 }
 
                 boolean removed = manager.removeRecipe(sel.getId());
-                // exit remove mode regardless of success to avoid stuck state
+
                 exitRemoveMode();
-                // clear selection so the UI doesn't remain highlighted or retrigger listeners
+
                 listView.getSelectionModel().clearSelection();
 
-                // consume so no other handler (e.g. selection listener) opens viewer
+
                 ev.consume();
                 return;
             }
 
-            // --- CLONE MODE ---
+
             if (cloneMode) {
                 Recipe sel = listView.getSelectionModel().getSelectedItem();
                 if (sel != null && onCloneRequest != null) {
-                    // delegate actual popup/clone logic to whoever registered the callback
+
                     onCloneRequest.accept(sel);
                 }
-                // exit clone mode and clear selection to avoid visual flicker
+
                 exitCloneMode();
                 listView.getSelectionModel().clearSelection();
 
@@ -81,7 +80,7 @@ public class RecipeListCtrl {
                 return;
             }
 
-            // If neither mode is active, do nothing here; normal click/double-click handlers run.
+
         });
 
 
@@ -113,6 +112,8 @@ public class RecipeListCtrl {
      * The next click on a list item will remove it instead of selecting it.
      */
     public void enterRemoveMode() {
+
+        cloneMode = false;
         removeMode = true;
         if (listView != null) listView.requestFocus();
     }
@@ -140,6 +141,7 @@ public class RecipeListCtrl {
         return manager.getRecipesSnapshot();
     }
     public void enterCloneMode() {
+        removeMode = false;
         cloneMode = true;
         if (listView != null) listView.requestFocus();
     }
