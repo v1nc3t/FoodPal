@@ -150,7 +150,7 @@ public class Recipe {
      */
     public Recipe cloneWithTitle(String newTitle) {
         Recipe cloned = this.cloneRecipe();
-        // title is a public field in this model; set it directly for convenience.
+
         cloned.title = newTitle;
         return cloned;
     }
