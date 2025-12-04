@@ -21,6 +21,7 @@ import java.util.ResourceBundle;
 import static client.Main.BUNDLE_NAME;
 import static client.Main.DEFAULT_LOCALE;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class AddIngredientCtrl {
@@ -64,6 +65,8 @@ public class AddIngredientCtrl {
 
     private final StringProperty cancelProperty = new SimpleStringProperty();
     @FXML private Button cancelButton;
+
+    private UUID ingredientId = UUID.randomUUID();
 
     private ServerUtils server;
     private AddRecipeCtrl ctrl;
@@ -166,7 +169,7 @@ public class AddIngredientCtrl {
      * Function gets called when user clicks on Done and new ingredient is created
      * @param callback new ingredient made will be sent
      */
-    public void setIngredientAdded(Consumer<RecipeIngredient> callback) {
+    public void setIngredientAddedCb(Consumer<RecipeIngredient> callback) {
         this.ingredientAdded = callback;
     }
 
@@ -186,7 +189,7 @@ public class AddIngredientCtrl {
     public void clickDone() {
         RecipeIngredient newIngredient = null;
         try {
-            newIngredient = getRecipeIngredient();
+            newIngredient = setRecipeIngredient();
             //TODO server.addIngredient(getIngredient());
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
@@ -204,6 +207,28 @@ public class AddIngredientCtrl {
     }
 
     /**
+     * Sets the fields to be that of an existing ingredient, for editing purposes
+     * @param ingredient - the ingredient to edit
+     */
+    public void setIngredient(RecipeIngredient recipeIngredient) {
+        Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+        ingredientId = ingredient.getId();
+        nameField.setText(ingredient.getName());
+        var nv = ingredient.getNutritionValues();
+        proteinField.setText(Double.toString(nv.protein()));
+        fatField.setText(Double.toString(nv.fat()));
+        carbsField.setText(Double.toString(nv.carbs()));
+        var unit = recipeIngredient.getAmount().unit();
+        var description = recipeIngredient.getAmount().description();
+        amountField.setText(Double.toString(recipeIngredient.getAmount().quantity()));
+        if (unit != null) {
+            unitComboBox.getEditor().setText(unit.name());
+        } else {
+            unitComboBox.getEditor().setText(description);
+        }
+    }
+
+    /**
      * Clears all fields and closes the popup
      */
     private void closeWindow() {
@@ -217,6 +242,7 @@ public class AddIngredientCtrl {
      * Clears all fields
      */
     private void clearFields() {
+        ingredientId = UUID.randomUUID();
         nameField.clear();
         amountField.clear();
         proteinField.clear();
@@ -227,9 +253,10 @@ public class AddIngredientCtrl {
     }
 
     /**
-     * Creates a new RecipeIngredient with user input
+     * If creating, creates a new Ingredient, and returns a RecipeIngredient that references it
+     * If editing, sets the existing ingredient, and returns the RecipeIngredient
      */
-    private RecipeIngredient getRecipeIngredient() {
+    private RecipeIngredient setRecipeIngredient() {
         String name = TextFieldUtils.getStringFromField(nameField, nameLabel);
         Amount newAmount = getAmount();
         double protein = TextFieldUtils.getDoubleFromField(proteinField, proteinLabel);
@@ -238,8 +265,9 @@ public class AddIngredientCtrl {
 
         NutritionValues newValues = new NutritionValues(protein, fat, carbs);
 
-        // put the new ingredient in the database
-        Ingredient newIngredient = new Ingredient(name, newValues);
+        Ingredient newIngredient = new Ingredient(ingredientId, name, newValues);
+        RecipeManager.getInstance().setIngredient(newIngredient);
+        // TODO: put the new ingredient in the database
 
 
         return new RecipeIngredient(newIngredient.getId(), newAmount);
