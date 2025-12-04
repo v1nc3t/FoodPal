@@ -251,7 +251,7 @@ public class AddRecipeCtrl {
      */
     private Recipe getRecipe() {
         String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
-        List<RecipeIngredient> ingredients = new ArrayList<>();
+        List<RecipeIngredient> ingredients = editingRecipe.ingredients;
         List<String> preparations = getPreparations();
         int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
 
@@ -324,6 +324,7 @@ public class AddRecipeCtrl {
         addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
             Platform.runLater(() -> {
                 ingredientsList.getChildren().add(createIngredientItem(newIngredient));
+                editingRecipe.ingredients.add(newIngredient);
             });
         });
         var scene = new Scene(addIngredientRoot);

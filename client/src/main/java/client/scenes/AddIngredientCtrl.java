@@ -208,7 +208,7 @@ public class AddIngredientCtrl {
 
     /**
      * Sets the fields to be that of an existing ingredient, for editing purposes
-     * @param ingredient - the ingredient to edit
+     * @param recipeIngredient - the ingredient to edit
      */
     public void setIngredient(RecipeIngredient recipeIngredient) {
         Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
