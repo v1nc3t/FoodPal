@@ -6,10 +6,11 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import javafx.stage.Stage;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.Start;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(ApplicationExtension.class)
 class SortUtilsTest {
 
     private RecipeManager recipeManager;
@@ -25,13 +27,10 @@ class SortUtilsTest {
     private Recipe sample1;
     private Recipe sample2;
 
-    @BeforeAll
-    static void beforeAll() {
-        try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException e) {
-            // silently deal with it
-        }
+    @Start
+    public void start(Stage stage) {
+        stage.show();
+        Platform.setImplicitExit(false);
     }
 
     @BeforeEach
