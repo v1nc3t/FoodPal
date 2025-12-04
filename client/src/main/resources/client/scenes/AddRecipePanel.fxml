@@ -4,29 +4,29 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
-    <Label fx:id="nameLabel" layoutX="15.0" layoutY="14.0" prefHeight="17.0" prefWidth="100.0" text="${controller.nameProperty}" />
-    <TextField fx:id="nameField" layoutX="128.0" layoutY="10.0" prefHeight="25.0" prefWidth="180.0" promptText="${controller.recipeNameFieldProperty}" />
-    <Label fx:id="ingredientsLabel" layoutX="15.0" layoutY="52.0" prefHeight="17.0" prefWidth="100.0" text="${controller.ingredientsProperty}" />
-    <ComboBox fx:id="ingredientsComboBox" layoutX="128.0" layoutY="48.0" prefHeight="25.0" prefWidth="312.0" promptText="${controller.selectIngredientProperty}" />
-    <Button fx:id="addIngredientButton" layoutX="455.0" layoutY="48.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
-    <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" layoutX="128.0" layoutY="83.0" prefHeight="110.0" prefWidth="350.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
+<Pane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
+    <Label fx:id="nameLabel" layoutX="26.0" layoutY="14.0" text="${controller.nameProperty}" />
+    <TextField fx:id="nameField" layoutX="108.0" layoutY="10.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.recipeNameFieldProperty}" />
+    <Label fx:id="ingredientsLabel" layoutX="26.0" layoutY="48.0" text="${controller.ingredientsProperty}" />
+    <ComboBox fx:id="ingredientsComboBox" layoutX="108.0" layoutY="44.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.selectIngredientProperty}" />
+    <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="44.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
+    <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="78.0" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
       <content>
-         <VBox fx:id="ingredientsList" prefHeight="110.0" prefWidth="350.0">
+         <VBox fx:id="ingredientsList" prefHeight="90.0" prefWidth="275.0">
             <padding>
                <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
             </padding></VBox>
       </content></ScrollPane>
-    <Label fx:id="preparationLabel" layoutX="15.0" layoutY="209.0" prefHeight="17.0" prefWidth="100.0" text="${controller.preparationProperty}" />
-    <TextField fx:id="preparationField" layoutX="128.0" layoutY="205.0" prefHeight="25.0" prefWidth="312.0" promptText="${controller.addPreparationStepProperty}" />
-    <Button fx:id="addPreparationButton" layoutX="455.0" layoutY="205.0" mnemonicParsing="false" onAction="#clickAddPreparation" text="+" />
-    <Label fx:id="servingSizeLabel" layoutX="15.0" layoutY="366.0" prefHeight="17.0" prefWidth="100.0" text="${controller.servingSizeProperty}" />
-    <TextField fx:id="servingSizeField" layoutX="128.0" layoutY="362.0" prefHeight="25.0" prefWidth="180.0" promptText="${controller.portionsProperty}" />
-    <Button fx:id="cancelButton" layoutX="371.0" layoutY="362.0" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
-    <Button fx:id="doneButton" layoutX="447.0" layoutY="362.0" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
-   <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" layoutX="128.0" layoutY="240.0" prefHeight="110.0" prefWidth="350.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
+    <Label fx:id="preparationLabel" layoutX="25.0" layoutY="182.0" text="${controller.preparationProperty}" />
+    <TextField fx:id="preparationField" layoutX="108.0" layoutY="178.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.addPreparationStepProperty}" />
+    <Button fx:id="addPreparationButton" layoutX="359.0" layoutY="178.0" mnemonicParsing="false" onAction="#clickAddPreparation" text="+" />
+    <Label fx:id="servingSizeLabel" layoutX="26.0" layoutY="317.0" text="${controller.servingSizeProperty}" />
+    <TextField fx:id="servingSizeField" layoutX="108.0" layoutY="313.0" prefHeight="25.0" prefWidth="142.0" promptText="${controller.portionsProperty}" />
+    <Button fx:id="cancelButton" layoutX="283.0" layoutY="313.0" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
+    <Button fx:id="doneButton" layoutX="345.0" layoutY="313.0" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
+   <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="212.0" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
       <content>
-          <VBox fx:id="preparationList" prefHeight="110.0" prefWidth="350.0" spacing="2.0">
+          <VBox fx:id="preparationList" prefHeight="90.0" prefWidth="275.0" spacing="2.0">
             <padding>
                <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
             </padding></VBox>
