@@ -63,8 +63,6 @@ public class MainApplicationCtrl {
      * Should only be called once when initializing the controller.
      */
     private void bindElementsProperties() {
-        addButton.textProperty().bind(addProperty);
-        removeButton.textProperty().bind(removeProperty);
         refreshButton.textProperty().bind(refreshProperty);
     }
 

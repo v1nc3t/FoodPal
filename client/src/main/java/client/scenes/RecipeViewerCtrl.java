@@ -2,6 +2,8 @@ package client.scenes;
 
 import client.services.RecipePrinter;
 import commons.Recipe;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -9,17 +11,29 @@ import javafx.scene.control.ListView;
 
 
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import static client.Main.BUNDLE_NAME;
+import static client.Main.DEFAULT_LOCALE;
 
 public class RecipeViewerCtrl {
 
-    @FXML
-    private Label titleLabel;
-    @FXML
-    private ListView<String> ingredientsList;
-    @FXML
-    private ListView<String> preparationList;
-    @FXML
-    private Button editButton;
+    @FXML private Label titleLabel;
+
+
+    private final StringProperty ingredientsProperty = new SimpleStringProperty();
+    @FXML private Label ingredientsLabel;
+
+    @FXML private ListView<String> ingredientsList;
+
+    private final StringProperty preparationProperty = new SimpleStringProperty();
+    @FXML private Label preparationLabel;
+
+    @FXML private ListView<String> preparationList;
+
+    private final StringProperty editProperty = new SimpleStringProperty();
+    @FXML private Button editButton;
     @FXML
     private Button printButton;
 
@@ -37,11 +51,29 @@ public class RecipeViewerCtrl {
         this.mainCtrl = mainCtrl;
     }
 
-    /**
-     * This sets the values inside the Recipe viewer
-     *
-     * @param recipe the recipe
-     */
+    @FXML
+    private void initialize() {
+        bindElementsProperties();
+
+        setLocale(DEFAULT_LOCALE);
+    }
+
+    private void bindElementsProperties() {
+        ingredientsLabel.textProperty().bind(ingredientsProperty);
+        preparationLabel.textProperty().bind(preparationProperty);
+
+    }
+
+    private void setLocale(Locale locale) {
+        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+        ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
+        preparationProperty.set(resourceBundle.getString("txt.preparation"));
+    }
+
+  /**
+   * This sets the values inside the recipe viewer
+   * @param recipe the recipe
+   */
     public void setRecipe(Recipe recipe) {
         this.currentRecipe = recipe;
 

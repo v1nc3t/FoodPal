@@ -4,29 +4,22 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipeViewerCtrl">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipeViewerCtrl">
 
-   <Button fx:id="editButton" layoutX="348.0" layoutY="310.0" mnemonicParsing="false" onAction="#editRecipe" text="%txt.edit" />
-   <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" layoutY="15.0" prefHeight="17.0" prefWidth="400.0" text="%txt.recipe_name">
-      <font>
-         <Font size="18.0" />
-      </font></Label>
-   <Label alignment="CENTER" contentDisplay="CENTER" layoutX="-2.0" layoutY="26.0" prefHeight="23.0" prefWidth="103.0" text="%txt.ingredients">
-      <font>
-         <Font size="18.0" />
-      </font>
-   </Label>
-   <ScrollPane layoutY="49.0" prefHeight="105.0" prefWidth="400.0">
-      <ListView fx:id="ingredientsList" prefHeight="101.0" prefWidth="398.0" />
-   </ScrollPane>
-   <Label alignment="CENTER" contentDisplay="CENTER" layoutX="-2.0" layoutY="155.0" prefHeight="23.0" prefWidth="103.0" text="%txt.preparation">
-      <font>
-         <Font size="18.0" />
-      </font>
-   </Label>
-   <ScrollPane layoutY="178.0" prefHeight="106.0" prefWidth="400.0">
-      <ListView fx:id="preparationList" prefHeight="104.0" prefWidth="396.0" />
-   </ScrollPane>
+    <Button fx:id="editButton" layoutX="409.0" layoutY="364.0" mnemonicParsing="false" onAction="#editRecipe" prefHeight="25.0" prefWidth="80.0" text="%txt.edit" />
+    <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" layoutY="14.0" prefHeight="20.0" prefWidth="500.0" style="-fx-wrap-text: true;" text="%txt.recipe_name">
+        <font>
+            <Font size="14.0" />
+        </font>
+    </Label>
+    <Label fx:id="ingredientsLabel" layoutX="21.0" layoutY="42.0" prefHeight="17.0" prefWidth="200.0" text="${controller.ingredientsProperty}" />
+    <ScrollPane hbarPolicy="NEVER" layoutX="20.0" layoutY="69.0" prefHeight="120.0" prefWidth="460.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
+        <ListView fx:id="ingredientsList" prefHeight="120.0" prefWidth="460.0" />
+    </ScrollPane>
+    <Label fx:id="preparationLabel" layoutX="21.0" layoutY="200.0" prefHeight="17.0" prefWidth="200.0" text="${controller.preparationProperty}" />
+    <ScrollPane hbarPolicy="NEVER" layoutX="20.0" layoutY="226.0" prefHeight="120.0" prefWidth="460.0" style="-fx-border-width: 0.5; -fx-border-color: black;" vbarPolicy="NEVER">
+        <ListView fx:id="preparationList" prefHeight="120.0" prefWidth="460.0" />
+    </ScrollPane>
    <Button fx:id="printButton" layoutX="338.0" layoutY="14.0" mnemonicParsing="false" onAction="#printRecipe" text="Print" />
 
 </Pane>

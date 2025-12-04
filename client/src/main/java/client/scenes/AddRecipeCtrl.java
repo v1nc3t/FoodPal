@@ -297,11 +297,13 @@ public class AddRecipeCtrl {
                 ingredientsList.getChildren().add(createIngredientItem(newIngredient));
             });
         });
+        var scene = new Scene(addIngredientRoot);
+        scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
 
         Stage addIngredientStage = new Stage();
         addIngredientStage.setTitle("Add Ingredient");
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
-        addIngredientStage.setScene(new Scene(addIngredientRoot));
+        addIngredientStage.setScene(scene);
         addIngredientStage.setResizable(false);
         addIngredientStage.showAndWait();
     }
