@@ -10,7 +10,6 @@ public class RecipeCloneTest {
 
     private Recipe makeSimpleRecipe() {
         List<RecipeIngredient> ingredients = new ArrayList<>();
-        // adapt constructor to your classes; use a non-null Amount if required
         ingredients.add(new RecipeIngredient(UUID.randomUUID(), null));
         List<String> steps = List.of("step1");
         return new Recipe("Original", ingredients, steps, 2);
