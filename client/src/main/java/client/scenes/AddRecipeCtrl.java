@@ -295,8 +295,8 @@ public class AddRecipeCtrl {
         // waits for new ingredient to be made in popup
         addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
             Platform.runLater(() -> {
-                ingredientsList.getChildren().add(createIngredientItem(newIngredient));
                 ingredients.add(newIngredient);
+                refreshIngredientsList();
             });
         });
         var scene = new Scene(addIngredientRoot);
@@ -326,8 +326,8 @@ public class AddRecipeCtrl {
         // waits for new ingredient to be made in popup
         addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
             Platform.runLater(() -> {
-                ingredientsList.getChildren().add(createIngredientItem(newIngredient));
-                ingredients.add(newIngredient);
+                ingredients.set(ingredients.indexOf(recipeIngredient), newIngredient);
+                refreshIngredientsList();
             });
         });
         var scene = new Scene(addIngredientRoot);
@@ -424,6 +424,14 @@ public class AddRecipeCtrl {
         return item;
     }
 
+    /** Remakes the `ingredientsList` from `ingredients` */
+    public void refreshIngredientsList() {
+        ingredientsList.getChildren().clear();
+        for (RecipeIngredient ri : ingredients) {
+            ingredientsList.getChildren().add(createIngredientItem(ri));
+        }
+    }
+
     /**
      * Loads an existing recipe into the Add Recipe form for editing.
      * @param recipe the recipe to edit
@@ -437,12 +445,10 @@ public class AddRecipeCtrl {
         servingSizeField.setText(String.valueOf(recipe.getServingSize()));
 
         //needs to be changed once server side is done.
-        ingredientsList.getChildren().clear();
         ingredients.clear();
-        for (RecipeIngredient ri : recipe.getIngredients()) {
-            ingredientsList.getChildren().add(createIngredientItem(ri));
-            ingredients.add(ri);
-        }
+        if (editingRecipe != null)
+            ingredients.addAll(recipe.getIngredients());
+        refreshIngredientsList();
 
         preparationList.getChildren().clear();
         for (String step : recipe.getSteps()) {
