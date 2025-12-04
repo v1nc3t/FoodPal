@@ -25,27 +25,21 @@ public class MainApplicationCtrl {
     /**
      *   This is the right pane(This pane will load different screens)
      */
-    @FXML
-    private Pane contentPane;
+    @FXML private Pane contentPane;
 
-    private final StringProperty addProperty = new SimpleStringProperty();
-    @FXML
-    private Button addButton;
-    @FXML
-    private ChoiceBox<String> searchChoice;
-    @FXML
-    private TextField searchField;
+    @FXML private TextField searchField;
 
-    private final StringProperty removeProperty = new SimpleStringProperty();
-    @FXML
-    private Button removeButton;
+    @FXML private ChoiceBox<String> searchChoice;
+
+    @FXML private Button addButton;
+
+    @FXML private Button removeButton;
 
     private final StringProperty refreshProperty = new SimpleStringProperty();
     @FXML
     private Button refreshButton;
 
-    @FXML
-    private ListView<Recipe> recipeListView;
+    @FXML private ListView<Recipe> recipeListView;
 
     private RecipeListCtrl recipeListCtrl;
 
@@ -63,8 +57,6 @@ public class MainApplicationCtrl {
      * Should only be called once when initializing the controller.
      */
     private void bindElementsProperties() {
-        addButton.textProperty().bind(addProperty);
-        removeButton.textProperty().bind(removeProperty);
         refreshButton.textProperty().bind(refreshProperty);
     }
 
@@ -75,8 +67,6 @@ public class MainApplicationCtrl {
      */
     private void setLocale(Locale locale) {
         var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
-        addProperty.set(resourceBundle.getString("txt.add"));
-        removeProperty.set(resourceBundle.getString("txt.remove"));
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
     }
 
