@@ -24,6 +24,14 @@ public class RecipeIngredient {
         this.amount = amount;
     }
 
+    public RecipeIngredient(RecipeIngredient other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Cannot copy null RecipeIngredient");
+        }
+        this.ingredientRef = other.ingredientRef;
+        this.amount = other.amount;
+    }
+
     public UUID getIngredientRef() {
         return ingredientRef;
     }

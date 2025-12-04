@@ -16,12 +16,6 @@ import java.util.ResourceBundle;
 
 import static client.Main.BUNDLE_NAME;
 import static client.Main.DEFAULT_LOCALE;
-import javafx.collections.ListChangeListener;
-import client.services.RecipeManager;
-import java.util.Objects;
-import client.utils.RecipeUtils;
-
-
 
 
 public class MainApplicationCtrl {
@@ -286,9 +280,10 @@ public class MainApplicationCtrl {
 
         String newName = result.get();
 
-        Recipe clone = RecipeUtils.cloneWithTitle(original, newName);
+        Recipe clone = original.cloneWithTitle(newName);
         client.services.RecipeManager.getInstance().addRecipeOptimistic(clone);
         showRecipe(clone);
+
     }
 
 }
