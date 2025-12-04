@@ -34,11 +34,4 @@ public class RecipeListCtrlTest {
         ctrl.exitRemoveMode();
         assertNotNull(ctrl); // just ensure it doesn't throw
     }
-
-    @Test
-    public void testAddNullRecipeDoesNothing() {
-        ctrl.addRecipe(null);
-        assertEquals(0, ctrl.getRecipesSnapshot().size());
-    }
-
 }

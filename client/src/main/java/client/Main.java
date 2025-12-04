@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 
 import com.google.inject.Injector;
 
+import client.config.ConfigManager;
 import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -39,12 +40,25 @@ public class Main extends Application {
     private static final Injector INJECTOR = createInjector(new MyModule());
     private static final MyFXML FXML = new MyFXML(INJECTOR);
 
+    private ConfigManager configManager;
+
+    public static ConfigManager getConfigManager() {
+        return INJECTOR.getInstance(ConfigManager.class);
+    }
+
     public static void main(String[] args) throws URISyntaxException, IOException {
-        launch();
+        launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // load config
+        String cfgPath = getParameters().getNamed().get("cfg");
+        configManager = new ConfigManager(cfgPath);
+
+        configManager.load();
+
+
         var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
@@ -64,5 +78,10 @@ public class Main extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(false);
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() {
+        configManager.save();       // save config on exit
     }
 }
