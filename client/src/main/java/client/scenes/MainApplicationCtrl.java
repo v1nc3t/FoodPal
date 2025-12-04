@@ -272,7 +272,7 @@ public class MainApplicationCtrl {
     }
     /**
      * Opens a modal popup asking the user to enter a name for a cloned recipe.
-     * The popup is pre-filled with "<original title> (Copy)"
+     * The popup is pre-filled with {@code "<original title> (Copy)"} for convenience.
      * @param original the recipe to be cloned (must not be null)
      */
     private void openClonePopup(Recipe original) {
