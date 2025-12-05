@@ -10,13 +10,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
 import commons.Recipe;
-import javafx.scene.control.ListView;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static client.Main.BUNDLE_NAME;
 import static client.Main.DEFAULT_LOCALE;
+
 
 public class MainApplicationCtrl {
 
@@ -43,12 +43,15 @@ public class MainApplicationCtrl {
     private Button refreshButton;
 
     @FXML
+    private Button cloneButton;
+
+    @FXML
     private ListView<Recipe> recipeListView;
 
     private RecipeListCtrl recipeListCtrl;
 
     private final MyFXML fxml;
-
+    private Recipe currentlyShownRecipe = null;
     @Inject
     public MainApplicationCtrl(MyFXML fxml){
         this.fxml =fxml;
@@ -113,17 +116,52 @@ public class MainApplicationCtrl {
         if (recipeListView != null) {
             recipeListCtrl.setListView(recipeListView);
 
-            recipeListView.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldRecipe, newRecipe) -> {
-                    if (newRecipe != null) {
-                        showRecipe(newRecipe);
-                    }
+            recipeListCtrl.setOnCloneRequest(originalRecipe -> openClonePopup(originalRecipe));
+            // open viewer on double-click, and ignore clicks when in remove mode
+            recipeListView.setOnMouseClicked(evt -> {
+                if (evt.getClickCount() != 2) return; // require double-click to open
+
+                Recipe sel = recipeListView.getSelectionModel().getSelectedItem();
+                if (sel == null) return;
+
+                // If the list is in remove mode, the click was for deleting — ignore it
+                if (recipeListCtrl != null && recipeListCtrl.isInRemoveMode()) {
+                    recipeListView.getSelectionModel().clearSelection(); // avoid visual flicker
+                    evt.consume();
+                    return;
                 }
-            );
+
+                // Open the viewer
+                showRecipe(sel);
+            });
+
+            if (cloneButton != null) {
+                cloneButton.setOnAction(e -> recipeListCtrl.enterCloneMode());
+            }
+
         }
+
         if (removeButton != null) {
             removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
         }
+        //if the currently shown recipe disappears, close viewer.
+        client.services.RecipeManager.getInstance().getObservableRecipes()
+                .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
+                    while (change.next()) {
+                        if (change.wasRemoved() && currentlyShownRecipe != null) {
+                            boolean stillPresent = client.services.RecipeManager.getInstance()
+                                    .getObservableRecipes()
+                                    .stream()
+                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
+                            if (!stillPresent) {
+                                javafx.application.Platform.runLater(() -> {
+                                    showMainScreen();
+                                    currentlyShownRecipe = null;
+                                });
+                            }
+                        }
+                    }
+                });
 
         sortUponSelection(recipeListCtrl);
     }
@@ -148,6 +186,24 @@ public class MainApplicationCtrl {
         {
             recipeListCtrl.setSortMethod(newValue);
         });
+        //if the currently shown recipe disappears, close viewer.
+        client.services.RecipeManager.getInstance().getObservableRecipes()
+                .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
+                    while (change.next()) {
+                        if (change.wasRemoved() && currentlyShownRecipe != null) {
+                            boolean stillPresent = client.services.RecipeManager.getInstance()
+                                    .getObservableRecipes()
+                                    .stream()
+                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
+                            if (!stillPresent) {
+                                javafx.application.Platform.runLater(() -> {
+                                    showMainScreen();
+                                    currentlyShownRecipe = null;
+                                });
+                            }
+                        }
+                    }
+                });
     }
 
     /**
@@ -169,11 +225,12 @@ public class MainApplicationCtrl {
         var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
         if (recipe == null) {
             showMainScreen();
+            currentlyShownRecipe = null;
             return;
         }
 
         Pair<RecipeViewerCtrl, Parent> pair = fxml.load(RecipeViewerCtrl.class, bundle,
-            "client", "scenes", "RecipeViewer.fxml");
+                "client", "scenes", "RecipeViewer.fxml");
 
         RecipeViewerCtrl viewerCtrl = pair.getKey();
         Parent viewerRoot = pair.getValue();
@@ -182,7 +239,9 @@ public class MainApplicationCtrl {
         viewerCtrl.setRecipe(recipe);
 
         contentPane.getChildren().setAll(viewerRoot);
+        currentlyShownRecipe = recipe;
     }
+
 
     public void showRecipeViewer(Recipe recipe) {
         showRecipe(recipe);   // reuse your existing private method
@@ -245,4 +304,27 @@ public class MainApplicationCtrl {
 
         showMainScreen();
     }
+    /**
+     * Opens a modal popup asking the user to enter a name for a cloned recipe.
+     * The popup is pre-filled with {@code "<original title> (Copy)"} for convenience.
+     * @param original the recipe to be cloned (must not be null)
+     */
+    private void openClonePopup(Recipe original) {
+        TextInputDialog dialog = new TextInputDialog(original.getTitle() + " (Copy)");
+        dialog.setTitle("Clone Recipe");
+        dialog.setHeaderText("Cloning: " + original.getTitle());
+        dialog.setContentText("Enter a name for the cloned recipe:");
+
+        var result = dialog.showAndWait();
+        if (result.isEmpty()) return;
+
+        String newName = result.get();
+
+        Recipe clone = original.cloneWithTitle(newName);
+        client.services.RecipeManager.getInstance().addRecipeOptimistic(clone);
+        showRecipe(clone);
+
+    }
+
 }
+

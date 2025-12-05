@@ -18,10 +18,11 @@
       <Pane prefHeight="400.0" prefWidth="200.0" BorderPane.alignment="CENTER">
           <Pane prefHeight="400.0" prefWidth="200.0" BorderPane.alignment="CENTER">
               <ListView fx:id="recipeListView" prefHeight="350.0" prefWidth="200.0" />
-              <Button fx:id="refreshButton" layoutX="89.0" layoutY="362.0" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="100.0" text="${controller.refreshProperty}" />
+              <Button fx:id="addButton" layoutX="13.0" layoutY="362.0" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" />
+              <Button fx:id="removeButton" layoutX="51.0" layoutY="362.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
+              <Button fx:id="refreshButton" layoutX="150.0" layoutY="362.0" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="60.0"  text="${controller.refreshProperty}" />
+              <Button fx:id="cloneButton" layoutX="89.0" layoutY="362.0" mnemonicParsing="false" text="Clone" />
           </Pane>
-           <Button fx:id="addButton" layoutX="13.0" layoutY="362.0" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" />
-           <Button fx:id="removeButton" layoutX="51.0" layoutY="362.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
       </Pane>
    </left>
 </BorderPane>
