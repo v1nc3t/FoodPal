@@ -77,6 +77,7 @@ public class AddRecipeCtrl {
 
     private Recipe editingRecipe;
 
+    private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
     private final ServerUtils server;
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
@@ -196,7 +197,9 @@ public class AddRecipeCtrl {
                     // Server not available / failed: keep optimistic copy.
                 }
             } else {
-                mgr.setRecipe(r);
+                if (!mgr.setRecipe(r)) {
+                    System.out.println("Failed to add recipe " + r);
+                }
             }
 
         } catch (WebApplicationException e) {
@@ -230,6 +233,7 @@ public class AddRecipeCtrl {
         nameField.clear();
         servingSizeField.clear();
         preparationField.clear();
+        ingredients = new ArrayList<>();
 
         ingredientsComboBox.getSelectionModel().clearSelection();
         ingredientsComboBox.getItems().clear();
@@ -244,25 +248,15 @@ public class AddRecipeCtrl {
      */
     private Recipe getRecipe() {
         String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
-        List<RecipeIngredient> ingredients = new ArrayList<>();
         List<String> preparations = getPreparations();
         int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
-
         if(editingRecipe == null){
             // new recipe
             return new Recipe(name, ingredients, preparations, servingSize);
-        }else{
+        } else {
             // Editing one
             return new Recipe(editingRecipe.getId(), name, ingredients, preparations, servingSize);
         }
-    }
-
-    /**
-     * Gets ingredients used in recipe from user
-     * @return list of RecipeIngredient
-     */
-    private List<RecipeIngredient> getIngredients() {
-        return new ArrayList<>(); //TODO get ingredients from list
     }
 
     /**
@@ -292,9 +286,10 @@ public class AddRecipeCtrl {
         Parent addIngredientRoot = addIngredientPair.getValue();
 
         // waits for new ingredient to be made in popup
-        addIngredientCtrl.setIngredientAdded(newIngredient -> {
+        addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
             Platform.runLater(() -> {
-                ingredientsList.getChildren().add(createIngredientItem(newIngredient));
+                ingredients.add(newIngredient);
+                refreshIngredientsList();
             });
         });
         var scene = new Scene(addIngredientRoot);
@@ -309,12 +304,43 @@ public class AddRecipeCtrl {
     }
 
     /**
+     * When click on edit button next to ingredient
+     * Open pop up window for editing the existing Ingredient
+     */
+    public void clickEditIngredient(RecipeIngredient recipeIngredient) {
+        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
+                bundle,"client", "scenes", "AddIngredient.fxml");
+
+        AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
+        addIngredientCtrl.setIngredient(recipeIngredient);
+        Parent addIngredientRoot = addIngredientPair.getValue();
+
+        // waits for new ingredient to be made in popup
+        addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
+            Platform.runLater(() -> {
+                ingredients.set(ingredients.indexOf(recipeIngredient), newIngredient);
+                refreshIngredientsList();
+            });
+        });
+        var scene = new Scene(addIngredientRoot);
+        scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
+
+        Stage addIngredientStage = new Stage();
+        addIngredientStage.setTitle("Edit Ingredient");
+        addIngredientStage.initModality(Modality.APPLICATION_MODAL);
+        addIngredientStage.setScene(scene);
+        addIngredientStage.setResizable(false);
+        addIngredientStage.showAndWait();
+    }
+
+    /**
      * A new item which consist of the name of an ingredient and a delete button:
-     * @param newRecipeIngredient user input of ingredient
+     * @param recipeIngredient user input of ingredient
      * @return a horizontal box with the ingredient name and delete button
      */
-    private HBox createIngredientItem(RecipeIngredient newRecipeIngredient) {
-        UUID id = newRecipeIngredient.getIngredientRef();
+    private HBox createIngredientItem(RecipeIngredient recipeIngredient) {
+        Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
 
         //TODO find newIngredient based on id
 
@@ -322,20 +348,22 @@ public class AddRecipeCtrl {
         item.setAlignment(Pos.CENTER_LEFT);
         item.setMaxWidth(Double.MAX_VALUE);
 
-        TextFlow textFlow = new TextFlow(new Text("test"));
+        TextFlow textFlow = new TextFlow(new Text(ingredient.name + " | " + recipeIngredient.amount.toPrettyString()));
 
         textFlow.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(textFlow, Priority.ALWAYS);
 
         Button delete = new Button("-");
+        Button edit =  new Button("Edit");
 
-        HBox buttonGroup = new HBox(5, delete);
+        HBox buttonGroup = new HBox(5, delete, edit);
         buttonGroup.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(buttonGroup, Priority.NEVER);
 
         item.getChildren().addAll(textFlow, buttonGroup);
 
         delete.setOnAction(e -> ingredientsList.getChildren().remove(item));
+        edit.setOnAction(e -> clickEditIngredient(recipeIngredient));
 
         return item;
     }
@@ -389,6 +417,14 @@ public class AddRecipeCtrl {
         return item;
     }
 
+    /** Remakes the `ingredientsList` from `ingredients` */
+    public void refreshIngredientsList() {
+        ingredientsList.getChildren().clear();
+        for (RecipeIngredient ri : ingredients) {
+            ingredientsList.getChildren().add(createIngredientItem(ri));
+        }
+    }
+
     /**
      * Loads an existing recipe into the Add Recipe form for editing.
      * @param recipe the recipe to edit
@@ -402,10 +438,10 @@ public class AddRecipeCtrl {
         servingSizeField.setText(String.valueOf(recipe.getServingSize()));
 
         //needs to be changed once server side is done.
-        ingredientsList.getChildren().clear();
-        for (RecipeIngredient ri : recipe.getIngredients()) {
-            ingredientsList.getChildren().add(createIngredientItem(ri));
-        }
+        ingredients.clear();
+        if (editingRecipe != null)
+            ingredients.addAll(recipe.getIngredients());
+        refreshIngredientsList();
 
         preparationList.getChildren().clear();
         for (String step : recipe.getSteps()) {

@@ -34,6 +34,13 @@ public record Amount( double quantity,
                 '}';
     }
 
+    public String toPrettyString() {
+        if (unit != null && description == null)
+            return quantity + " " + unit.name();
+        else
+            return quantity + " " + description();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

@@ -1,5 +1,7 @@
 package client.scenes;
 
+import client.services.RecipeManager;
+import commons.Ingredient;
 import client.services.RecipePrinter;
 import commons.Recipe;
 import javafx.beans.property.SimpleStringProperty;
@@ -71,7 +73,7 @@ public class RecipeViewerCtrl {
     }
 
   /**
-   * This sets the values inside the recipe viewer
+   * This sets the values inside the `RecipeViewer`
    * @param recipe the recipe
    */
     public void setRecipe(Recipe recipe) {
@@ -89,26 +91,25 @@ public class RecipeViewerCtrl {
         setPreparationList(recipe);
     }
 
-    /**
-     * This sets the ingredients
-     *
-     * @param recipe the recipe
-     */
+  /**
+   * This sets the ingredients
+   * @param recipe the recipe
+   */
     private void setIngredientsList(Recipe recipe) {
         ingredientsList.getItems().clear();
-        List<?> ingredients = recipe.getIngredients();
+        var ingredients = recipe.getIngredients();
         if (ingredients != null) {
-            for (Object ingredient : ingredients) {
-                ingredientsList.getItems().add(String.valueOf(ingredient));
+            for (var recipeIngredient : ingredients) {
+                Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+                ingredientsList.getItems().add(ingredient.getName() + " | " + recipeIngredient.getAmount().toPrettyString());
             }
         }
     }
 
-    /**
-     * This sets the steps
-     *
-     * @param recipe the recipe
-     */
+  /**
+   * This sets the steps
+   * @param recipe the recipe
+   */
     private void setPreparationList(Recipe recipe) {
         preparationList.getItems().clear();
         List<String> steps = recipe.getSteps();
