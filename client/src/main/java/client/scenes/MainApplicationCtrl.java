@@ -26,15 +26,15 @@ public class MainApplicationCtrl {
     @FXML
     private Pane contentPane;
 
-    private final StringProperty addProperty = new SimpleStringProperty();
+    @FXML
+    private ChoiceBox<String> orderBy;
+
     @FXML
     private Button addButton;
-    @FXML
-    private ChoiceBox<String> searchChoice;
+
     @FXML
     private TextField searchField;
 
-    private final StringProperty removeProperty = new SimpleStringProperty();
     @FXML
     private Button removeButton;
 
@@ -74,8 +74,6 @@ public class MainApplicationCtrl {
      */
     private void setLocale(Locale locale) {
         var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
-        addProperty.set(resourceBundle.getString("txt.add"));
-        removeProperty.set(resourceBundle.getString("txt.remove"));
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
     }
 
@@ -111,10 +109,10 @@ public class MainApplicationCtrl {
         */
         setLocale(DEFAULT_LOCALE);
 
-        searchChoice.getItems().setAll("test1", "test2", "test3");
-        searchChoice.setValue("test1");
-
+        prepareSortBy();
         recipeListCtrl = new RecipeListCtrl();
+        recipeListCtrl.initialize();
+
         if (recipeListView != null) {
             recipeListCtrl.setListView(recipeListView);
 
@@ -146,6 +144,48 @@ public class MainApplicationCtrl {
         if (removeButton != null) {
             removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
         }
+        //if the currently shown recipe disappears, close viewer.
+        client.services.RecipeManager.getInstance().getObservableRecipes()
+                .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
+                    while (change.next()) {
+                        if (change.wasRemoved() && currentlyShownRecipe != null) {
+                            boolean stillPresent = client.services.RecipeManager.getInstance()
+                                    .getObservableRecipes()
+                                    .stream()
+                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
+                            if (!stillPresent) {
+                                javafx.application.Platform.runLater(() -> {
+                                    showMainScreen();
+                                    currentlyShownRecipe = null;
+                                });
+                            }
+                        }
+                    }
+                });
+
+        sortUponSelection(recipeListCtrl);
+    }
+
+    /**
+     * Prepares the sort-by choice box, by default sorting alphabetically.
+     * TODO: enable internationalization
+     */
+    private void prepareSortBy() {
+        orderBy.getItems().setAll("Alphabetical", "Most recent");
+        orderBy.setValue("Alphabetical");
+    }
+
+    /**
+     * Adds a listener for changes to sort-by choice box,
+     * so recipe list viewer can get sorted after a selection.
+     * @param recipeListCtrl the recipe list controller which is responsible for the recipe list
+     */
+    private void sortUponSelection(RecipeListCtrl recipeListCtrl) {
+        SingleSelectionModel<String> selectionModel = orderBy.getSelectionModel();
+        selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) ->
+        {
+            recipeListCtrl.setSortMethod(newValue);
+        });
         //if the currently shown recipe disappears, close viewer.
         client.services.RecipeManager.getInstance().getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
@@ -214,10 +254,9 @@ public class MainApplicationCtrl {
      */
     public void search(){
         String query = searchField.getText();
-        String mode  = searchChoice.getValue();
 
         // To be implemented once server side is done.
-        System.out.println("Searching for '" + query + "' by " + mode);
+        System.out.println("Searching for '" + query);
     }
 
     /**
@@ -235,6 +274,7 @@ public class MainApplicationCtrl {
     public void addRecipeToList(Recipe r) {
         if (recipeListCtrl == null) {
             recipeListCtrl = new RecipeListCtrl();
+            recipeListCtrl.initialize();
             if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
         }
         recipeListCtrl.addRecipe(r);
