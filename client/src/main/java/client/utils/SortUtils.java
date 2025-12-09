@@ -98,8 +98,10 @@ public class SortUtils {
      */
     public Comparator<Recipe> getComparator() {
         return switch (sortMethod) {
-            case "Alphabetical" -> Comparator.comparing(Recipe::getTitle);
-            case "Most recent" -> Comparator.comparing(Recipe::getTitle).reversed();
+            case "Alphabetical" -> Comparator.comparing(Recipe::getTitle,
+                    String.CASE_INSENSITIVE_ORDER);
+            case "Most recent" -> Comparator.comparing(Recipe::getTitle,
+                    String.CASE_INSENSITIVE_ORDER).reversed();
             default -> throw new IllegalStateException("Unexpected value: " + sortMethod);
         };
     }
