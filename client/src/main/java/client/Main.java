@@ -76,7 +76,7 @@ public class Main extends Application {
 
         primaryStage.setTitle("FoodPal");
         primaryStage.setScene(new Scene(root));
-        primaryStage.setResizable(false);
+        //primaryStage.setResizable(false);
         primaryStage.show();
 
         /*
