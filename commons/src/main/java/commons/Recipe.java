@@ -27,13 +27,16 @@ public class Recipe {
 
     public List<String> steps;
     public int servingSize;
+    public Language language;
 
-    public Recipe(String title, List<RecipeIngredient> ingredients, List<String> steps, int servingSize) {
+    public Recipe(String title, List<RecipeIngredient> ingredients,
+                  List<String> steps, int servingSize, Language language) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.ingredients = ingredients;
         this.steps = steps;
         this.servingSize = servingSize;
+        this.language = language;
     }
 
     /**
@@ -44,18 +47,21 @@ public class Recipe {
      * @param ingredients the ingredients of the recipe
      * @param steps       the steps of the recipe
      * @param servingSize the serving size of the recipe
+     * @param language    the language of the recipe
      */
     @JsonCreator
     public Recipe(@JsonProperty("id") UUID id,
                   @JsonProperty("title") String title,
                   @JsonProperty("ingredients") List<RecipeIngredient> ingredients,
                   @JsonProperty("steps") List<String> steps,
-                  @JsonProperty("servingSize") int servingSize) {
+                  @JsonProperty("servingSize") int servingSize,
+                  @JsonProperty("language") Language language) {
         this.id = id;
         this.title = title;
         this.ingredients = ingredients;
         this.steps = steps;
         this.servingSize = servingSize;
+        this.language = language;
     }
 
     // an empty constructor for object mapper
@@ -82,6 +88,10 @@ public class Recipe {
         return servingSize;
     }
 
+    public Language getLanguage() {
+        return language;
+    }
+
     @Override
     public String toString() {
         return "Recipe{" +
@@ -90,6 +100,7 @@ public class Recipe {
                 ", ingredients=" + ingredients +
                 ", steps='" + steps + '\'' +
                 ", servingSize=" + servingSize +
+                ", language=" + language.proper() +
                 '}';
     }
 
@@ -102,12 +113,13 @@ public class Recipe {
                 servingSize == that.servingSize &&
                 title.equals(that.title) &&
                 Objects.equals(ingredients, that.ingredients) &&
-                Objects.equals(steps, that.steps);
+                Objects.equals(steps, that.steps) &&
+                Objects.equals(language, that.language);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, ingredients, steps, servingSize);
+        return Objects.hash(id, title, ingredients, steps, servingSize, language);
     }
 
     /**
@@ -137,7 +149,8 @@ public class Recipe {
                 this.title,
                 ingrCopy,
                 stepsCopy,
-                this.servingSize
+                this.servingSize,
+                this.language
         );
     }
 

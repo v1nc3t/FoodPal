@@ -44,7 +44,8 @@ public class RecipeServiceTest {
                     "Get yogurt",
                     "Mix"
             ),
-            67
+            67,
+            Language.EN
     );
 
     @Test
@@ -79,7 +80,8 @@ public class RecipeServiceTest {
                         )
                 ),
                 List.of(),
-                67
+                67,
+                Language.EN
         );
         assertThrows(InvalidRecipeError.class, () ->
                 recipeService.setRecipe(recipe)

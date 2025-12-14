@@ -124,13 +124,14 @@ public class RecipeManager {
     /** Adds a single in-memory test recipe so the ListView shows an entry at startup. */
     private void seedSampleRecipe() {
         try {
-            Ingredient sampleIngredient = new Ingredient("Honey Tester", new NutritionValues(1,1,1));
+            Ingredient sampleIngredient = new Ingredient("Honey Tester",
+                    new NutritionValues(1,1,1));
             ingredientsMap.put(sampleIngredient.getId(), sampleIngredient);
 
             // empty ingredient list for quick seed
             List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
             int servingSize = 2;
-
+            Language language = Language.EN;
 
             Recipe sampleRecipe = new Recipe("Test Pancakes",
                     List.of(
@@ -140,7 +141,8 @@ public class RecipeManager {
                             )
                     ),
                     preparations,
-                    servingSize);
+                    servingSize,
+                    language);
 
             // store in maps if id exists
             if (sampleRecipe.getId() != null) recipesMap.put(sampleRecipe.getId(), sampleRecipe);

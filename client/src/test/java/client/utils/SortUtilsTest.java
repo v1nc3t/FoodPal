@@ -1,6 +1,7 @@
 package client.utils;
 
 import client.services.RecipeManager;
+import commons.Language;
 import commons.Recipe;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -26,6 +27,9 @@ class SortUtilsTest {
     private Recipe sample;
     private Recipe sample1;
     private Recipe sample2;
+    private Language languageEN;
+    private Language languageDE;
+    private Language languageNL;
 
     @Start
     public void start(Stage stage) {
@@ -41,10 +45,13 @@ class SortUtilsTest {
         String title3 = "X pizza";
         List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
         int servingSize = 2;
+        languageEN = Language.EN;
+        languageDE = Language.DE;
+        languageNL = Language.NL;
 
-        sample = new Recipe(title1, new ArrayList<>(), preparations, servingSize);
-        sample1 = new Recipe(title2, new ArrayList<>(), preparations, servingSize);
-        sample2 = new Recipe(title3, new ArrayList<>(), preparations, servingSize);
+        sample = new Recipe(title1, new ArrayList<>(), preparations, servingSize, languageEN);
+        sample1 = new Recipe(title2, new ArrayList<>(), preparations, servingSize, languageDE);
+        sample2 = new Recipe(title3, new ArrayList<>(), preparations, servingSize, languageNL);
         recipeManager.addRecipeOptimistic(sample);
         recipeManager.addRecipeOptimistic(sample1);
         recipeManager.addRecipeOptimistic(sample2);

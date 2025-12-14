@@ -5,6 +5,7 @@ import client.utils.ServerUtils;
 
 import client.utils.TextFieldUtils;
 import commons.Ingredient;
+import commons.Language;
 import commons.Recipe;
 import commons.RecipeIngredient;
 
@@ -252,10 +253,11 @@ public class AddRecipeCtrl {
         int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
         if(editingRecipe == null){
             // new recipe
-            return new Recipe(name, ingredients, preparations, servingSize);
+            return new Recipe(name, ingredients, preparations, servingSize, Language.EN);
         } else {
             // Editing one
-            return new Recipe(editingRecipe.getId(), name, ingredients, preparations, servingSize);
+            return new Recipe(editingRecipe.getId(), name, ingredients,
+                    preparations, servingSize, Language.EN);
         }
     }
 
@@ -348,7 +350,8 @@ public class AddRecipeCtrl {
         item.setAlignment(Pos.CENTER_LEFT);
         item.setMaxWidth(Double.MAX_VALUE);
 
-        TextFlow textFlow = new TextFlow(new Text(ingredient.name + " | " + recipeIngredient.amount.toPrettyString()));
+        TextFlow textFlow = new TextFlow(new Text(ingredient.name + " | "
+                + recipeIngredient.amount.toPrettyString()));
 
         textFlow.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(textFlow, Priority.ALWAYS);
