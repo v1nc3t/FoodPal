@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.MyFXML;
+import client.services.LocaleManager;
 import jakarta.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -18,7 +19,7 @@ import static client.Main.BUNDLE_NAME;
 import static client.Main.DEFAULT_LOCALE;
 
 
-public class MainApplicationCtrl {
+public class MainApplicationCtrl implements Internationalizable {
 
     /**
      *   This is the right pane(This pane will load different screens)
@@ -51,10 +52,16 @@ public class MainApplicationCtrl {
     private RecipeListCtrl recipeListCtrl;
 
     private final MyFXML fxml;
+    private final LocaleManager localeManager;
+
     private Recipe currentlyShownRecipe = null;
+
     @Inject
-    public MainApplicationCtrl(MyFXML fxml){
-        this.fxml =fxml;
+    public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
+        this.fxml = fxml;
+        this.localeManager = localeManager;
+
+        this.localeManager.register(this);
     }
 
     /**
@@ -70,11 +77,27 @@ public class MainApplicationCtrl {
     /**
      * Dynamically updates properties of UI elements to the language
      * of a corresponding locale
-     * @param locale provided locale/language for UI elements
+     * @param newLocale provided locale/language for UI elements
      */
-    private void setLocale(Locale locale) {
-        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    @Override
+    public void setLocale(Locale newLocale) {
+        var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
+    }
+
+    @FXML
+    private void setEN() {
+        localeManager.setAllLocale(Locale.ENGLISH);
+    }
+
+    @FXML
+    private void setDE() {
+        localeManager.setAllLocale(Locale.GERMAN);
+    }
+
+    @FXML
+    private void setNL() {
+        localeManager.setAllLocale(Locale.forLanguageTag("nl-NL"));
     }
 
     /**
