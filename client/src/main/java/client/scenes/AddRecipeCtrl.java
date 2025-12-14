@@ -57,7 +57,7 @@ public class AddRecipeCtrl {
     @FXML private Label preparationLabel;
 
     private final StringProperty addPreparationStepProperty = new SimpleStringProperty();
-    @FXML private TextField preparationField;
+    @FXML private TextArea preparationField;
 
     @FXML private Button addPreparationButton;
     @FXML private ScrollPane preparationScrollPane;
@@ -112,12 +112,15 @@ public class AddRecipeCtrl {
         */
         setLocale(DEFAULT_LOCALE);
 
+        /*
         // when user entered a prep step, clicking enter will add it to the list
         preparationField.setOnAction(e -> {
             if(!preparationField.getText().isBlank()) {
                 addPreparationButton.fire();
             }
         });
+         */
+        
 
         preparationScrollPane.setFitToWidth(true);
 

@@ -1,35 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<Pane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
-    <Label fx:id="nameLabel" layoutX="26.0" layoutY="14.0" text="${controller.nameProperty}" />
-    <TextField fx:id="nameField" layoutX="108.0" layoutY="10.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.recipeNameFieldProperty}" />
-    <Label fx:id="ingredientsLabel" layoutX="26.0" layoutY="48.0" text="${controller.ingredientsProperty}" />
-    <ComboBox fx:id="ingredientsComboBox" layoutX="108.0" layoutY="44.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.selectIngredientProperty}" />
-    <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="44.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
-    <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="78.0" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
-      <content>
-         <VBox fx:id="ingredientsList" prefHeight="90.0" prefWidth="275.0">
-            <padding>
-               <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
-            </padding></VBox>
-      </content></ScrollPane>
-    <Label fx:id="preparationLabel" layoutX="25.0" layoutY="182.0" text="${controller.preparationProperty}" />
-    <TextField fx:id="preparationField" layoutX="108.0" layoutY="178.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.addPreparationStepProperty}" />
-    <Button fx:id="addPreparationButton" layoutX="359.0" layoutY="178.0" mnemonicParsing="false" onAction="#clickAddPreparation" text="+" />
-    <Label fx:id="servingSizeLabel" layoutX="26.0" layoutY="317.0" text="${controller.servingSizeProperty}" />
-    <TextField fx:id="servingSizeField" layoutX="108.0" layoutY="313.0" prefHeight="25.0" prefWidth="142.0" promptText="${controller.portionsProperty}" />
-    <Button fx:id="cancelButton" layoutX="283.0" layoutY="313.0" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
-    <Button fx:id="doneButton" layoutX="345.0" layoutY="313.0" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
-   <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" layoutX="108.0" layoutY="212.0" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
-      <content>
-          <VBox fx:id="preparationList" prefHeight="90.0" prefWidth="275.0" spacing="2.0">
-            <padding>
-               <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
-            </padding></VBox>
-      </content>
-   </ScrollPane>
-</Pane>
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
+   <children>
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <children>
+             <Label fx:id="nameLabel" text="${controller.nameProperty}" />
+             <TextField fx:id="nameField" promptText="${controller.recipeNameFieldProperty}" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <children>
+             <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" />
+             <ComboBox fx:id="ingredientsComboBox" promptText="${controller.selectIngredientProperty}" HBox.hgrow="ALWAYS" />
+             <Button fx:id="addIngredientButton" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
+         </children>
+      </HBox>
+       <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+         <content>
+            <VBox fx:id="ingredientsList" spacing="2.0">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+         </content>
+      </ScrollPane>
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <children>
+             <Label fx:id="preparationLabel" text="${controller.preparationProperty}" />
+            <TextArea fx:id="preparationField" prefRowCount="2" promptText="${controller.addPreparationStepProperty}" />
+             <Button fx:id="addPreparationButton" mnemonicParsing="false" onAction="#clickAddPreparation" text="+" />
+         </children>
+      </HBox>
+      <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+         <content>
+             <VBox fx:id="preparationList" spacing="2.0">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="2.0" />
+               </padding>
+            </VBox>
+         </content>
+      </ScrollPane>
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <children>
+             <Label fx:id="servingSizeLabel" text="${controller.servingSizeProperty}" />
+             <TextField fx:id="servingSizeField" promptText="${controller.portionsProperty}" />
+             <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
+             <Button fx:id="doneButton" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>
