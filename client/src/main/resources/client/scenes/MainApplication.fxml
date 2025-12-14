@@ -12,6 +12,7 @@
          <children>
             <ChoiceBox fx:id="orderBy" layoutX="150.0" layoutY="12.0" prefHeight="25.0" prefWidth="50.0" />
             <TextField fx:id="searchField" layoutX="10.0" layoutY="12.0" onAction="#search" prefHeight="25.0" prefWidth="130.0" promptText="Search" />
+            <ChoiceBox fx:id="languageOptions" layoutX="586.0" layoutY="13.0" onAction="#changeLanguage" prefHeight="25.0" prefWidth="100.0" />
          </children></Pane>
    </top>
    <left>
@@ -20,7 +21,7 @@
               <ListView fx:id="recipeListView" prefHeight="350.0" prefWidth="200.0" />
               <Button fx:id="addButton" layoutX="13.0" layoutY="362.0" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" />
               <Button fx:id="removeButton" layoutX="51.0" layoutY="362.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
-              <Button fx:id="refreshButton" layoutX="150.0" layoutY="362.0" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="60.0"  text="${controller.refreshProperty}" />
+              <Button fx:id="refreshButton" layoutX="150.0" layoutY="362.0" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="60.0" text="${controller.refreshProperty}" />
               <Button fx:id="cloneButton" layoutX="89.0" layoutY="362.0" mnemonicParsing="false" text="Clone" />
           </Pane>
       </Pane>

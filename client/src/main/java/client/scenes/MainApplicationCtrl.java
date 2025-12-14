@@ -30,6 +30,8 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private ChoiceBox<String> orderBy;
 
+    @FXML private ChoiceBox<String> languageOptions;
+
     @FXML
     private Button addButton;
 
@@ -85,21 +87,6 @@ public class MainApplicationCtrl implements Internationalizable {
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
     }
 
-    @FXML
-    private void setEN() {
-        localeManager.setAllLocale(Locale.ENGLISH);
-    }
-
-    @FXML
-    private void setDE() {
-        localeManager.setAllLocale(Locale.GERMAN);
-    }
-
-    @FXML
-    private void setNL() {
-        localeManager.setAllLocale(Locale.forLanguageTag("nl-NL"));
-    }
-
     /**
      *  This clears the current screen back to the main(blank for now)
      */
@@ -131,6 +118,8 @@ public class MainApplicationCtrl implements Internationalizable {
          NL: Locale.forLanguageTag("nl-NL")
         */
         setLocale(DEFAULT_LOCALE);
+
+        prepareLanguageOptions();
 
         prepareSortBy();
         recipeListCtrl = new RecipeListCtrl();
@@ -196,6 +185,44 @@ public class MainApplicationCtrl implements Internationalizable {
     private void prepareSortBy() {
         orderBy.getItems().setAll("Alphabetical", "Most recent");
         orderBy.setValue("Alphabetical");
+    }
+
+    private void prepareLanguageOptions() {
+        languageOptions.getItems().setAll("English", "German", "Dutch");
+
+        Locale currentLocale = localeManager.getCurrentLocale();
+        String currentDisplay;
+        if (currentLocale.equals(Locale.GERMAN)) {
+            currentDisplay = "German";
+        } else if (currentLocale.equals(Locale.forLanguageTag("nl-NL"))) {
+            currentDisplay = "Dutch";
+        } else {
+            currentDisplay = "English";
+        }
+
+        languageOptions.setValue(currentDisplay);
+    }
+
+    @FXML
+    private void changeLanguage() {
+        String currentDisplay = languageOptions.getValue();
+
+        Locale newLocale;
+        switch (currentDisplay) {
+            case "German":
+                newLocale = Locale.GERMAN;
+                break;
+            case "Dutch":
+                newLocale = Locale.forLanguageTag("nl-NL");
+                break;
+            case "English":
+                newLocale = Locale.ENGLISH;
+                break;
+            default:
+                return;
+        }
+
+        localeManager.setAllLocale(newLocale);
     }
 
     /**

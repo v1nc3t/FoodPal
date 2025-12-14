@@ -10,7 +10,7 @@ public class LocaleManager {
 
     private static final String BUNDLE_NAME = "client.language";
 
-    private Locale currentLocale;
+    private Locale currentLocale = Locale.ENGLISH;
 
     private static final List<Internationalizable> registeredCtrls = new ArrayList<>();
 
