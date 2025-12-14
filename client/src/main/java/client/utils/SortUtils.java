@@ -1,8 +1,11 @@
 package client.utils;
 
 import client.services.RecipeManager;
+import commons.Language;
 import commons.Recipe;
 import jakarta.inject.Inject;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 
 import java.util.ArrayList;
@@ -10,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class SortUtils {
-    private List<String> languageFilters;
+    private List<Language> languageFilters;
     private String sortMethod;
     private final RecipeManager recipeManager;
 
@@ -28,7 +31,7 @@ public class SortUtils {
      * Gets the language filters.
      * @return list of language filters
      */
-    public List<String> getLanguageFilters() {
+    public List<Language> getLanguageFilters() {
         return languageFilters;
     }
 
@@ -36,7 +39,7 @@ public class SortUtils {
      * Sets the language filters.
      * @param languageFilters provided language filters
      */
-    public void setLanguageFilters(List<String> languageFilters) {
+    public void setLanguageFilters(List<Language> languageFilters) {
         this.languageFilters = languageFilters;
     }
 
@@ -44,7 +47,7 @@ public class SortUtils {
      * Adds a language to the list of language filters.
      * @param languageFilter filter language to be added
      */
-    public void addLanguageFilter(String languageFilter) {
+    public void addLanguageFilter(Language languageFilter) {
         this.languageFilters.add(languageFilter);
     }
 
@@ -73,7 +76,7 @@ public class SortUtils {
             // TODO: try to load config for user defined filters (languages and favorites)
             throw new Exception("Mock config file failing.");
         } catch (Exception e) {
-            languageFilters = new ArrayList<>(List.of("en", "de", "nl"));
+            languageFilters = new ArrayList<>(List.of(Language.EN, Language.DE, Language.NL));
         } finally {
             sortMethod = "Alphabetical";
         }
@@ -84,7 +87,14 @@ public class SortUtils {
      * @return filtered SortedList with a set comparator
      */
     public SortedList<Recipe> applyFilters() {
-        SortedList<Recipe> sortedList = new SortedList<>(recipeManager.getObservableRecipes());
+        List<Recipe> filteredRecipes = recipeManager.getObservableRecipes()
+                .parallelStream()
+                .filter(recipe -> languageFilters.contains(recipe.getLanguage()))
+                .toList();
+        ObservableList<Recipe> filteredObservableList =
+                FXCollections.observableArrayList(filteredRecipes);
+
+        SortedList<Recipe> sortedList = new SortedList<>(filteredObservableList);
 
         Comparator<Recipe> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);

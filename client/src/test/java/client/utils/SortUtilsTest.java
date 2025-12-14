@@ -71,8 +71,9 @@ class SortUtilsTest {
     @Test
     void getLanguageFilters() {
         SortUtils sortUtils = new SortUtils(recipeManager);
-        List<String> expected = new ArrayList<>(List.of("en", "de", "nl"));
-        List<String> actual = sortUtils.getLanguageFilters();
+        List<Language> expected = new ArrayList<>(List.of(Language.EN, Language.DE,
+                Language.NL));
+        List<Language> actual = sortUtils.getLanguageFilters();
 
         Collections.sort(expected);
         Collections.sort(actual);
@@ -83,10 +84,10 @@ class SortUtilsTest {
     @Test
     void setLanguageFilters() {
         SortUtils sortUtils = new SortUtils(recipeManager);
-        List<String> expected = new ArrayList<>(List.of("lt"));
+        List<Language> expected = new ArrayList<>(List.of(Language.DE));
 
         sortUtils.setLanguageFilters(expected);
-        List<String> actual = sortUtils.getLanguageFilters();
+        List<Language> actual = sortUtils.getLanguageFilters();
 
         Collections.sort(expected);
         Collections.sort(actual);
@@ -97,10 +98,14 @@ class SortUtilsTest {
     @Test
     void addLanguageFilter() {
         SortUtils sortUtils = new SortUtils(recipeManager);
-        List<String> expected = new ArrayList<>(List.of("en", "de", "nl", "lt"));
+        List<Language> expected = new ArrayList<>(List.of(Language.DE,
+                Language.NL));
 
-        sortUtils.addLanguageFilter("lt");
-        List<String> actual = sortUtils.getLanguageFilters();
+        List<Language> actual = new ArrayList<>(List.of(Language.DE));
+        sortUtils.setLanguageFilters(actual);
+
+        sortUtils.addLanguageFilter(Language.NL);
+        actual = sortUtils.getLanguageFilters();
 
         Collections.sort(expected);
         Collections.sort(actual);
@@ -127,22 +132,38 @@ class SortUtilsTest {
     void loadConfig() {
         SortUtils sortUtils = new SortUtils(recipeManager);
         sortUtils.setSortMethod("Reverse alphabetical");
-        sortUtils.setLanguageFilters(List.of("lt"));
+        sortUtils.setLanguageFilters(List.of(Language.NL));
         sortUtils.loadConfig();
 
-        List<String> expected = new ArrayList<>(List.of("en", "de", "nl"));
+        List<Language> expected = new ArrayList<>(List.of(Language.EN, Language.DE,
+                Language.NL));
 
         assertEquals("Alphabetical", sortUtils.getSortMethod(), "loadConfig() should have Alphabetical sorting manner by default.");
         assertEquals(expected, sortUtils.getLanguageFilters(), "loadConfig() should resort to default language filters");
     }
 
     @Test
-    void applyFilters() {
+    void applyFiltersSortTest() {
         SortUtils sortUtils = new SortUtils(recipeManager);
         assertEquals("Alphabetical", sortUtils.getSortMethod());
 
         ObservableList<Recipe> sampleList = FXCollections.observableArrayList(sample, sample1, sample2);
         SortedList<Recipe> expected = new SortedList<>(sampleList);
+
+        expected.setComparator(Comparator.comparing(Recipe::getTitle));
+        SortedList<Recipe> actual = sortUtils.applyFilters();
+
+        assertEquals(expected, actual, "Expected a different SortedList after applyFilters().");
+    }
+
+    @Test
+    void applyFiltersLanguageTest() {
+        SortUtils sortUtils = new SortUtils(recipeManager);
+        sortUtils.setLanguageFilters(List.of(Language.DE, Language.NL));
+        assertEquals(List.of(Language.DE, Language.NL), sortUtils.getLanguageFilters());
+
+        ObservableList<Recipe> expectedSampleList = FXCollections.observableArrayList(sample1, sample2);
+        SortedList<Recipe> expected = new SortedList<>(expectedSampleList);
 
         expected.setComparator(Comparator.comparing(Recipe::getTitle));
         SortedList<Recipe> actual = sortUtils.applyFilters();
