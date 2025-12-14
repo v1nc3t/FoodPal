@@ -6,12 +6,12 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.RecipeViewerCtrl">
 
-    <Button fx:id="editButton" layoutX="409.0" layoutY="364.0" mnemonicParsing="false" onAction="#editRecipe" prefHeight="25.0" prefWidth="80.0" text="%txt.edit" />
     <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" layoutY="14.0" prefHeight="20.0" prefWidth="500.0" style="-fx-wrap-text: true;" text="%txt.recipe_name">
         <font>
             <Font size="14.0" />
         </font>
     </Label>
+    <Button fx:id="printButton" layoutX="338.0" layoutY="14.0" mnemonicParsing="false" onAction="#printRecipe" text="Print" />
     <Label fx:id="ingredientsLabel" layoutX="21.0" layoutY="42.0" prefHeight="17.0" prefWidth="200.0" text="${controller.ingredientsProperty}" />
     <ScrollPane hbarPolicy="NEVER" layoutX="20.0" layoutY="69.0" prefHeight="120.0" prefWidth="460.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER">
         <ListView fx:id="ingredientsList" prefHeight="120.0" prefWidth="460.0" />
@@ -20,6 +20,8 @@
     <ScrollPane hbarPolicy="NEVER" layoutX="20.0" layoutY="226.0" prefHeight="120.0" prefWidth="460.0" style="-fx-border-width: 0.5; -fx-border-color: black;" vbarPolicy="NEVER">
         <ListView fx:id="preparationList" prefHeight="120.0" prefWidth="460.0" />
     </ScrollPane>
-   <Button fx:id="printButton" layoutX="338.0" layoutY="14.0" mnemonicParsing="false" onAction="#printRecipe" text="Print" />
+    <Button fx:id="editButton" layoutX="409.0" layoutY="364.0" mnemonicParsing="false" onAction="#editRecipe" prefHeight="25.0" prefWidth="80.0" text="%txt.edit" />
+    <Label fx:id="languageLabel" layoutX="21.0" layoutY="356.0" prefHeight="17.0" text="${controller.languageProperty}" />
+    <Label fx:id="languageSuffixLabel" layoutX="${languageLabel.width + 22}" layoutY="356.0" prefHeight="17.0" text="${controller.languageSuffixProperty}" />
 
 </Pane>

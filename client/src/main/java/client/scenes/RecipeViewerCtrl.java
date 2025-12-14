@@ -23,6 +23,11 @@ public class RecipeViewerCtrl {
 
     @FXML private Label titleLabel;
 
+    private final StringProperty languageProperty = new SimpleStringProperty();
+    @FXML private Label languageLabel;
+
+    private final StringProperty languageSuffixProperty = new SimpleStringProperty();
+    @FXML private Label languageSuffixLabel;
 
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML private Label ingredientsLabel;
@@ -61,6 +66,8 @@ public class RecipeViewerCtrl {
     }
 
     private void bindElementsProperties() {
+        languageLabel.textProperty().bind(languageProperty);
+        languageSuffixLabel.textProperty().bind(languageSuffixProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
 
@@ -68,6 +75,7 @@ public class RecipeViewerCtrl {
 
     private void setLocale(Locale locale) {
         var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+        languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
     }
@@ -86,6 +94,7 @@ public class RecipeViewerCtrl {
             return;
         }
 
+        languageSuffixProperty.set(recipe.getLanguage().proper());
         titleLabel.setText(recipe.getTitle());
         setIngredientsList(recipe);
         setPreparationList(recipe);
@@ -101,7 +110,8 @@ public class RecipeViewerCtrl {
         if (ingredients != null) {
             for (var recipeIngredient : ingredients) {
                 Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
-                ingredientsList.getItems().add(ingredient.getName() + " | " + recipeIngredient.getAmount().toPrettyString());
+                ingredientsList.getItems().add(ingredient.getName() + " | " +
+                        recipeIngredient.getAmount().toPrettyString());
             }
         }
     }
