@@ -15,10 +15,6 @@ import commons.Recipe;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static client.Main.BUNDLE_NAME;
-import static client.Main.DEFAULT_LOCALE;
-
-
 public class MainApplicationCtrl implements Internationalizable {
 
     /**
@@ -117,7 +113,7 @@ public class MainApplicationCtrl implements Internationalizable {
          DE: Locale.GERMAN
          NL: Locale.forLanguageTag("nl-NL")
         */
-        setLocale(DEFAULT_LOCALE);
+        setLocale(localeManager.getCurrentLocale());
 
         prepareLanguageOptions();
 
@@ -261,7 +257,7 @@ public class MainApplicationCtrl implements Internationalizable {
      */
     @FXML
     private void addRecipe() {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,bundle,
                 "client", "scenes", "AddRecipePanel.fxml");
 
@@ -272,7 +268,7 @@ public class MainApplicationCtrl implements Internationalizable {
     }
 
     private void showRecipe(Recipe recipe) {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         if (recipe == null) {
             showMainScreen();
             currentlyShownRecipe = null;
@@ -285,7 +281,6 @@ public class MainApplicationCtrl implements Internationalizable {
         RecipeViewerCtrl viewerCtrl = pair.getKey();
         Parent viewerRoot = pair.getValue();
 
-        viewerCtrl.setMainCtrl(this);
         viewerCtrl.setRecipe(recipe);
 
         contentPane.getChildren().setAll(viewerRoot);
@@ -331,7 +326,7 @@ public class MainApplicationCtrl implements Internationalizable {
     }
 
     public void editRecipe(Recipe recipe) {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         if (recipe == null) return;
 
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,

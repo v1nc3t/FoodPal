@@ -5,6 +5,7 @@ import client.scenes.Internationalizable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class LocaleManager {
 
@@ -36,6 +37,10 @@ public class LocaleManager {
 
     public String getBundleName() {
         return BUNDLE_NAME;
+    }
+
+    public ResourceBundle getCurrentBundle() {
+        return ResourceBundle.getBundle(BUNDLE_NAME, currentLocale);
     }
 
 }
