@@ -22,7 +22,7 @@
          <children>
              <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" />
              <ComboBox fx:id="ingredientsComboBox" promptText="${controller.selectIngredientProperty}" HBox.hgrow="ALWAYS" />
-             <Button fx:id="addIngredientButton" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />
+             <Button fx:id="addIngredientButton" mnemonicParsing="false" onAction="#clickAddIngredient" prefHeight="25.0" prefWidth="25.0" text="+" />
          </children>
       </HBox>
        <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
@@ -37,8 +37,8 @@
       <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
              <Label fx:id="preparationLabel" text="${controller.preparationProperty}" />
-            <TextArea fx:id="preparationField" prefRowCount="2" promptText="${controller.addPreparationStepProperty}" />
-             <Button fx:id="addPreparationButton" mnemonicParsing="false" onAction="#clickAddPreparation" text="+" />
+            <TextArea fx:id="preparationField" maxWidth="1.7976931348623157E308" prefRowCount="2" promptText="${controller.addPreparationStepProperty}" HBox.hgrow="ALWAYS" />
+             <Button fx:id="addPreparationButton" mnemonicParsing="false" onAction="#clickAddPreparation" prefHeight="25.0" prefWidth="25.0" text="+" />
          </children>
       </HBox>
       <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">

@@ -49,6 +49,7 @@ public class AddRecipeCtrl {
     private final StringProperty selectIngredientProperty = new SimpleStringProperty();
     @FXML private ComboBox<Ingredient> ingredientsComboBox;
 
+    //private final StringProperty addProperty = new SimpleStringProperty();
     @FXML private Button addIngredientButton;
     @FXML private ScrollPane ingredientsScrollPane;
     @FXML private VBox ingredientsList;
@@ -148,6 +149,8 @@ public class AddRecipeCtrl {
         servingSizeField.promptTextProperty().bind(portionsProperty);
         doneButton.textProperty().bind(doneProperty);
         cancelButton.textProperty().bind(cancelProperty);
+        //addIngredientButton.textProperty().bind(addProperty);
+        //addPreparationButton.textProperty().bind(addProperty);
     }
 
     /**
@@ -167,6 +170,7 @@ public class AddRecipeCtrl {
         portionsProperty.set(resourceBundle.getString("txt.portions"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+        //addProperty.set(resourceBundle.getString("txt.add"));
     }
 
     /**

@@ -29,6 +29,7 @@ public class MainApplicationCtrl {
     @FXML
     private ChoiceBox<String> orderBy;
 
+    //private final StringProperty addProperty = new SimpleStringProperty();
     @FXML
     private Button addButton;
 
@@ -65,6 +66,7 @@ public class MainApplicationCtrl {
      */
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
+        //addButton.textProperty().bind(addProperty);
     }
 
     /**
@@ -75,6 +77,7 @@ public class MainApplicationCtrl {
     private void setLocale(Locale locale) {
         var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
+        //addProperty.set(resourceBundle.getString("txt.add"));
     }
 
     /**
