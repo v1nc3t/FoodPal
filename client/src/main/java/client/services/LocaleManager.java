@@ -2,10 +2,7 @@ package client.services;
 
 import client.scenes.Internationalizable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class LocaleManager {
 
@@ -13,11 +10,7 @@ public class LocaleManager {
 
     private Locale currentLocale = Locale.ENGLISH;
 
-    private static final List<Internationalizable> registeredCtrls = new ArrayList<>();
-
-    public LocaleManager() {
-        //TODO load initial locale from config
-    }
+    private final List<Internationalizable> registeredCtrls = new ArrayList<>();
 
     public void register(Internationalizable ctrl) {
         registeredCtrls.add(ctrl);

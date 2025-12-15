@@ -89,7 +89,10 @@ public class AddRecipeCtrl implements Internationalizable {
     }
 
     @Inject
-    public AddRecipeCtrl(ServerUtils server, MainApplicationCtrl mainCtrl, MyFXML fxml, LocaleManager localeManager) {
+    public AddRecipeCtrl(ServerUtils server,
+                         MainApplicationCtrl mainCtrl,
+                         MyFXML fxml,
+                         LocaleManager localeManager) {
         this.server = server;
         this.mainCtrl = mainCtrl;
         this.fxml = fxml;
