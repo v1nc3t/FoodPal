@@ -1,6 +1,7 @@
 package commons;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public enum Language {
@@ -55,5 +56,18 @@ public enum Language {
         for (Language language : Language.values()) {
             language.loadProperLabel(resourceBundle);
         }
+    }
+
+    /**
+     * Finds and returns the language enum of the proper language label provided.
+     * In case such a label does not exist, EN is returned.
+     * @param properLabel proper language label
+     * @return language enum of the proper language label, EN if label not found
+     */
+    public static Language valueOfProper(String properLabel) {
+        for (Language language : Language.values()) {
+            if (Objects.equals(language.proper, properLabel)) return language;
+        }
+        return EN;
     }
 }

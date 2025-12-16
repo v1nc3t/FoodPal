@@ -6,7 +6,9 @@
 
 <Pane prefHeight="350.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
     <Label fx:id="nameLabel" layoutX="26.0" layoutY="14.0" text="${controller.nameProperty}" />
-    <TextField fx:id="nameField" layoutX="108.0" layoutY="10.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.recipeNameFieldProperty}" />
+    <TextField fx:id="nameField" layoutX="108.0" layoutY="10.0" prefHeight="25.0" prefWidth="140.0" promptText="${controller.recipeNameFieldProperty}" />
+    <Label fx:id="languageLabel" layoutX="253.0" layoutY="14.0" prefWidth="55.0" text="${controller.languageProperty}" />
+    <ChoiceBox fx:id="languageChoiceBox" layoutX="310.0" layoutY="10.0" prefHeight="25.0" prefWidth="73.0"/>
     <Label fx:id="ingredientsLabel" layoutX="26.0" layoutY="48.0" text="${controller.ingredientsProperty}" />
     <ComboBox fx:id="ingredientsComboBox" layoutX="108.0" layoutY="44.0" prefHeight="25.0" prefWidth="240.0" promptText="${controller.selectIngredientProperty}" />
     <Button fx:id="addIngredientButton" layoutX="359.0" layoutY="44.0" mnemonicParsing="false" onAction="#clickAddIngredient" text="+" />

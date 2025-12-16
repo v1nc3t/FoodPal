@@ -62,4 +62,20 @@ class LanguageEnumTest {
         assertEquals(expectedPropers, actualPropers, "Expected proper language names to be in German after" +
                 " reloading the locale.");
     }
+
+    @Test
+    void valueOfProperInEnglishTest() {
+        var resourceBundle = ResourceBundle.getBundle("commons.language", Locale.ENGLISH);
+        Language.reloadLocale(resourceBundle);
+        Language actual = Language.valueOfProper("German");
+        assertEquals(languageDE, actual, "Expected the proper language name German to return a DE language enum.");
+    }
+
+    @Test
+    void valueOfProperInGermanTest() {
+        var resourceBundle = ResourceBundle.getBundle("commons.language", Locale.GERMAN);
+        Language.reloadLocale(resourceBundle);
+        Language actual = Language.valueOfProper("Deutsch");
+        assertEquals(languageDE, actual, "Expected the proper language name Deutsch to return a DE language enum.");
+    }
 }
