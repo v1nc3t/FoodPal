@@ -5,6 +5,7 @@ import client.MyModule;
 import client.scenes.AddIngredientCtrl;
 import client.scenes.AddRecipeCtrl;
 import client.scenes.MainApplicationCtrl;
+import client.services.LocaleManager;
 import client.utils.IServerUtils;
 
 import client.utils.ServerUtils;
@@ -47,8 +48,11 @@ public class AddIngredientCtrlTest {
     private static class StubServer implements IServerUtils {}
 
     private static class StubParentCtrl extends AddRecipeCtrl {
-        public StubParentCtrl(ServerUtils server, MainApplicationCtrl mainCtrl, MyFXML fxml) {
-            super(server, mainCtrl, fxml);
+        public StubParentCtrl(ServerUtils server,
+                              MainApplicationCtrl mainCtrl,
+                              MyFXML fxml,
+                              LocaleManager localeManager) {
+            super(server, mainCtrl, fxml, localeManager);
         }
     }
 
