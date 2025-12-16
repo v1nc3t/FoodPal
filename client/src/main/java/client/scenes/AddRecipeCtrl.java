@@ -48,6 +48,7 @@ public class AddRecipeCtrl implements Internationalizable {
     private final StringProperty selectIngredientProperty = new SimpleStringProperty();
     @FXML private ComboBox<Ingredient> ingredientsComboBox;
 
+    //private final StringProperty addProperty = new SimpleStringProperty();
     @FXML private Button addIngredientButton;
     @FXML private ScrollPane ingredientsScrollPane;
     @FXML private VBox ingredientsList;
@@ -56,7 +57,7 @@ public class AddRecipeCtrl implements Internationalizable {
     @FXML private Label preparationLabel;
 
     private final StringProperty addPreparationStepProperty = new SimpleStringProperty();
-    @FXML private TextField preparationField;
+    @FXML private TextArea preparationField;
 
     @FXML private Button addPreparationButton;
     @FXML private ScrollPane preparationScrollPane;
@@ -118,12 +119,15 @@ public class AddRecipeCtrl implements Internationalizable {
         */
         setLocale(localeManager.getCurrentLocale());
 
+        /*
         // when user entered a prep step, clicking enter will add it to the list
         preparationField.setOnAction(e -> {
             if(!preparationField.getText().isBlank()) {
                 addPreparationButton.fire();
             }
         });
+         */
+        
 
         preparationScrollPane.setFitToWidth(true);
 
@@ -151,6 +155,8 @@ public class AddRecipeCtrl implements Internationalizable {
         servingSizeField.promptTextProperty().bind(portionsProperty);
         doneButton.textProperty().bind(doneProperty);
         cancelButton.textProperty().bind(cancelProperty);
+        //addIngredientButton.textProperty().bind(addProperty);
+        //addPreparationButton.textProperty().bind(addProperty);
     }
 
     /**
@@ -171,6 +177,7 @@ public class AddRecipeCtrl implements Internationalizable {
         portionsProperty.set(resourceBundle.getString("txt.portions"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+        //addProperty.set(resourceBundle.getString("txt.add"));
     }
 
     /**

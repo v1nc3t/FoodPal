@@ -70,6 +70,7 @@ public class MainApplicationCtrl implements Internationalizable {
      */
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
+        //addButton.textProperty().bind(addProperty);
     }
 
     /**
@@ -81,6 +82,7 @@ public class MainApplicationCtrl implements Internationalizable {
     public void setLocale(Locale newLocale) {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
+        //addProperty.set(resourceBundle.getString("txt.add"));
     }
 
     /**
