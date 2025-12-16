@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.MyFXML;
+import client.services.LocaleManager;
 import client.utils.ServerUtils;
 
 import client.utils.TextFieldUtils;
@@ -31,11 +32,9 @@ import javafx.util.Pair;
 
 import java.util.*;
 
-import static client.Main.BUNDLE_NAME;
-import static client.Main.DEFAULT_LOCALE;
 import client.services.RecipeManager;
 
-public class AddRecipeCtrl {
+public class AddRecipeCtrl implements Internationalizable {
 
     private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML private Label nameLabel;
@@ -82,6 +81,7 @@ public class AddRecipeCtrl {
     private final ServerUtils server;
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
+    private final LocaleManager localeManager;
 
     // callback so MainApplicationCtrl can be notified when a recipe is added
     private java.util.function.Consumer<Recipe> onRecipeAdded;
@@ -90,10 +90,16 @@ public class AddRecipeCtrl {
     }
 
     @Inject
-    public AddRecipeCtrl(ServerUtils server, MainApplicationCtrl mainCtrl, MyFXML fxml) {
+    public AddRecipeCtrl(ServerUtils server,
+                         MainApplicationCtrl mainCtrl,
+                         MyFXML fxml,
+                         LocaleManager localeManager) {
         this.server = server;
         this.mainCtrl = mainCtrl;
         this.fxml = fxml;
+        this.localeManager = localeManager;
+
+        localeManager.register(this);
     }
 
     /**
@@ -111,7 +117,7 @@ public class AddRecipeCtrl {
          DE: Locale.GERMAN
          NL: Locale.forLanguageTag("nl-NL")
         */
-        setLocale(DEFAULT_LOCALE);
+        setLocale(localeManager.getCurrentLocale());
 
         /*
         // when user entered a prep step, clicking enter will add it to the list
@@ -158,8 +164,9 @@ public class AddRecipeCtrl {
      * of a corresponding locale
      * @param locale provided locale/language for UI elements
      */
-    private void setLocale(Locale locale) {
-        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    @Override
+    public void setLocale(Locale locale) {
+        var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         nameProperty.set(resourceBundle.getString("txt.name"));
         recipeNameFieldProperty.set(resourceBundle.getString("txt.recipe_name"));
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
@@ -285,7 +292,7 @@ public class AddRecipeCtrl {
      * Open pop up window for adding a new Ingredient
      */
     public void clickAddIngredient() {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
                 bundle,"client", "scenes", "AddIngredient.fxml");
 
@@ -315,7 +322,7 @@ public class AddRecipeCtrl {
      * Open pop up window for editing the existing Ingredient
      */
     public void clickEditIngredient(RecipeIngredient recipeIngredient) {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
                 bundle,"client", "scenes", "AddIngredient.fxml");
 
