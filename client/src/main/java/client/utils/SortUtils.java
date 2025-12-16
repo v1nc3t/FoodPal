@@ -4,8 +4,6 @@ import client.services.RecipeManager;
 import commons.Language;
 import commons.Recipe;
 import jakarta.inject.Inject;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 
 import java.util.ArrayList;
@@ -87,14 +85,9 @@ public class SortUtils {
      * @return filtered SortedList with a set comparator
      */
     public SortedList<Recipe> applyFilters() {
-        List<Recipe> filteredRecipes = recipeManager.getObservableRecipes()
-                .parallelStream()
-                .filter(recipe -> languageFilters.contains(recipe.getLanguage()))
-                .toList();
-        ObservableList<Recipe> filteredObservableList =
-                FXCollections.observableArrayList(filteredRecipes);
-
-        SortedList<Recipe> sortedList = new SortedList<>(filteredObservableList);
+        SortedList<Recipe> sortedList = new SortedList<>(recipeManager
+                .getObservableRecipes()
+                .filtered(recipe-> languageFilters.contains(recipe.getLanguage())));
 
         Comparator<Recipe> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);
