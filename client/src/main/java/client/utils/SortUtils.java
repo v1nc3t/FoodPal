@@ -1,5 +1,6 @@
 package client.utils;
 
+import client.scenes.ListObject;
 import commons.Recipe;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
@@ -16,14 +17,14 @@ import java.util.concurrent.CountDownLatch;
 public class SortUtils {
     private List<String> languageFilters;
     private String sortMethod;
-    private final ObservableList<String> list;
+    private final ObservableList<ListObject> list;
 
     /**
      * Instantiates SortUtils with a given ObservableList of String
      * @param list the ObservableList the utils will use
      */
     @Inject
-    public SortUtils(ObservableList<String> list) {
+    public SortUtils(ObservableList<ListObject> list) {
         loadConfig();
         this.list = list;
     }
@@ -39,9 +40,15 @@ public class SortUtils {
      * @param list the ObservableList the utils will sort from
      */
     public static SortUtils fromRecipeList(ObservableList<Recipe> list) {
-        ObservableList<String> derivedList= FXCollections.observableArrayList();
+        ObservableList<ListObject> derivedList= FXCollections.observableArrayList();
         CountDownLatch latch = new CountDownLatch(1);
-        runOnFx(() -> derivedList.addAll(list.stream().map(Recipe::getTitle).toList()));
+        runOnFx(() ->
+                derivedList.addAll(
+                        list
+                            .stream()
+                            .map(ListObject::fromRecipe).toList()
+                )
+        );
         latch.countDown();
         try {
             latch.await();
@@ -52,7 +59,11 @@ public class SortUtils {
             CountDownLatch latch2 = new CountDownLatch(1);
             runOnFx(() -> {
                 derivedList.clear();
-                derivedList.addAll(changed.getList().stream().map(Recipe::getTitle).toList());
+                derivedList.addAll(
+                        list
+                                .stream()
+                                .map(ListObject::fromRecipe).toList()
+                );
                 latch2.countDown();
             });
             try {
@@ -123,10 +134,10 @@ public class SortUtils {
      * Sorts and filters the recipes from ObservableList by creating a SortedList.
      * @return filtered SortedList with a set comparator
      */
-    public SortedList<String> applyFilters() {
-        SortedList<String> sortedList = new SortedList<>(list);
+    public SortedList<ListObject> applyFilters() {
+        var sortedList = new SortedList<>(list);
 
-        Comparator<String> recipeComparator = getComparator();
+        Comparator<ListObject> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);
 
         return sortedList;
@@ -136,12 +147,18 @@ public class SortUtils {
      * Determines and returns the comparator of the respective ordering manner.
      * @return Comparator for sorting Recipes
      */
-    public Comparator<String> getComparator() {
+    public Comparator<ListObject> getComparator() {
         return switch (sortMethod) {
             case "Alphabetical" ->
-                    String.CASE_INSENSITIVE_ORDER;
+                    Comparator.comparing(
+                            ListObject::name,
+                            String.CASE_INSENSITIVE_ORDER
+                    );
             case "Most recent" ->
-                    String.CASE_INSENSITIVE_ORDER.reversed();
+                    Comparator.comparing(
+                            ListObject::name,
+                            String.CASE_INSENSITIVE_ORDER.reversed()
+                    );
             default -> throw new IllegalStateException("Unexpected value: " + sortMethod);
         };
     }

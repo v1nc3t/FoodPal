@@ -46,7 +46,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private Button cloneButton;
 
     @FXML
-    private ListView<String> recipeListView;
+    private ListView<ListObject> recipeListView;
 
     private SidebarListCtrl sidebarListCtrl;
 
@@ -132,8 +132,7 @@ public class MainApplicationCtrl implements Internationalizable {
             recipeListView.setOnMouseClicked(evt -> {
                 if (evt.getClickCount() != 2) return; // require double-click to open
 
-                int index = recipeListView.getSelectionModel().getSelectedIndex();
-                Recipe sel = RecipeManager.getInstance().getObservableRecipes().get(index);
+                var sel = recipeListView.getSelectionModel().getSelectedItem();
                 if (sel == null) return;
 
                 // If the list is in remove mode, the click was for deleting — ignore it
@@ -144,7 +143,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 }
 
                 // Open the viewer
-                showRecipe(sel);
+                showRecipe(RecipeManager.getInstance().getRecipe(sel.id()));
             });
 
             if (cloneButton != null) {

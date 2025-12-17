@@ -4,6 +4,7 @@ import client.services.RecipeManager;
 import client.utils.SortUtils;
 import commons.Recipe;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 
@@ -17,11 +18,11 @@ public class SidebarListCtrl {
 
     private final RecipeManager manager = RecipeManager.getInstance();
     private SortUtils sortUtils;
-    private ListView<String> listView;
+    private ListView<ListObject> listView;
     private boolean removeMode = false;
     private boolean cloneMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
-    private ESidebarMode currentMode = ESidebarMode.Recipe;
+    private final ESidebarMode currentMode = ESidebarMode.Recipe;
 
 
     /**
@@ -34,12 +35,8 @@ public class SidebarListCtrl {
         }
     }
 
-    private void initializeSortUtils(ESidebarMode mode) {
-        switch (mode) {
-            case Recipe:
-                initializeRecipeSortUtils();
-                break;
-        }
+    private void initializeSortUtils(ESidebarMode _mode) {
+        initializeRecipeSortUtils();
     }
 
     /**
@@ -55,7 +52,7 @@ public class SidebarListCtrl {
      * Connects this controller to the UI ListView, and binds it to a sorted list of recipes.
      * @param lv the ListView defined in FXML
      */
-    public void setListView(ListView<String> lv) {
+    public void setListView(ListView<ListObject> lv) {
         this.listView = lv;
 
         setListViewSorted();
@@ -71,10 +68,16 @@ public class SidebarListCtrl {
      * </ul>
      */
     private void loadListViewProperties() {
+        listView.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(ListObject item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.name());
+            }
+        });
+
         // Handle remove-mode and clone-mode clicks in a single event filter.
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
-
-
             if (removeMode) {
                 Recipe sel = manager.getObservableRecipes().get(listView.getSelectionModel().getSelectedIndex());
                 if (sel == null) {

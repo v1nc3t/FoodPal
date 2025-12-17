@@ -89,6 +89,15 @@ public class RecipeManager {
         return true;
     }
 
+    /**
+     * Gets the recipe by id
+     * @param id the key to look for
+     * @return the recipe if found, null if not
+     */
+    public Recipe getRecipe(UUID id) {
+        return recipesMap.get(id);
+    }
+
     /** Add recipe without strict ingredient validation (useful for optimistic UI). */
     public void addRecipeOptimistic(Recipe recipe) {
         if (recipe == null) return;

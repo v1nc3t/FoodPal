@@ -1,5 +1,6 @@
 package client.utils;
 
+import client.scenes.ListObject;
 import client.services.RecipeManager;
 import commons.Recipe;
 import javafx.application.Platform;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -130,11 +132,13 @@ class SortUtilsTest {
         SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertEquals("Alphabetical", sortUtils.getSortMethod());
 
-        ObservableList<String> sampleList = FXCollections.observableArrayList(sample.getTitle(), sample1.getTitle(), sample2.getTitle());
-        SortedList<String> expected = new SortedList<>(sampleList);
+        ObservableList<ListObject> sampleList = FXCollections.observableArrayList(
+                Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList()
+        );
+        var expected = new SortedList<>(sampleList);
 
-        expected.setComparator(String::compareTo);
-        SortedList<String> actual = sortUtils.applyFilters();
+        expected.setComparator(Comparator.comparing(ListObject::name));
+        var actual = sortUtils.applyFilters();
 
         assertEquals(expected, actual, "Expected a different SortedList after applyFilters().");
     }
@@ -144,10 +148,10 @@ class SortUtilsTest {
         SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertEquals("Alphabetical", sortUtils.getSortMethod());
 
-        Comparator<String> comparator = String::compareTo;
+        Comparator<ListObject> comparator = Comparator.comparing(ListObject::name);
 
-        List<String> expected = new ArrayList<>(List.of(sample.getTitle(), sample1.getTitle(), sample2.getTitle()));
-        List<String> actual = new ArrayList<>(List.of(sample.getTitle(), sample1.getTitle(), sample2.getTitle()));
+        var expected = new ArrayList<>(Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList());
+        var actual = new ArrayList<>(Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList());
         expected.sort(comparator);
         actual.sort(sortUtils.getComparator());
 
