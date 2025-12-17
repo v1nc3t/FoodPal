@@ -35,7 +35,8 @@ class SortUtilsTest {
 
     @BeforeEach
     void beforeEach() {
-        recipeManager = RecipeManager.getInstance();
+        recipeManager = new RecipeManager();
+        recipeManager.clearForTests();
         String title1 = "Test Pancakes";
         String title2 = "A pizza";
         String title3 = "X pizza";
@@ -48,11 +49,6 @@ class SortUtilsTest {
         recipeManager.addRecipeOptimistic(sample);
         recipeManager.addRecipeOptimistic(sample1);
         recipeManager.addRecipeOptimistic(sample2);
-    }
-
-    @AfterEach
-    void afterEach() {
-        recipeManager.clearForTests();
     }
 
     @Test

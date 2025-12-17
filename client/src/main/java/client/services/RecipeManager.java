@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * - Keeps maps for fast lookup and validation.
@@ -24,7 +25,7 @@ public class RecipeManager {
 
     private static RecipeManager instance;
 
-    private RecipeManager() {
+    public RecipeManager() {
         // Seed a test recipe so ListView shows something immediately during manual testing.
         seedSampleRecipe();
     }
@@ -73,11 +74,18 @@ public class RecipeManager {
         // store
         if (recipe.getId() != null) recipesMap.put(recipe.getId(), recipe);
 
+        CountDownLatch latch = new CountDownLatch(1);
         runOnFx(() -> {
             int idx = indexOfRecipe(recipe.getId());
             if (idx >= 0) recipes.set(idx, recipe);
             else recipes.add(recipe);
+            latch.countDown();
         });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -155,7 +163,16 @@ public class RecipeManager {
     public void clearForTests() {
         recipesMap.clear();
         ingredientsMap.clear();
-        runOnFx(recipes::clear);
+        CountDownLatch latch =  new CountDownLatch(1);
+        runOnFx(() -> {
+            recipes.clear();
+            latch.countDown();
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

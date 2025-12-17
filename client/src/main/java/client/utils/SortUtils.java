@@ -2,6 +2,7 @@ package client.utils;
 
 import commons.Recipe;
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -10,6 +11,7 @@ import javafx.collections.transformation.SortedList;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class SortUtils {
     private List<String> languageFilters;
@@ -26,32 +28,37 @@ public class SortUtils {
         this.list = list;
     }
 
+    private static void runOnFx(Runnable r) {
+        if (Platform.isFxApplicationThread()) r.run();
+        else Platform.runLater(r);
+    }
+
     /**
      * Instantiates SortUtils with a given ObservableList of Recipe
      * Creates a derived ObservableList of String that the SortUtils will use
      * @param list the ObservableList the utils will sort from
      */
     public static SortUtils fromRecipeList(ObservableList<Recipe> list) {
-        ObservableList<String> derivedList  = FXCollections.observableArrayList();
-        derivedList.addAll(
-                list.stream().map(Recipe::getTitle).toList()
-        );
+        ObservableList<String> derivedList= FXCollections.observableArrayList();
+        CountDownLatch latch = new CountDownLatch(1);
+        runOnFx(() -> derivedList.addAll(list.stream().map(Recipe::getTitle).toList()));
+        latch.countDown();
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         list.addListener((ListChangeListener<? super Recipe>) changed -> {
-            while (changed.next()) {
-                if (changed.wasPermutated()) {
-                    for (int i = changed.getFrom(); i < changed.getTo(); i++) {
-                        derivedList.set(i, list.get(i).getTitle());
-                    }
-                } else {
-                    if (changed.wasRemoved()) {
-                        derivedList.remove(changed.getFrom(), changed.getFrom() + changed.getRemovedSize());
-                    }
-                    if (changed.wasAdded()) {
-                        for (int i = changed.getFrom(); i < changed.getTo(); i++) {
-                            derivedList.add(i, list.get(i).getTitle());
-                        }
-                    }
-                }
+            CountDownLatch latch2 = new CountDownLatch(1);
+            runOnFx(() -> {
+                derivedList.clear();
+                derivedList.addAll(changed.getList().stream().map(Recipe::getTitle).toList());
+                latch2.countDown();
+            });
+            try {
+                latch2.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         });
         return new SortUtils(derivedList);
