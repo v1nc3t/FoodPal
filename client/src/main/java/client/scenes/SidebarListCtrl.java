@@ -21,6 +21,8 @@ public class SidebarListCtrl {
     private boolean removeMode = false;
     private boolean cloneMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
+    private ESidebarMode currentMode = ESidebarMode.Recipe;
+
 
     /**
      * Initializes RecipeList controller
@@ -28,14 +30,22 @@ public class SidebarListCtrl {
     @FXML
     public void initialize() {
         if (sortUtils == null) {
-            initializeSortUtils();
+            initializeSortUtils(currentMode);
+        }
+    }
+
+    private void initializeSortUtils(ESidebarMode mode) {
+        switch (mode) {
+            case Recipe:
+                initializeRecipeSortUtils();
+                break;
         }
     }
 
     /**
      * Initializes SortUtils for sorting and filtering
      */
-    private void initializeSortUtils() {
+    private void initializeRecipeSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
         var recipesList = manager.getObservableRecipes();
         sortUtils = SortUtils.fromRecipeList(recipesList);
@@ -111,7 +121,7 @@ public class SidebarListCtrl {
      */
     private void setListViewSorted() {
         if (sortUtils == null) {
-            initializeSortUtils();
+            initializeSortUtils(currentMode);
         }
         listView.setItems(sortUtils.applyFilters());
     }
@@ -122,7 +132,7 @@ public class SidebarListCtrl {
      */
     public void setSortMethod(String sortMethod) {
         if (sortUtils == null) {
-            initializeSortUtils();
+            initializeSortUtils(currentMode);
         }
 
         sortUtils.setSortMethod(sortMethod);
@@ -197,7 +207,7 @@ public class SidebarListCtrl {
         return cloneMode;
     }
 
-    public void setOnCloneRequest(java.util.function.Consumer<Recipe> callback) {
+    public void setOnRecipeCloneRequest(java.util.function.Consumer<Recipe> callback) {
         this.onCloneRequest = callback;
     }
 

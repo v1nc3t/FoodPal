@@ -127,7 +127,7 @@ public class MainApplicationCtrl implements Internationalizable {
         if (recipeListView != null) {
             sidebarListCtrl.setListView(recipeListView);
 
-            sidebarListCtrl.setOnCloneRequest(originalRecipe -> openClonePopup(originalRecipe));
+            sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
             // open viewer on double-click, and ignore clicks when in remove mode
             recipeListView.setOnMouseClicked(evt -> {
                 if (evt.getClickCount() != 2) return; // require double-click to open
