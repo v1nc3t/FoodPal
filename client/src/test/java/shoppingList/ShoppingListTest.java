@@ -1,0 +1,94 @@
+package shoppingList;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import client.shoppingList.ShoppingList;
+import client.shoppingList.ShoppingListItem;
+import commons.Amount;
+import commons.Unit;
+
+public class ShoppingListTest {
+
+    private ShoppingList list;
+    private ShoppingListItem item;
+
+    @BeforeEach
+    public void setup() {
+        list = new ShoppingList();
+        item = new ShoppingListItem(
+            UUID.randomUUID(),
+            new Amount(1.0, Unit.CUP)
+        );
+    }
+
+    @Test
+    public void newListIsEmpty() {
+        assertNotNull(list.getItems());
+        assertEquals(0, list.getItems().size());
+    }
+
+    @Test
+    public void addItemAddsItem() {
+        list.addItem(item);
+        assertEquals(1, list.getItems().size());
+        assertEquals(item, list.getItems().get(0));
+    }
+
+    @Test
+    public void clearEmptiesList() {
+        list.addItem(item);
+        list.clear();
+        assertEquals(0, list.getItems().size());
+    }
+
+    @Test
+    public void toStringTest() {
+        list.addItem(item);
+        assertEquals("ShoppingList{items=" + list.getItems() + "}", list.toString());
+    }
+
+    @Test
+    public void equalsSameObject() {
+        assertEquals(list, list);
+    }
+
+    @Test
+    public void equalsNull() {
+        assertNotEquals(list, null);
+    }
+
+    @Test
+    public void equalsDifferentClass() {
+        assertNotEquals(list, "not a list");
+    }
+
+    @Test
+    public void equalsSameContent() {
+        ShoppingList other = new ShoppingList();
+        list.addItem(item);
+        other.addItem(item);
+        assertEquals(list, other);
+    }
+
+    @Test
+    public void equalsDifferentContent() {
+        ShoppingList other = new ShoppingList();
+        list.addItem(item);
+        assertNotEquals(list, other);
+    }
+
+    @Test
+    public void hashCodeSameForEqualLists() {
+        ShoppingList other = new ShoppingList();
+        list.addItem(item);
+        other.addItem(item);
+        assertEquals(list.hashCode(), other.hashCode());
+    }
+
+}
+
