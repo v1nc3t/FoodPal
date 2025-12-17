@@ -3,6 +3,7 @@ package client.utils;
 import client.services.RecipeManager;
 import commons.Recipe;
 import jakarta.inject.Inject;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 
 import java.util.ArrayList;
@@ -12,16 +13,16 @@ import java.util.List;
 public class SortUtils {
     private List<String> languageFilters;
     private String sortMethod;
-    private final RecipeManager recipeManager;
+    private final ObservableList<String> list;
 
     /**
-     * Instantiates SortUtils with a given RecipeManager
-     * @param recipeManager provided RecipeManager
+     * Instantiates SortUtils with a given ObservableList
+     * @param list the ObservableList the utils will use
      */
     @Inject
-    public SortUtils(RecipeManager recipeManager) {
-        this.recipeManager = recipeManager;
+    public SortUtils(ObservableList<String> list) {
         loadConfig();
+        this.list = list;
     }
 
     /**
@@ -83,10 +84,10 @@ public class SortUtils {
      * Sorts and filters the recipes from ObservableList by creating a SortedList.
      * @return filtered SortedList with a set comparator
      */
-    public SortedList<Recipe> applyFilters() {
-        SortedList<Recipe> sortedList = new SortedList<>(recipeManager.getObservableRecipes());
+    public SortedList<String> applyFilters() {
+        SortedList<String> sortedList = new SortedList<>(list);
 
-        Comparator<Recipe> recipeComparator = getComparator();
+        Comparator<String> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);
 
         return sortedList;
@@ -96,12 +97,12 @@ public class SortUtils {
      * Determines and returns the comparator of the respective ordering manner.
      * @return Comparator for sorting Recipes
      */
-    public Comparator<Recipe> getComparator() {
+    public Comparator<String> getComparator() {
         return switch (sortMethod) {
-            case "Alphabetical" -> Comparator.comparing(Recipe::getTitle,
-                    String.CASE_INSENSITIVE_ORDER);
-            case "Most recent" -> Comparator.comparing(Recipe::getTitle,
-                    String.CASE_INSENSITIVE_ORDER).reversed();
+            case "Alphabetical" ->
+                    String.CASE_INSENSITIVE_ORDER;
+            case "Most recent" ->
+                    String.CASE_INSENSITIVE_ORDER.reversed();
             default -> throw new IllegalStateException("Unexpected value: " + sortMethod);
         };
     }

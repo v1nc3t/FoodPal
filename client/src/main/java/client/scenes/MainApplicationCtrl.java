@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.MyFXML;
 import client.services.LocaleManager;
+import client.services.RecipeManager;
 import jakarta.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -45,7 +46,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private Button cloneButton;
 
     @FXML
-    private ListView<Recipe> recipeListView;
+    private ListView<String> recipeListView;
 
     private RecipeListCtrl recipeListCtrl;
 
@@ -131,7 +132,8 @@ public class MainApplicationCtrl implements Internationalizable {
             recipeListView.setOnMouseClicked(evt -> {
                 if (evt.getClickCount() != 2) return; // require double-click to open
 
-                Recipe sel = recipeListView.getSelectionModel().getSelectedItem();
+                int index = recipeListView.getSelectionModel().getSelectedIndex();
+                Recipe sel = RecipeManager.getInstance().getObservableRecipes().get(index);
                 if (sel == null) return;
 
                 // If the list is in remove mode, the click was for deleting — ignore it

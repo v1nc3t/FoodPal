@@ -3,6 +3,9 @@ package client.scenes;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import commons.Recipe;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -18,7 +21,7 @@ public class RecipeListCtrl {
 
     private final RecipeManager manager = RecipeManager.getInstance();
     private SortUtils sortUtils;
-    private ListView<Recipe> listView;
+    private ListView<String> listView;
     private boolean removeMode = false;
     private boolean cloneMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
@@ -37,14 +40,26 @@ public class RecipeListCtrl {
      * Initializes SortUtils for sorting and filtering
      */
     private void initializeSortUtils() {
-        sortUtils = new SortUtils(manager);
+        // This makes a list which is automatically updated whenever the list of recipes changes.
+        ObservableList<String> derivedList = FXCollections.observableArrayList();
+        var recipesList = manager.getObservableRecipes();
+        derivedList.addAll(
+                recipesList.stream().map(Recipe::getTitle).toList()
+        );
+        recipesList.addListener((ListChangeListener<? super Recipe>)  changed -> {
+            derivedList.clear();
+            derivedList.addAll(
+                changed.getList().stream().map(Recipe::getTitle).toList()
+            );
+        });
+        sortUtils = new SortUtils(derivedList);
     }
 
     /**
      * Connects this controller to the UI ListView, and binds it to a sorted list of recipes.
      * @param lv the ListView defined in FXML
      */
-    public void setListView(ListView<Recipe> lv) {
+    public void setListView(ListView<String> lv) {
         this.listView = lv;
 
         setListViewSorted();
@@ -60,20 +75,12 @@ public class RecipeListCtrl {
      * </ul>
      */
     private void loadListViewProperties() {
-        listView.setCellFactory(lvv -> new ListCell<>() {
-            @Override
-            protected void updateItem(Recipe item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getTitle());
-            }
-        });
-
         // Handle remove-mode and clone-mode clicks in a single event filter.
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
 
 
             if (removeMode) {
-                Recipe sel = listView.getSelectionModel().getSelectedItem();
+                Recipe sel = manager.getObservableRecipes().get(listView.getSelectionModel().getSelectedIndex());
                 if (sel == null) {
                     exitRemoveMode();
                     ev.consume();
@@ -93,7 +100,7 @@ public class RecipeListCtrl {
 
 
             if (cloneMode) {
-                Recipe sel = listView.getSelectionModel().getSelectedItem();
+                Recipe sel = RecipeManager.getInstance().getObservableRecipes().get(listView.getSelectionModel().getSelectedIndex());
                 if (sel != null && onCloneRequest != null) {
 
                     onCloneRequest.accept(sel);
