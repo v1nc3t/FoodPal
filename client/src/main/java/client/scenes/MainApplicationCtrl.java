@@ -190,9 +190,9 @@ public class MainApplicationCtrl implements Internationalizable {
 
         Locale currentLocale = localeManager.getCurrentLocale();
         String currentDisplay;
-        if (currentLocale.equals(Locale.GERMAN)) {
+        if (currentLocale.equals(LocaleManager.DE)) {
             currentDisplay = "German";
-        } else if (currentLocale.equals(Locale.forLanguageTag("nl-NL"))) {
+        } else if (currentLocale.equals(LocaleManager.NL)) {
             currentDisplay = "Dutch";
         } else {
             currentDisplay = "English";
@@ -208,13 +208,13 @@ public class MainApplicationCtrl implements Internationalizable {
         Locale newLocale;
         switch (currentDisplay) {
             case "German":
-                newLocale = Locale.GERMAN;
+                newLocale = LocaleManager.DE;
                 break;
             case "Dutch":
-                newLocale = Locale.forLanguageTag("nl-NL");
+                newLocale = LocaleManager.NL;
                 break;
             case "English":
-                newLocale = Locale.ENGLISH;
+                newLocale = LocaleManager.EN;
                 break;
             default:
                 return;
