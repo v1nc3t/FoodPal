@@ -57,13 +57,13 @@ class SortUtilsTest {
 
     @Test
     void constructorTest() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertNotNull(sortUtils, "Newly initialized SortUtils should not be null.");
     }
 
     @Test
     void getLanguageFilters() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         List<String> expected = new ArrayList<>(List.of("en", "de", "nl"));
         List<String> actual = sortUtils.getLanguageFilters();
 
@@ -75,7 +75,7 @@ class SortUtilsTest {
 
     @Test
     void setLanguageFilters() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         List<String> expected = new ArrayList<>(List.of("lt"));
 
         sortUtils.setLanguageFilters(expected);
@@ -89,7 +89,7 @@ class SortUtilsTest {
 
     @Test
     void addLanguageFilter() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         List<String> expected = new ArrayList<>(List.of("en", "de", "nl", "lt"));
 
         sortUtils.addLanguageFilter("lt");
@@ -103,14 +103,14 @@ class SortUtilsTest {
 
     @Test
     void getSortMethod() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
 
         assertEquals("Alphabetical", sortUtils.getSortMethod(), "Expected a different sort method.");
     }
 
     @Test
     void setSortMethod() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         sortUtils.setSortMethod("Reverse alphabetical");
 
         assertEquals("Reverse alphabetical", sortUtils.getSortMethod(), "Expected a different sort method afer setting one.");
@@ -118,7 +118,7 @@ class SortUtilsTest {
 
     @Test
     void loadConfig() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         sortUtils.setSortMethod("Reverse alphabetical");
         sortUtils.setLanguageFilters(List.of("lt"));
         sortUtils.loadConfig();
@@ -131,27 +131,27 @@ class SortUtilsTest {
 
     @Test
     void applyFilters() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertEquals("Alphabetical", sortUtils.getSortMethod());
 
-        ObservableList<Recipe> sampleList = FXCollections.observableArrayList(sample, sample1, sample2);
-        SortedList<Recipe> expected = new SortedList<>(sampleList);
+        ObservableList<String> sampleList = FXCollections.observableArrayList(sample.getTitle(), sample1.getTitle(), sample2.getTitle());
+        SortedList<String> expected = new SortedList<>(sampleList);
 
-        expected.setComparator(Comparator.comparing(Recipe::getTitle));
-        SortedList<Recipe> actual = sortUtils.applyFilters();
+        expected.setComparator(String::compareTo);
+        SortedList<String> actual = sortUtils.applyFilters();
 
         assertEquals(expected, actual, "Expected a different SortedList after applyFilters().");
     }
 
     @Test
     void getComparator() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertEquals("Alphabetical", sortUtils.getSortMethod());
 
-        Comparator<Recipe> comparator = Comparator.comparing(Recipe::getTitle);
+        Comparator<String> comparator = String::compareTo;
 
-        List<Recipe> expected = new ArrayList<>(List.of(sample, sample1, sample2));
-        List<Recipe> actual = new ArrayList<>(List.of(sample2, sample1, sample));
+        List<String> expected = new ArrayList<>(List.of(sample.getTitle(), sample1.getTitle(), sample2.getTitle()));
+        List<String> actual = new ArrayList<>(List.of(sample.getTitle(), sample1.getTitle(), sample2.getTitle()));
         expected.sort(comparator);
         actual.sort(sortUtils.getComparator());
 

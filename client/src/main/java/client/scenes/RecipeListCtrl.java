@@ -3,11 +3,7 @@ package client.scenes;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import commons.Recipe;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 
@@ -41,18 +37,8 @@ public class RecipeListCtrl {
      */
     private void initializeSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
-        ObservableList<String> derivedList = FXCollections.observableArrayList();
         var recipesList = manager.getObservableRecipes();
-        derivedList.addAll(
-                recipesList.stream().map(Recipe::getTitle).toList()
-        );
-        recipesList.addListener((ListChangeListener<? super Recipe>)  changed -> {
-            derivedList.clear();
-            derivedList.addAll(
-                changed.getList().stream().map(Recipe::getTitle).toList()
-            );
-        });
-        sortUtils = new SortUtils(derivedList);
+        sortUtils = SortUtils.fromRecipeList(recipesList);
     }
 
     /**

@@ -1,8 +1,9 @@
 package client.utils;
 
-import client.services.RecipeManager;
 import commons.Recipe;
 import jakarta.inject.Inject;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 
@@ -16,13 +17,27 @@ public class SortUtils {
     private final ObservableList<String> list;
 
     /**
-     * Instantiates SortUtils with a given ObservableList
+     * Instantiates SortUtils with a given ObservableList of String
      * @param list the ObservableList the utils will use
      */
     @Inject
     public SortUtils(ObservableList<String> list) {
         loadConfig();
         this.list = list;
+    }
+
+    public static SortUtils fromRecipeList(ObservableList<Recipe> list) {
+        ObservableList<String> derivedList  = FXCollections.observableArrayList();
+        derivedList.addAll(
+                list.stream().map(Recipe::getTitle).toList()
+        );
+        list.addListener((ListChangeListener<? super Recipe>) changed -> {
+            derivedList.clear();
+            derivedList.addAll(
+                    changed.getList().stream().map(Recipe::getTitle).toList()
+            );
+        });
+        return new SortUtils(derivedList);
     }
 
     /**
