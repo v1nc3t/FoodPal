@@ -37,10 +37,22 @@ public class SortUtils {
                 list.stream().map(Recipe::getTitle).toList()
         );
         list.addListener((ListChangeListener<? super Recipe>) changed -> {
-            derivedList.clear();
-            derivedList.addAll(
-                    changed.getList().stream().map(Recipe::getTitle).toList()
-            );
+            while (changed.next()) {
+                if (changed.wasPermutated()) {
+                    for (int i = changed.getFrom(); i < changed.getTo(); i++) {
+                        derivedList.set(i, list.get(i).getTitle());
+                    }
+                } else {
+                    if (changed.wasRemoved()) {
+                        derivedList.remove(changed.getFrom(), changed.getFrom() + changed.getRemovedSize());
+                    }
+                    if (changed.wasAdded()) {
+                        for (int i = changed.getFrom(); i < changed.getTo(); i++) {
+                            derivedList.add(i, list.get(i).getTitle());
+                        }
+                    }
+                }
+            }
         });
         return new SortUtils(derivedList);
     }
