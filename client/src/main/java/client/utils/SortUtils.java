@@ -26,6 +26,11 @@ public class SortUtils {
         this.list = list;
     }
 
+    /**
+     * Instantiates SortUtils with a given ObservableList of Recipe
+     * Creates a derived ObservableList of String that the SortUtils will use
+     * @param list the ObservableList the utils will sort from
+     */
     public static SortUtils fromRecipeList(ObservableList<Recipe> list) {
         ObservableList<String> derivedList  = FXCollections.observableArrayList();
         derivedList.addAll(

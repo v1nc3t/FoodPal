@@ -48,7 +48,7 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private ListView<String> recipeListView;
 
-    private RecipeListCtrl recipeListCtrl;
+    private SidebarListCtrl sidebarListCtrl;
 
     private final MyFXML fxml;
     private final LocaleManager localeManager;
@@ -97,7 +97,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * Initializes the main application UI components related to the recipe list.
      * This method is automatically called by the JavaFX runtime after FXML loading.
      * It performs the following:
-     *     Creates a new {@link RecipeListCtrl} instance, which manages the list of recipes.
+     *     Creates a new {@link SidebarListCtrl} instance, which manages the list of recipes.
      *     Binds the existing FXML {@code ListView} to the controller
      *     so recipe titles can be displayed.
      *     Configures the Remove button so that clicking it puts the list into "remove mode",
@@ -121,13 +121,13 @@ public class MainApplicationCtrl implements Internationalizable {
         prepareLanguageOptions();
 
         prepareSortBy();
-        recipeListCtrl = new RecipeListCtrl();
-        recipeListCtrl.initialize();
+        sidebarListCtrl = new SidebarListCtrl();
+        sidebarListCtrl.initialize();
 
         if (recipeListView != null) {
-            recipeListCtrl.setListView(recipeListView);
+            sidebarListCtrl.setListView(recipeListView);
 
-            recipeListCtrl.setOnCloneRequest(originalRecipe -> openClonePopup(originalRecipe));
+            sidebarListCtrl.setOnCloneRequest(originalRecipe -> openClonePopup(originalRecipe));
             // open viewer on double-click, and ignore clicks when in remove mode
             recipeListView.setOnMouseClicked(evt -> {
                 if (evt.getClickCount() != 2) return; // require double-click to open
@@ -137,7 +137,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 if (sel == null) return;
 
                 // If the list is in remove mode, the click was for deleting — ignore it
-                if (recipeListCtrl != null && recipeListCtrl.isInRemoveMode()) {
+                if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
                     recipeListView.getSelectionModel().clearSelection(); // avoid visual flicker
                     evt.consume();
                     return;
@@ -148,13 +148,13 @@ public class MainApplicationCtrl implements Internationalizable {
             });
 
             if (cloneButton != null) {
-                cloneButton.setOnAction(e -> recipeListCtrl.enterCloneMode());
+                cloneButton.setOnAction(e -> sidebarListCtrl.enterCloneMode());
             }
 
         }
 
         if (removeButton != null) {
-            removeButton.setOnAction(e -> recipeListCtrl.enterRemoveMode());
+            removeButton.setOnAction(e -> sidebarListCtrl.enterRemoveMode());
         }
         //if the currently shown recipe disappears, close viewer.
         client.services.RecipeManager.getInstance().getObservableRecipes()
@@ -175,7 +175,7 @@ public class MainApplicationCtrl implements Internationalizable {
                     }
                 });
 
-        sortUponSelection(recipeListCtrl);
+        sortUponSelection(sidebarListCtrl);
     }
 
     /**
@@ -228,13 +228,13 @@ public class MainApplicationCtrl implements Internationalizable {
     /**
      * Adds a listener for changes to sort-by choice box,
      * so recipe list viewer can get sorted after a selection.
-     * @param recipeListCtrl the recipe list controller which is responsible for the recipe list
+     * @param sidebarListCtrl the recipe list controller which is responsible for the recipe list
      */
-    private void sortUponSelection(RecipeListCtrl recipeListCtrl) {
+    private void sortUponSelection(SidebarListCtrl sidebarListCtrl) {
         SingleSelectionModel<String> selectionModel = orderBy.getSelectionModel();
         selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) ->
         {
-            recipeListCtrl.setSortMethod(newValue);
+            sidebarListCtrl.setSortMethod(newValue);
         });
         //if the currently shown recipe disappears, close viewer.
         client.services.RecipeManager.getInstance().getObservableRecipes()
@@ -313,7 +313,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * This method is called by {@link AddRecipeCtrl} after the user completes the
      * Add Recipe form and presses the Done button. It ensures that:
      *     The recipe appears immediately in the list displayed in the left rectangle.
-     *     If the {@link RecipeListCtrl} was not initialized yet,
+     *     If the {@link SidebarListCtrl} was not initialized yet,
      *         it will be created and linked to the FXML {@code ListView}.
      * This method performs an in-memory update only; no server or database
      * persistence is involved at this stage.
@@ -321,12 +321,12 @@ public class MainApplicationCtrl implements Internationalizable {
      * @param r the newly created {@link Recipe} to add to the UI list
      */
     public void addRecipeToList(Recipe r) {
-        if (recipeListCtrl == null) {
-            recipeListCtrl = new RecipeListCtrl();
-            recipeListCtrl.initialize();
-            if (recipeListView != null) recipeListCtrl.setListView(recipeListView);
+        if (sidebarListCtrl == null) {
+            sidebarListCtrl = new SidebarListCtrl();
+            sidebarListCtrl.initialize();
+            if (recipeListView != null) sidebarListCtrl.setListView(recipeListView);
         }
-        recipeListCtrl.addRecipe(r);
+        sidebarListCtrl.addRecipe(r);
     }
 
     public void editRecipe(Recipe recipe) {

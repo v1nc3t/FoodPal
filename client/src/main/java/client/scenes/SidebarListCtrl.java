@@ -13,7 +13,7 @@ import java.util.List;
  * Controller for the left-hand recipe list.
  * Uses {@link RecipeManager} as the single source of truth for all recipe data.
  */
-public class RecipeListCtrl {
+public class SidebarListCtrl {
 
     private final RecipeManager manager = RecipeManager.getInstance();
     private SortUtils sortUtils;
