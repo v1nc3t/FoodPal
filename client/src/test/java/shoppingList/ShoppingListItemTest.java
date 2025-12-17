@@ -92,7 +92,9 @@ public class ShoppingListItemTest {
 
     @Test
     public void toStringTest() {
-        assertEquals("ShoppingListItem{ingredientId=" + RecIngredient.getIngredientRef() + ", amount=Amount{quantity=2.0, unit=CUP, description='null'}, sourceRecipeId=" + recipe.getId() + "}", shopListItem.toString());
+        assertEquals("ShoppingListItem{ingredientId=" + RecIngredient.getIngredientRef() + 
+        ", amount=Amount{quantity=2.0, unit=CUP, description='null'}, sourceRecipeId=" + 
+        recipe.getId() + "}", shopListItem.toString());
     }   
 
     @Test
