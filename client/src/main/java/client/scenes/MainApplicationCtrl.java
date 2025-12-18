@@ -3,7 +3,7 @@ package client.scenes;
 import client.MyFXML;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -51,12 +51,15 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private ListView<ListObject> recipeListView;
 
+    @Inject
     private SidebarListCtrl sidebarListCtrl;
 
     private final MyFXML fxml;
     private final LocaleManager localeManager;
 
     private Recipe currentlyShownRecipe = null;
+    @Inject
+    private RecipeManager recipeManager;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
@@ -124,7 +127,6 @@ public class MainApplicationCtrl implements Internationalizable {
         prepareLanguageOptions();
 
         prepareSortBy();
-        sidebarListCtrl = new SidebarListCtrl();
         sidebarListCtrl.initialize();
 
         if (recipeListView != null) {
@@ -146,7 +148,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 }
 
                 // Open the viewer
-                showRecipe(RecipeManager.getInstance().getRecipe(sel.id()));
+                showRecipe(recipeManager.getRecipe(sel.id()));
             });
 
             if (cloneButton != null) {
@@ -163,11 +165,11 @@ public class MainApplicationCtrl implements Internationalizable {
         }
 
         //if the currently shown recipe disappears, close viewer.
-        client.services.RecipeManager.getInstance().getObservableRecipes()
+        recipeManager.getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
                     while (change.next()) {
                         if (change.wasRemoved() && currentlyShownRecipe != null) {
-                            boolean stillPresent = client.services.RecipeManager.getInstance()
+                            boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
                                     .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
@@ -243,11 +245,11 @@ public class MainApplicationCtrl implements Internationalizable {
             sidebarListCtrl.setSortMethod(newValue);
         });
         //if the currently shown recipe disappears, close viewer.
-        client.services.RecipeManager.getInstance().getObservableRecipes()
+        recipeManager.getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
                     while (change.next()) {
                         if (change.wasRemoved() && currentlyShownRecipe != null) {
-                            boolean stillPresent = client.services.RecipeManager.getInstance()
+                            boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
                                     .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
@@ -376,7 +378,7 @@ public class MainApplicationCtrl implements Internationalizable {
         String newName = result.get();
 
         Recipe clone = original.cloneWithTitle(newName);
-        client.services.RecipeManager.getInstance().addRecipeOptimistic(clone);
+        recipeManager.addRecipeOptimistic(clone);
         showRecipe(clone);
 
     }

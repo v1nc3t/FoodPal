@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.services.RecipeManager;
 import client.utils.SortUtils;
+import com.google.inject.Inject;
 import commons.Recipe;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
@@ -16,7 +17,8 @@ import java.util.List;
  */
 public class SidebarListCtrl {
 
-    private final RecipeManager manager = RecipeManager.getInstance();
+    @Inject
+    private RecipeManager recipeManager;
     private SortUtils sortUtils;
     private ListView<ListObject> listView;
     private boolean removeMode = false;
@@ -45,7 +47,7 @@ public class SidebarListCtrl {
      */
     private void initializeRecipeSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
-        var recipesList = manager.getObservableRecipes();
+        var recipesList = recipeManager.getObservableRecipes();
         sortUtils = SortUtils.fromRecipeList(recipesList);
     }
 
@@ -93,7 +95,7 @@ public class SidebarListCtrl {
                     return;
                 }
 
-                boolean removed = manager.removeRecipe(sel.id());
+                boolean removed = recipeManager.removeRecipe(sel.id());
 
                 exitRemoveMode();
 
@@ -107,7 +109,7 @@ public class SidebarListCtrl {
             if (cloneMode) {
                 ListObject sel = listView.getSelectionModel().getSelectedItem();
                 if (sel != null && onCloneRequest != null) {
-                    Recipe recipe = RecipeManager.getInstance().getRecipe(sel.id());
+                    Recipe recipe = recipeManager.getRecipe(sel.id());
                     onCloneRequest.accept(recipe);
                 }
 
@@ -169,7 +171,7 @@ public class SidebarListCtrl {
      */
     public void addRecipe(Recipe r) {
         if (r == null) return;
-        manager.addRecipeOptimistic(r);
+        recipeManager.addRecipeOptimistic(r);
     }
 
     /**
@@ -179,7 +181,7 @@ public class SidebarListCtrl {
      */
     public void removeRecipe(Recipe r) {
         if (r == null) return;
-        manager.removeRecipe(r.getId());
+        recipeManager.removeRecipe(r.getId());
     }
 
     /**
@@ -213,7 +215,7 @@ public class SidebarListCtrl {
      * @return an immutable snapshot of recipes
      */
     public List<Recipe> getRecipesSnapshot() {
-        return manager.getRecipesSnapshot();
+        return recipeManager.getRecipesSnapshot();
     }
     public void enterCloneMode() {
         removeMode = false;
