@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.junit.jupiter.api.Test;
@@ -35,9 +36,6 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import javax.swing.*;
-
-import static client.Main.BUNDLE_NAME;
-import static client.Main.DEFAULT_LOCALE;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -81,7 +79,7 @@ public class AddIngredientCtrlTest {
         Injector injector = Guice.createInjector(new MyModule());
         MyFXML fxml = new MyFXML(injector);
 
-        resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        resourceBundle = ResourceBundle.getBundle("client.language", Locale.ENGLISH);
 
         var loaded = fxml.load(
                 AddIngredientCtrl.class,
