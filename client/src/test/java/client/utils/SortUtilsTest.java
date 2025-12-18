@@ -112,6 +112,38 @@ class SortUtilsTest {
     }
 
     @Test
+    void toggleRemoveLanguageFilter() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        List<Language> expected = new ArrayList<>(List.of(Language.DE,
+                Language.NL));
+
+        sortUtils.toggleLanguageFilter(Language.EN);
+        List<Language> actual = sortUtils.getLanguageFilters();
+
+        Collections.sort(expected);
+        Collections.sort(actual);
+
+        assertEquals(expected, actual, "Language filters should match after toggling (here, removing) one language filter.");
+    }
+
+    @Test
+    void toggleAddLanguageFilter() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        List<Language> expected = new ArrayList<>(List.of(Language.DE));
+
+        sortUtils.setLanguageFilters(expected);
+        expected.add(Language.NL);
+
+        sortUtils.toggleLanguageFilter(Language.NL);
+        List<Language> actual = sortUtils.getLanguageFilters();
+
+        Collections.sort(expected);
+        Collections.sort(actual);
+
+        assertEquals(expected, actual, "Language filters should match after toggling one language filter.");
+    }
+
+    @Test
     void getSortMethod() {
         SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
 

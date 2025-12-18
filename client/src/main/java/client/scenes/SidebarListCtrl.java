@@ -3,6 +3,7 @@ package client.scenes;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import com.google.inject.Inject;
+import commons.Language;
 import commons.Recipe;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
@@ -131,6 +132,19 @@ public class SidebarListCtrl {
     }
 
     /**
+     * Toggles the language filter of the provided language in SortUtils
+     * @param language provided language to toggle filter of
+     */
+    public void toggleLanguageFilter(Language language) {
+        if (sortUtils == null) {
+            initializeSortUtils(currentMode);
+        }
+
+        sortUtils.toggleLanguageFilter(language);
+        setListViewSorted();
+    }
+
+    /**
      * Sets SortUtils to use the specified ordering
      * @param sortMethod provided ordering manner
      */
@@ -214,5 +228,4 @@ public class SidebarListCtrl {
     public void setOnRecipeCloneRequest(java.util.function.Consumer<Recipe> callback) {
         this.onCloneRequest = callback;
     }
-
 }

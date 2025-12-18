@@ -3,9 +3,11 @@ package client.scenes;
 import client.MyFXML;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import commons.Language;
 import jakarta.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -45,7 +47,6 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty dutchProperty = new SimpleStringProperty();
     @FXML
     private CheckBox dutchFilter;
-
 
     @FXML
     private Button addButton;
@@ -125,9 +126,9 @@ public class MainApplicationCtrl implements Internationalizable {
             orderBy.getSelectionModel().select(selectedIndex >= 0 ? selectedIndex : 0);
         }
 
-        englishProperty.set(resourceBundle.getString("txt.english"));
-        germanProperty.set(resourceBundle.getString("txt.german"));
-        dutchProperty.set(resourceBundle.getString("txt.dutch"));
+        englishProperty.set(resourceBundle.getString("txt.en"));
+        germanProperty.set(resourceBundle.getString("txt.de"));
+        dutchProperty.set(resourceBundle.getString("txt.nl"));
         if (languageOptions != null) {
             int selectedIndex = languageOptions.getSelectionModel().getSelectedIndex();
 
@@ -171,7 +172,6 @@ public class MainApplicationCtrl implements Internationalizable {
 
         prepareSortBy();
 
-        sidebarListCtrl = new SidebarListCtrl();
         sidebarListCtrl.initialize();
 
         if (recipeListView != null) {
@@ -225,6 +225,38 @@ public class MainApplicationCtrl implements Internationalizable {
                 });
 
         sortUponSelection(sidebarListCtrl);
+        prepareLanguageFilters();
+        filterUponSelection(sidebarListCtrl);
+    }
+
+    /**
+     * Initializes the language filter checkboxes to the default configuration.
+     * TODO: read from config instead of assuming all languages are enabled
+     */
+    private void prepareLanguageFilters() {
+        englishFilter.setSelected(true);
+        germanFilter.setSelected(true);
+        dutchFilter.setSelected(true);
+    }
+
+    /**
+     * Adds a listener for changes to language filter checkboxes,
+     * so recipe list viewer can get filtered after a selection of a filter.
+     * @param sidebarListCtrl the recipe list controller which is responsible for the recipe list
+     */
+    private void filterUponSelection(SidebarListCtrl sidebarListCtrl) {
+        englishFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.EN);
+        });
+        germanFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.DE);
+        });
+        dutchFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.NL);
+        });
     }
 
     /**
@@ -244,7 +276,8 @@ public class MainApplicationCtrl implements Internationalizable {
      * @param sidebarListCtrl the recipe list controller which is responsible for the recipe list
      */
     private void sortUponSelection(SidebarListCtrl sidebarListCtrl) {
-        orderBy.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        orderBy.getSelectionModel().selectedItemProperty().addListener((
+                observable, oldValue, newValue) -> {
             if (newValue == null) return;
 
             if (newValue.equals(alphabeticalProperty.get())) {

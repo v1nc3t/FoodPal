@@ -101,6 +101,21 @@ public class SortUtils {
     }
 
     /**
+     * Toggles the language filter of the provided language.
+     * This means that a filter is added if it doesn't exist yet
+     * and is removed if it does exist.
+     * @param language provided language to toggle filter of
+     */
+    public void toggleLanguageFilter(Language language) {
+        if (languageFilters.contains(language)) {
+            languageFilters.remove(language);
+        }
+        else {
+            languageFilters.add(language);
+        }
+    }
+
+    /**
      * Returns the sort method of SortUtils.
      * @return ordering manner
      */
