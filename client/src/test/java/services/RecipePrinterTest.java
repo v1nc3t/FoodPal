@@ -2,6 +2,7 @@ package services;
 
 import client.services.RecipePrinter;
 import commons.Amount;
+import commons.Language;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import javafx.application.Platform;
@@ -140,6 +141,6 @@ public class RecipePrinterTest {
                 ))
                 .toList();
 
-        return new Recipe(title, ingredients, steps, 1);
+        return new Recipe(title, ingredients, steps, 1, Language.EN);
     }
 }

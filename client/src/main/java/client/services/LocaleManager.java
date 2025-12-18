@@ -2,6 +2,7 @@ package client.services;
 
 import client.config.ConfigManager;
 import client.scenes.Internationalizable;
+import commons.Language;
 
 import java.util.*;
 
@@ -28,6 +29,7 @@ public class LocaleManager {
         } else {
             this.currentLocale = EN;
         }
+        Language.reloadLocale(getCurrentBundle());
     }
 
     public void register(Internationalizable ctrl) {
@@ -36,6 +38,7 @@ public class LocaleManager {
 
     public void setAllLocale(Locale locale) {
         currentLocale = locale;
+        Language.reloadLocale(getCurrentBundle());
 
         if (configManager != null) {
             configManager.getConfig().setLanguagePreference(locale.toLanguageTag());

@@ -22,6 +22,12 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     @FXML private Label titleLabel;
 
+    private final StringProperty languageProperty = new SimpleStringProperty();
+    @FXML private Label languageLabel;
+
+    private final StringProperty languageSuffixProperty = new SimpleStringProperty();
+    @FXML private Label languageSuffixLabel;
+
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML private Label ingredientsLabel;
 
@@ -61,6 +67,8 @@ public class RecipeViewerCtrl implements Internationalizable {
     }
 
     private void bindElementsProperties() {
+        languageLabel.textProperty().bind(languageProperty);
+        languageSuffixLabel.textProperty().bind(languageSuffixProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
         editButton.textProperty().bind(editProperty);
@@ -70,6 +78,10 @@ public class RecipeViewerCtrl implements Internationalizable {
     @Override
     public void setLocale(Locale locale) {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
+        if (currentRecipe != null) {
+            languageSuffixProperty.set(currentRecipe.getLanguage().proper());
+        }
+        languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
         editProperty.set(resourceBundle.getString("txt.edit"));
@@ -90,6 +102,7 @@ public class RecipeViewerCtrl implements Internationalizable {
             return;
         }
 
+        languageSuffixProperty.set(recipe.getLanguage().proper());
         titleLabel.setText(recipe.getTitle());
         setIngredientsList(recipe);
         setPreparationList(recipe);
@@ -105,7 +118,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         if (ingredients != null) {
             for (var recipeIngredient : ingredients) {
                 Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
-                ingredientsList.getItems().add(ingredient.getName() + " | " + recipeIngredient.getAmount().toPrettyString());
+                ingredientsList.getItems().add(ingredient.getName() + " | " +
+                        recipeIngredient.getAmount().toPrettyString());
             }
         }
     }

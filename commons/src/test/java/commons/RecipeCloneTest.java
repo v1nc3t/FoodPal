@@ -12,7 +12,7 @@ public class RecipeCloneTest {
         List<RecipeIngredient> ingredients = new ArrayList<>();
         ingredients.add(new RecipeIngredient(UUID.randomUUID(), null));
         List<String> steps = List.of("step1");
-        return new Recipe("Original", ingredients, steps, 2);
+        return new Recipe("Original", ingredients, steps, 2, Language.EN);
     }
 
     @Test
@@ -26,9 +26,10 @@ public class RecipeCloneTest {
         assertEquals("Clone Name", cloned.getTitle());
         assertEquals(original.getServingSize(), cloned.getServingSize());
         assertEquals(original.getSteps(), cloned.getSteps());
-        assertNotSame(original.getSteps(), cloned.getSteps(), "Steps list must be copied");
+        assertNotSame(original.getSteps(), cloned.getSteps(), "Steps list must be deep copied");
         assertEquals(original.getIngredients().size(), cloned.getIngredients().size());
         assertNotSame(original.getIngredients().get(0), cloned.getIngredients().get(0),
                 "RecipeIngredient instances should be distinct");
+        assertEquals(original.getLanguage(), cloned.getLanguage(), "Language should be copied");
     }
 }

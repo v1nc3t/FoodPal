@@ -3,6 +3,7 @@ package client.scenes;
 import client.MyFXML;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import commons.Language;
 import com.google.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -29,9 +30,22 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty recentProperty = new SimpleStringProperty();
 
     @FXML private ChoiceBox<String> languageOptions;
+
+    private final StringProperty showRecipesProperty = new SimpleStringProperty();
+    @FXML
+    private Label showRecipesLabel;
+
     private final StringProperty englishProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox englishFilter;
+
     private final StringProperty germanProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox germanFilter;
+
     private final StringProperty dutchProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox dutchFilter;
 
     @FXML
     private Button addButton;
@@ -82,9 +96,12 @@ public class MainApplicationCtrl implements Internationalizable {
      */
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
+        showRecipesLabel.textProperty().bind(showRecipesProperty);
+        englishFilter.textProperty().bind(englishProperty);
+        germanFilter.textProperty().bind(germanProperty);
+        dutchFilter.textProperty().bind(dutchProperty);
         cloneButton.textProperty().bind(cloneProperty);
         searchField.promptTextProperty().bind(searchProperty);
-        //addButton.textProperty().bind(addProperty);
         favouriteButton.textProperty().bind(favouriteProperty);
     }
 
@@ -98,6 +115,7 @@ public class MainApplicationCtrl implements Internationalizable {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
 
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
+        showRecipesProperty.set(resourceBundle.getString("txt.show_recipes"));
         cloneProperty.set(resourceBundle.getString("txt.clone"));
         favouriteProperty.set(resourceBundle.getString("txt.favourite"));
         searchProperty.set(resourceBundle.getString("txt.search"));
@@ -114,10 +132,9 @@ public class MainApplicationCtrl implements Internationalizable {
             orderBy.getSelectionModel().select(selectedIndex >= 0 ? selectedIndex : 0);
         }
 
-        englishProperty.set(resourceBundle.getString("txt.english"));
-        germanProperty.set(resourceBundle.getString("txt.german"));
-        dutchProperty.set(resourceBundle.getString("txt.dutch"));
-
+        englishProperty.set(resourceBundle.getString("txt.en"));
+        germanProperty.set(resourceBundle.getString("txt.de"));
+        dutchProperty.set(resourceBundle.getString("txt.nl"));
         if (languageOptions != null) {
             int selectedIndex = languageOptions.getSelectionModel().getSelectedIndex();
             languageOptions.getItems().setAll(
@@ -153,17 +170,11 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private void initialize() {
         bindElementsProperties();
-        /* For UI testing purposes, since we don't have a button
-         for language selection just yet, change this line
-         if you want to visualize language changes.
-         Parameter choices:
-         EN: DEFAULT_LOCALE
-         DE: Locale.GERMAN
-         NL: Locale.forLanguageTag("nl-NL")
-        */
+
         setLocale(localeManager.getCurrentLocale());
         prepareLanguageOptions();
         prepareSortBy();
+
         sidebarListCtrl.initialize();
         if (recipeListView != null) {
             sidebarListCtrl.setListView(recipeListView);
@@ -211,6 +222,38 @@ public class MainApplicationCtrl implements Internationalizable {
                     }
                 });
         sortUponSelection(sidebarListCtrl);
+        prepareLanguageFilters();
+        filterUponSelection(sidebarListCtrl);
+    }
+
+    /**
+     * Initializes the language filter checkboxes to the default configuration.
+     * TODO: read from config instead of assuming all languages are enabled
+     */
+    private void prepareLanguageFilters() {
+        englishFilter.setSelected(true);
+        germanFilter.setSelected(true);
+        dutchFilter.setSelected(true);
+    }
+
+    /**
+     * Adds a listener for changes to language filter checkboxes,
+     * so recipe list viewer can get filtered after a selection of a filter.
+     * @param sidebarListCtrl the recipe list controller which is responsible for the recipe list
+     */
+    private void filterUponSelection(SidebarListCtrl sidebarListCtrl) {
+        englishFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.EN);
+        });
+        germanFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.DE);
+        });
+        dutchFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.NL);
+        });
     }
 
     /**
@@ -230,7 +273,8 @@ public class MainApplicationCtrl implements Internationalizable {
      * @param sidebarListCtrl the recipe list controller which is responsible for the recipe list
      */
     private void sortUponSelection(SidebarListCtrl sidebarListCtrl) {
-        orderBy.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        orderBy.getSelectionModel().selectedItemProperty().addListener((
+                observable, oldValue, newValue) -> {
             if (newValue == null) return;
 
             if (newValue.equals(alphabeticalProperty.get())) {

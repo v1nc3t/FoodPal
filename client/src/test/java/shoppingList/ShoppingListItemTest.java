@@ -8,16 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import java.util.List;
 import java.util.UUID;
 
+import commons.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import client.shoppingList.ShoppingListItem;
-import commons.Amount;
-import commons.Ingredient;
-import commons.NutritionValues;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.Unit;
 
 public class ShoppingListItemTest {
 
@@ -46,7 +41,7 @@ public class ShoppingListItemTest {
 
         int servingSize = 4;
 
-        recipe = new Recipe("Cake", ingredients, steps, servingSize);
+        recipe = new Recipe("Cake", ingredients, steps, servingSize, Language.EN);
 
         shopListItem = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount, recipe.getId());
     }

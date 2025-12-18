@@ -5,15 +5,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import java.util.UUID;
 
+import commons.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import client.shoppingList.ShoppingList;
 import client.shoppingList.ShoppingListItem;
-import commons.Amount;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.Unit;
 
 public class ShoppingListTest {
 
@@ -119,7 +116,8 @@ public class ShoppingListTest {
             new Amount(2.0, Unit.GRAM)
         );
 
-        Recipe recipe = new Recipe("Test Recipe", List.of(ingredient1, ingredient2), List.of("Step1: hello"), 2);
+        Recipe recipe = new Recipe("Test Recipe", List.of(ingredient1, ingredient2), List.of("Step1: hello"), 2,
+                Language.EN);
         list.addRecipeItems(recipe);
 
         assertEquals(2, list.getItems().size());
