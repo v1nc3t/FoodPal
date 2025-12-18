@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class RecipeWebSocketHandler extends TextWebSocketHandler {
@@ -37,10 +35,18 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        String type = json.path("type").asText();
-        String topic = json.path("topic").asText();
+        String typeString = json.path("type").asText("");
+        String topic = json.path("topic").asText("");
 
-        if (type.equals("SUBSCRIBE")) {
+        WebSocketTypes type;
+        try{
+            type = WebSocketTypes.valueOf(typeString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            sendErrorMessage(session, "unknown type:" + typeString);
+            return;
+        }
+
+        if (type == WebSocketTypes.SUBSCRIBE) {
             handleSubscription(session, topic, json);
         } else {
             sendErrorMessage(session, "Only subscribe command is allowed");
@@ -66,16 +72,12 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendConfirm(WebSocketSession session, String topic) throws Exception {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "SUBSCRIBED");
-        response.put("topic", topic);
+        WebSocketResponse response = new WebSocketResponse(WebSocketTypes.SUBSCRIBED, topic, null);
         session.sendMessage(new TextMessage(mapper.writeValueAsString(response)));
     }
 
     private void sendErrorMessage(WebSocketSession session, String msg) throws Exception {
-        Map<String, String> error = new HashMap<>();
-        error.put("status", "ERROR");
-        error.put("message", msg);
+      WebSocketResponse error = new WebSocketResponse(WebSocketTypes.ERROR, null,msg);
         session.sendMessage(new TextMessage(mapper.writeValueAsString(error)));
     }
 
