@@ -18,7 +18,7 @@ package client;
 import client.scenes.AddIngredientCtrl;
 import client.scenes.AddRecipeCtrl;
 import client.scenes.MainApplicationCtrl;
-import client.scenes.RecipeListCtrl;
+import client.scenes.SidebarListCtrl;
 import client.services.LocaleManager;
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -31,7 +31,7 @@ public class MyModule implements Module {
         binder.bind(MainApplicationCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddRecipeCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddIngredientCtrl.class).in(Scopes.SINGLETON);
-        binder.bind(RecipeListCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(SidebarListCtrl.class).in(Scopes.SINGLETON);
         binder.bind(LocaleManager.class).in(Scopes.SINGLETON);
     }
 }

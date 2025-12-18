@@ -14,14 +14,16 @@ import java.util.List;
  * Controller for the left-hand recipe list.
  * Uses {@link RecipeManager} as the single source of truth for all recipe data.
  */
-public class RecipeListCtrl {
+public class SidebarListCtrl {
 
     private final RecipeManager manager = RecipeManager.getInstance();
     private SortUtils sortUtils;
-    private ListView<Recipe> listView;
+    private ListView<ListObject> listView;
     private boolean removeMode = false;
     private boolean cloneMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
+    private final ESidebarMode currentMode = ESidebarMode.Recipe;
+
 
     /**
      * Initializes RecipeList controller
@@ -29,22 +31,28 @@ public class RecipeListCtrl {
     @FXML
     public void initialize() {
         if (sortUtils == null) {
-            initializeSortUtils();
+            initializeSortUtils(currentMode);
         }
+    }
+
+    private void initializeSortUtils(ESidebarMode _mode) {
+        initializeRecipeSortUtils();
     }
 
     /**
      * Initializes SortUtils for sorting and filtering
      */
-    private void initializeSortUtils() {
-        sortUtils = new SortUtils(manager);
+    private void initializeRecipeSortUtils() {
+        // This makes a list which is automatically updated whenever the list of recipes changes.
+        var recipesList = manager.getObservableRecipes();
+        sortUtils = SortUtils.fromRecipeList(recipesList);
     }
 
     /**
      * Connects this controller to the UI ListView, and binds it to a sorted list of recipes.
      * @param lv the ListView defined in FXML
      */
-    public void setListView(ListView<Recipe> lv) {
+    public void setListView(ListView<ListObject> lv) {
         this.listView = lv;
 
         setListViewSorted();
@@ -60,32 +68,29 @@ public class RecipeListCtrl {
      * </ul>
      */
     private void loadListViewProperties() {
-        listView.setCellFactory(lvv -> new ListCell<>() {
+        listView.setCellFactory(_ -> new ListCell<>() {
             @Override
-            protected void updateItem(Recipe item, boolean empty) {
+            protected void updateItem(ListObject item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getTitle());
+                setText(empty || item == null ? null : item.name());
             }
         });
 
         // Handle remove-mode and clone-mode clicks in a single event filter.
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
-
-
             if (removeMode) {
-                Recipe sel = listView.getSelectionModel().getSelectedItem();
+                ListObject sel = listView.getSelectionModel().getSelectedItem();
                 if (sel == null) {
                     exitRemoveMode();
                     ev.consume();
                     return;
                 }
 
-                boolean removed = manager.removeRecipe(sel.getId());
+                boolean removed = manager.removeRecipe(sel.id());
 
                 exitRemoveMode();
 
                 listView.getSelectionModel().clearSelection();
-
 
                 ev.consume();
                 return;
@@ -93,10 +98,10 @@ public class RecipeListCtrl {
 
 
             if (cloneMode) {
-                Recipe sel = listView.getSelectionModel().getSelectedItem();
+                ListObject sel = listView.getSelectionModel().getSelectedItem();
                 if (sel != null && onCloneRequest != null) {
-
-                    onCloneRequest.accept(sel);
+                    Recipe recipe = RecipeManager.getInstance().getRecipe(sel.id());
+                    onCloneRequest.accept(recipe);
                 }
 
                 exitCloneMode();
@@ -118,7 +123,7 @@ public class RecipeListCtrl {
      */
     private void setListViewSorted() {
         if (sortUtils == null) {
-            initializeSortUtils();
+            initializeSortUtils(currentMode);
         }
         listView.setItems(sortUtils.applyFilters());
     }
@@ -129,7 +134,7 @@ public class RecipeListCtrl {
      */
     public void setSortMethod(String sortMethod) {
         if (sortUtils == null) {
-            initializeSortUtils();
+            initializeSortUtils(currentMode);
         }
 
         sortUtils.setSortMethod(sortMethod);
@@ -204,7 +209,7 @@ public class RecipeListCtrl {
         return cloneMode;
     }
 
-    public void setOnCloneRequest(java.util.function.Consumer<Recipe> callback) {
+    public void setOnRecipeCloneRequest(java.util.function.Consumer<Recipe> callback) {
         this.onCloneRequest = callback;
     }
 
