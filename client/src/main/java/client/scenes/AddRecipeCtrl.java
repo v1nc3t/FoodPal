@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.MyFXML;
+import client.services.LocaleManager;
 import client.utils.ServerUtils;
 
 import client.utils.TextFieldUtils;
@@ -32,11 +33,9 @@ import javafx.util.Pair;
 
 import java.util.*;
 
-import static client.Main.BUNDLE_NAME;
-import static client.Main.DEFAULT_LOCALE;
 import client.services.RecipeManager;
 
-public class AddRecipeCtrl {
+public class AddRecipeCtrl implements Internationalizable {
 
     private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML private Label nameLabel;
@@ -55,6 +54,7 @@ public class AddRecipeCtrl {
     private final StringProperty selectIngredientProperty = new SimpleStringProperty();
     @FXML private ComboBox<Ingredient> ingredientsComboBox;
 
+    //private final StringProperty addProperty = new SimpleStringProperty();
     @FXML private Button addIngredientButton;
     @FXML private ScrollPane ingredientsScrollPane;
     @FXML private VBox ingredientsList;
@@ -63,7 +63,7 @@ public class AddRecipeCtrl {
     @FXML private Label preparationLabel;
 
     private final StringProperty addPreparationStepProperty = new SimpleStringProperty();
-    @FXML private TextField preparationField;
+    @FXML private TextArea preparationField;
 
     @FXML private Button addPreparationButton;
     @FXML private ScrollPane preparationScrollPane;
@@ -87,6 +87,7 @@ public class AddRecipeCtrl {
     private final ServerUtils server;
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
+    private final LocaleManager localeManager;
 
     // callback so MainApplicationCtrl can be notified when a recipe is added
     private java.util.function.Consumer<Recipe> onRecipeAdded;
@@ -95,10 +96,16 @@ public class AddRecipeCtrl {
     }
 
     @Inject
-    public AddRecipeCtrl(ServerUtils server, MainApplicationCtrl mainCtrl, MyFXML fxml) {
+    public AddRecipeCtrl(ServerUtils server,
+                         MainApplicationCtrl mainCtrl,
+                         MyFXML fxml,
+                         LocaleManager localeManager) {
         this.server = server;
         this.mainCtrl = mainCtrl;
         this.fxml = fxml;
+        this.localeManager = localeManager;
+
+        localeManager.register(this);
     }
 
     /**
@@ -116,16 +123,19 @@ public class AddRecipeCtrl {
          DE: Locale.GERMAN
          NL: Locale.forLanguageTag("nl-NL")
         */
-        setLocale(DEFAULT_LOCALE);
+        setLocale(localeManager.getCurrentLocale());
 
         refreshSelectLanguage();
 
+        /*
         // when user entered a prep step, clicking enter will add it to the list
         preparationField.setOnAction(e -> {
             if(!preparationField.getText().isBlank()) {
                 addPreparationButton.fire();
             }
         });
+         */
+
 
         preparationScrollPane.setFitToWidth(true);
 
@@ -173,6 +183,8 @@ public class AddRecipeCtrl {
         servingSizeField.promptTextProperty().bind(portionsProperty);
         doneButton.textProperty().bind(doneProperty);
         cancelButton.textProperty().bind(cancelProperty);
+        //addIngredientButton.textProperty().bind(addProperty);
+        //addPreparationButton.textProperty().bind(addProperty);
     }
 
     /**
@@ -180,8 +192,9 @@ public class AddRecipeCtrl {
      * of a corresponding locale
      * @param locale provided locale/language for UI elements
      */
-    private void setLocale(Locale locale) {
-        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    @Override
+    public void setLocale(Locale locale) {
+        var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         nameProperty.set(resourceBundle.getString("txt.name"));
         recipeNameFieldProperty.set(resourceBundle.getString("txt.recipe_name"));
         languageProperty.set(resourceBundle.getString("txt.language"));
@@ -193,6 +206,7 @@ public class AddRecipeCtrl {
         portionsProperty.set(resourceBundle.getString("txt.portions"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+        //addProperty.set(resourceBundle.getString("txt.add"));
     }
 
     /**
@@ -319,7 +333,7 @@ public class AddRecipeCtrl {
      * Open pop up window for adding a new Ingredient
      */
     public void clickAddIngredient() {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
                 bundle,"client", "scenes", "AddIngredient.fxml");
 
@@ -349,7 +363,7 @@ public class AddRecipeCtrl {
      * Open pop up window for editing the existing Ingredient
      */
     public void clickEditIngredient(RecipeIngredient recipeIngredient) {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
                 bundle,"client", "scenes", "AddIngredient.fxml");
 

@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.services.LocaleManager;
 import client.services.RecipeManager;
 import client.utils.ServerUtils;
 import client.utils.TextFieldUtils;
@@ -18,13 +19,10 @@ import javafx.stage.Stage;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static client.Main.BUNDLE_NAME;
-import static client.Main.DEFAULT_LOCALE;
-
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class AddIngredientCtrl {
+public class AddIngredientCtrl implements Internationalizable {
     RecipeManager recipeManager = RecipeManager.getInstance();
 
     private final StringProperty nameProperty = new SimpleStringProperty();
@@ -70,6 +68,7 @@ public class AddIngredientCtrl {
 
     private final ServerUtils server;
     private final AddRecipeCtrl ctrl;
+    private final LocaleManager localeManager;
     private Consumer<RecipeIngredient> ingredientAdded;
 
     @FXML
@@ -84,7 +83,7 @@ public class AddIngredientCtrl {
          DE: Locale.GERMAN
          NL: Locale.forLanguageTag("nl-NL")
         */
-        setLocale(DEFAULT_LOCALE);
+        setLocale(localeManager.getCurrentLocale());
 
         for (Unit unit : Unit.values()) {
             unitComboBox.getItems().add(unit.name().toLowerCase());
@@ -118,8 +117,9 @@ public class AddIngredientCtrl {
      * of a corresponding locale
      * @param locale provided locale/language for UI elements
      */
-    private void setLocale(Locale locale) {
-        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    @Override
+    public void setLocale(Locale locale) {
+        var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         nameProperty.set(resourceBundle.getString("txt.name"));
         enterIngredientNameProperty.set(resourceBundle.getString("txt.enter_ingredient_name"));
         amountProperty.set(resourceBundle.getString("txt.amount"));
@@ -142,9 +142,12 @@ public class AddIngredientCtrl {
     }
 
     @Inject
-    public AddIngredientCtrl(ServerUtils server, AddRecipeCtrl ctrl) {
+    public AddIngredientCtrl(ServerUtils server, AddRecipeCtrl ctrl, LocaleManager localeManager) {
         this.server = server;
         this.ctrl = ctrl;
+        this.localeManager = localeManager;
+
+        localeManager.register(this);
     }
 
     /**

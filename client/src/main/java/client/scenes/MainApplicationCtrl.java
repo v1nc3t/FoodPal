@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.MyFXML;
+import client.services.LocaleManager;
 import jakarta.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -14,11 +15,7 @@ import commons.Recipe;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static client.Main.BUNDLE_NAME;
-import static client.Main.DEFAULT_LOCALE;
-
-
-public class MainApplicationCtrl {
+public class MainApplicationCtrl implements Internationalizable {
 
     /**
      *   This is the right pane(This pane will load different screens)
@@ -28,6 +25,8 @@ public class MainApplicationCtrl {
 
     @FXML
     private ChoiceBox<String> orderBy;
+
+    @FXML private ChoiceBox<String> languageOptions;
 
     @FXML
     private Button addButton;
@@ -51,10 +50,16 @@ public class MainApplicationCtrl {
     private RecipeListCtrl recipeListCtrl;
 
     private final MyFXML fxml;
+    private final LocaleManager localeManager;
+
     private Recipe currentlyShownRecipe = null;
+
     @Inject
-    public MainApplicationCtrl(MyFXML fxml){
-        this.fxml =fxml;
+    public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
+        this.fxml = fxml;
+        this.localeManager = localeManager;
+
+        this.localeManager.register(this);
     }
 
     /**
@@ -65,16 +70,19 @@ public class MainApplicationCtrl {
      */
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
+        //addButton.textProperty().bind(addProperty);
     }
 
     /**
      * Dynamically updates properties of UI elements to the language
      * of a corresponding locale
-     * @param locale provided locale/language for UI elements
+     * @param newLocale provided locale/language for UI elements
      */
-    private void setLocale(Locale locale) {
-        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    @Override
+    public void setLocale(Locale newLocale) {
+        var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
+        //addProperty.set(resourceBundle.getString("txt.add"));
     }
 
     /**
@@ -107,7 +115,9 @@ public class MainApplicationCtrl {
          DE: Locale.GERMAN
          NL: Locale.forLanguageTag("nl-NL")
         */
-        setLocale(DEFAULT_LOCALE);
+        setLocale(localeManager.getCurrentLocale());
+
+        prepareLanguageOptions();
 
         prepareSortBy();
         recipeListCtrl = new RecipeListCtrl();
@@ -175,6 +185,44 @@ public class MainApplicationCtrl {
         orderBy.setValue("Alphabetical");
     }
 
+    private void prepareLanguageOptions() {
+        languageOptions.getItems().setAll("English", "German", "Dutch");
+
+        Locale currentLocale = localeManager.getCurrentLocale();
+        String currentDisplay;
+        if (currentLocale.equals(Locale.GERMAN)) {
+            currentDisplay = "German";
+        } else if (currentLocale.equals(Locale.forLanguageTag("nl-NL"))) {
+            currentDisplay = "Dutch";
+        } else {
+            currentDisplay = "English";
+        }
+
+        languageOptions.setValue(currentDisplay);
+    }
+
+    @FXML
+    private void changeLanguage() {
+        String currentDisplay = languageOptions.getValue();
+
+        Locale newLocale;
+        switch (currentDisplay) {
+            case "German":
+                newLocale = Locale.GERMAN;
+                break;
+            case "Dutch":
+                newLocale = Locale.forLanguageTag("nl-NL");
+                break;
+            case "English":
+                newLocale = Locale.ENGLISH;
+                break;
+            default:
+                return;
+        }
+
+        localeManager.setAllLocale(newLocale);
+    }
+
     /**
      * Adds a listener for changes to sort-by choice box,
      * so recipe list viewer can get sorted after a selection.
@@ -211,7 +259,7 @@ public class MainApplicationCtrl {
      */
     @FXML
     private void addRecipe() {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,bundle,
                 "client", "scenes", "AddRecipePanel.fxml");
 
@@ -222,7 +270,7 @@ public class MainApplicationCtrl {
     }
 
     private void showRecipe(Recipe recipe) {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         if (recipe == null) {
             showMainScreen();
             currentlyShownRecipe = null;
@@ -235,7 +283,6 @@ public class MainApplicationCtrl {
         RecipeViewerCtrl viewerCtrl = pair.getKey();
         Parent viewerRoot = pair.getValue();
 
-        viewerCtrl.setMainCtrl(this);
         viewerCtrl.setRecipe(recipe);
 
         contentPane.getChildren().setAll(viewerRoot);
@@ -281,7 +328,7 @@ public class MainApplicationCtrl {
     }
 
     public void editRecipe(Recipe recipe) {
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        var bundle = localeManager.getCurrentBundle();
         if (recipe == null) return;
 
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,

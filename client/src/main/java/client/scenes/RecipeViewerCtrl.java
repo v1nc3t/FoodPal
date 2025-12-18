@@ -1,6 +1,8 @@
 package client.scenes;
 
+import client.services.LocaleManager;
 import client.services.RecipeManager;
+import com.google.inject.Inject;
 import commons.Ingredient;
 import client.services.RecipePrinter;
 import commons.Recipe;
@@ -16,10 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static client.Main.BUNDLE_NAME;
-import static client.Main.DEFAULT_LOCALE;
-
-public class RecipeViewerCtrl {
+public class RecipeViewerCtrl implements Internationalizable {
 
     @FXML private Label titleLabel;
 
@@ -47,22 +46,21 @@ public class RecipeViewerCtrl {
     private Recipe currentRecipe;
 
     private MainApplicationCtrl mainCtrl;
+    private final LocaleManager localeManager;
 
-    /**
-     * Called by MainApplicationCtrl after loading this FXML.
-     * Allows the viewer to call back into the main controller.
-     *
-     * @param mainCtrl the main application controller
-     */
-    public void setMainCtrl(MainApplicationCtrl mainCtrl) {
+    @Inject
+    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager) {
         this.mainCtrl = mainCtrl;
+        this.localeManager = localeManager;
+
+        localeManager.register(this);
     }
 
     @FXML
     private void initialize() {
         bindElementsProperties();
 
-        setLocale(DEFAULT_LOCALE);
+        setLocale(localeManager.getCurrentLocale());
     }
 
     private void bindElementsProperties() {
@@ -73,8 +71,9 @@ public class RecipeViewerCtrl {
 
     }
 
-    private void setLocale(Locale locale) {
-        var resourceBundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    @Override
+    public void setLocale(Locale locale) {
+        var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
