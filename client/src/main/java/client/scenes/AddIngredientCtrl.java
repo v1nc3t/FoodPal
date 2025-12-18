@@ -23,7 +23,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class AddIngredientCtrl implements Internationalizable {
-    RecipeManager recipeManager = RecipeManager.getInstance();
+    @Inject
+    RecipeManager recipeManager;
 
     private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML private Label nameLabel;
