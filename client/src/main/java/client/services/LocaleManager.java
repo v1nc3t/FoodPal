@@ -1,6 +1,7 @@
 package client.services;
 
 import client.scenes.Internationalizable;
+import commons.Language;
 
 import java.util.*;
 
@@ -18,6 +19,7 @@ public class LocaleManager {
 
     public void setAllLocale(Locale locale) {
         currentLocale = locale;
+        Language.reloadLocale(getCurrentBundle());
 
         for (Internationalizable ctrl : registeredCtrls) {
             ctrl.setLocale(locale);

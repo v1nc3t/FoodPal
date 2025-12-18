@@ -74,6 +74,9 @@ public class RecipeViewerCtrl implements Internationalizable {
     @Override
     public void setLocale(Locale locale) {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
+        if (currentRecipe != null) {
+            languageSuffixProperty.set(currentRecipe.getLanguage().proper());
+        }
         languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
