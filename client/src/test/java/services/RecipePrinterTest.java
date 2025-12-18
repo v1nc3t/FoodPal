@@ -13,9 +13,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.Start;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -23,14 +27,13 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(ApplicationExtension.class)
 public class RecipePrinterTest {
 
-    @BeforeAll
-    static void initJavaFx() {
-        try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException ignored) {
-        }
+    @Start
+    public void start(Stage stage) {
+        stage.show();
+        Platform.setImplicitExit(false);
     }
 
     @Test
