@@ -1,35 +1,80 @@
 package services;
 
+import client.config.ConfigManager;
 import client.scenes.Internationalizable;
 import client.services.LocaleManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 public class LocaleManagerTest {
 
     private LocaleManager localeManager;
+    private ConfigManager configManager;
     private TestInternationalizable testCtrl1;
     private TestInternationalizable testCtrl2;
-    private Locale testLocale = Locale.GERMAN;
+    private Locale testLocale = LocaleManager.DE;
+
+    @TempDir
+    Path tempDir;
+
+    private String testCfgPath;
 
     @BeforeEach
     public void setUp() {
         localeManager = new LocaleManager();
+
+        testCfgPath = tempDir.resolve("test-config.json").toString();
+        configManager = new ConfigManager(testCfgPath);
 
         testCtrl1 = new TestInternationalizable();
         testCtrl2 = new TestInternationalizable();
     }
 
     @Test
-    public void localeIsEnglishTest() {
-        assertEquals(Locale.ENGLISH, localeManager.getCurrentLocale());
+    public void initDefaultTest() {
+        configManager.load();
+
+        localeManager.init(configManager);
+
+        assertEquals(LocaleManager.EN, localeManager.getCurrentLocale());
+    }
+
+    @Test
+    public void initDutchFromConfigTest() {
+        configManager.load();
+        configManager.getConfig().setLanguagePreference("nl-NL");
+        configManager.save();
+
+        ConfigManager newManager = new ConfigManager(testCfgPath);
+        newManager.load();
+
+        localeManager.init(newManager);
+
+        assertEquals(LocaleManager.NL, localeManager.getCurrentLocale());
+        assertEquals("nl-NL", localeManager.getCurrentLocale().toLanguageTag());
+    }
+
+    @Test
+    public void initGermanFromConfigTest() {
+        configManager.load();
+        configManager.getConfig().setLanguagePreference("DE");
+        configManager.save();
+
+        ConfigManager newManager = new ConfigManager(testCfgPath);
+        newManager.load();
+
+        localeManager.init(newManager);
+
+        assertEquals(LocaleManager.DE, localeManager.getCurrentLocale());
+        assertEquals("de", localeManager.getCurrentLocale().toLanguageTag());
     }
 
     @Test
@@ -39,9 +84,11 @@ public class LocaleManagerTest {
 
     @Test
     public void changeOfLocaleGetsPropagatedTest() {
+        configManager.load();
+        localeManager.init(configManager);
+
         localeManager.register(testCtrl1);
         localeManager.register(testCtrl2);
-
         localeManager.setAllLocale(testLocale);
 
         assertEquals(testLocale, localeManager.getCurrentLocale());
