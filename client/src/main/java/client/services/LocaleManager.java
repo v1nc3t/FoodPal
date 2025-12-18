@@ -29,6 +29,7 @@ public class LocaleManager {
         } else {
             this.currentLocale = EN;
         }
+        Language.reloadLocale(getCurrentBundle());
     }
 
     public void register(Internationalizable ctrl) {

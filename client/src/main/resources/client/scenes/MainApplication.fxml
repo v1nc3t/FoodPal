@@ -20,6 +20,12 @@
                <ChoiceBox fx:id="languageOptions" onAction="#changeLanguage" />
                <ChoiceBox fx:id="orderBy" />
             </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+             <Label fx:id="showRecipesLabel" prefHeight="25" text="${controller.showRecipesProperty}" />
+             <CheckBox fx:id="englishFilter" prefHeight="25" mnemonicParsing="false" text="${controller.englishProperty}" />
+             <CheckBox fx:id="germanFilter" prefHeight="25" mnemonicParsing="false" text="${controller.germanProperty}" />
+             <CheckBox fx:id="dutchFilter" prefHeight="25" mnemonicParsing="false" text="${controller.dutchProperty}" />
+            </HBox>
               <ListView fx:id="recipeListView" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             <HBox alignment="CENTER_LEFT" spacing="8.0">
                <children>
@@ -27,10 +33,6 @@
                     <Button fx:id="removeButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
                     <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refresh" text="${controller.refreshProperty}" />
                     <Button fx:id="cloneButton" mnemonicParsing="false" />
-                    <Label fx:id="showRecipesLabel" prefHeight="25" text="${controller.showRecipesProperty}" />
-                    <CheckBox fx:id="englishFilter" prefHeight="25" mnemonicParsing="false" text="${controller.englishProperty}" />
-                    <CheckBox fx:id="germanFilter" prefHeight="25" mnemonicParsing="false" text="${controller.germanProperty}" />
-                    <CheckBox fx:id="dutchFilter" prefHeight="25" mnemonicParsing="false" text="${controller.dutchProperty}" />
                </children>
             </HBox>
          </children>
