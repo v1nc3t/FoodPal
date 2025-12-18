@@ -20,6 +20,7 @@ import client.scenes.AddRecipeCtrl;
 import client.scenes.MainApplicationCtrl;
 import client.scenes.SidebarListCtrl;
 import client.services.LocaleManager;
+import client.services.RecipeManager;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -33,5 +34,6 @@ public class MyModule implements Module {
         binder.bind(AddIngredientCtrl.class).in(Scopes.SINGLETON);
         binder.bind(SidebarListCtrl.class).in(Scopes.SINGLETON);
         binder.bind(LocaleManager.class).in(Scopes.SINGLETON);
+        binder.bind(RecipeManager.class).in(Scopes.SINGLETON);
     }
 }
