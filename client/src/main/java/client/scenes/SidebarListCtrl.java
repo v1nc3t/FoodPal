@@ -36,6 +36,18 @@ public class SidebarListCtrl {
     }
 
     /**
+     * Sets the sidebar mode, if different, and reinitializes sort-utils if so
+     * @param mode the mode to become
+     */
+    public void setSidebarMode(ESidebarMode mode) {
+        if (currentMode != mode) {
+            currentMode = mode;
+            initializeSortUtils(mode);
+            setListViewSorted();
+        }
+    }
+
+    /**
      * Initializes SortUtils for sorting and filtering
      */
     private void initializeSortUtils(ESidebarMode mode) {
@@ -45,6 +57,7 @@ public class SidebarListCtrl {
                 break;
             case Ingredient:
                 initializeIngredientSortUtils();
+                break;
         }
     }
 
@@ -62,8 +75,8 @@ public class SidebarListCtrl {
      */
     private void initializeIngredientSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
-        var recipesList = manager.getObservableRecipes();
-        sortUtils = SortUtils.fromRecipeList(recipesList);
+        var recipesList = manager.getObservableIngredients();
+        sortUtils = SortUtils.fromIngredientList(recipesList);
     }
 
     /**

@@ -46,7 +46,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private Button cloneButton;
 
     @FXML
-    private ListView<ListObject> recipeListView;
+    private ListView<ListObject> sidebarListView;
 
     @FXML
     private ToggleButton recipeToggleButton;
@@ -132,55 +132,29 @@ public class MainApplicationCtrl implements Internationalizable {
         sidebarListCtrl = new SidebarListCtrl();
         sidebarListCtrl.initialize();
 
-        if (recipeListView != null) {
-            sidebarListCtrl.setListView(recipeListView);
+        sidebarListCtrl.setListView(sidebarListView);
 
-            sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
-            // open viewer on double-click, and ignore clicks when in remove mode
-            recipeListView.setOnMouseClicked(evt -> {
-                if (evt.getClickCount() != 2) return; // require double-click to open
+        sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
+        // open viewer on double-click, and ignore clicks when in remove mode
+        sidebarListView.setOnMouseClicked(evt -> {
+            if (evt.getClickCount() != 2) return; // require double-click to open
 
-                var sel = recipeListView.getSelectionModel().getSelectedItem();
-                if (sel == null) return;
+            var sel = sidebarListView.getSelectionModel().getSelectedItem();
+            if (sel == null) return;
 
-                // If the list is in remove mode, the click was for deleting — ignore it
-                if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
-                    recipeListView.getSelectionModel().clearSelection(); // avoid visual flicker
-                    evt.consume();
-                    return;
-                }
-
-                // Open the viewer
-                showRecipe(RecipeManager.getInstance().getRecipe(sel.id()));
-            });
-
-            if (cloneButton != null) {
-                cloneButton.setOnAction(e -> sidebarListCtrl.enterCloneMode());
+            // If the list is in remove mode, the click was for deleting — ignore it
+            if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
+                sidebarListView.getSelectionModel().clearSelection(); // avoid visual flicker
+                evt.consume();
+                return;
             }
 
-        }
+            // Open the viewer
+            showRecipe(RecipeManager.getInstance().getRecipe(sel.id()));
+        });
 
-        if (removeButton != null) {
-            removeButton.setOnAction(e -> sidebarListCtrl.enterRemoveMode());
-        }
-        //if the currently shown recipe disappears, close viewer.
-        client.services.RecipeManager.getInstance().getObservableRecipes()
-                .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
-                    while (change.next()) {
-                        if (change.wasRemoved() && currentlyShownRecipe != null) {
-                            boolean stillPresent = client.services.RecipeManager.getInstance()
-                                    .getObservableRecipes()
-                                    .stream()
-                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
-                            if (!stillPresent) {
-                                javafx.application.Platform.runLater(() -> {
-                                    showMainScreen();
-                                    currentlyShownRecipe = null;
-                                });
-                            }
-                        }
-                    }
-                });
+        cloneButton.setOnAction(_ -> sidebarListCtrl.enterCloneMode());
+        removeButton.setOnAction(_ -> sidebarListCtrl.enterRemoveMode());
 
         sortUponSelection(sidebarListCtrl);
     }
@@ -190,6 +164,11 @@ public class MainApplicationCtrl implements Internationalizable {
         ingredientToggleButton.setToggleGroup(categoryToggleGroup);
         recipeToggleButton.setSelected(true);
         categoryToggleGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
+            if (newValue == recipeToggleButton) {
+                sidebarListCtrl.setSidebarMode(ESidebarMode.Recipe);
+            } else if  (newValue == ingredientToggleButton) {
+                sidebarListCtrl.setSidebarMode(ESidebarMode.Ingredient);
+            }
         });
     }
 
@@ -339,7 +318,7 @@ public class MainApplicationCtrl implements Internationalizable {
         if (sidebarListCtrl == null) {
             sidebarListCtrl = new SidebarListCtrl();
             sidebarListCtrl.initialize();
-            if (recipeListView != null) sidebarListCtrl.setListView(recipeListView);
+            if (sidebarListView != null) sidebarListCtrl.setListView(sidebarListView);
         }
         sidebarListCtrl.addRecipe(r);
     }

@@ -1,6 +1,7 @@
 package client.utils;
 
 import client.scenes.ListObject;
+import commons.Ingredient;
 import commons.Recipe;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Function;
 
 public class SortUtils {
     private List<String> languageFilters;
@@ -36,17 +38,36 @@ public class SortUtils {
 
     /**
      * Instantiates SortUtils with a given ObservableList of Recipe
-     * Creates a derived ObservableList of String that the SortUtils will use
+     * Creates a derived ObservableList of ListObject that the SortUtils will use
      * @param list the ObservableList the utils will sort from
      */
     public static SortUtils fromRecipeList(ObservableList<Recipe> list) {
+        return SortUtils.fromOtherList(list, ListObject::fromRecipe);
+    }
+
+    /**
+     * Instantiates SortUtils with a given ObservableList of Ingredient
+     * Creates a derived ObservableList of ListObject that the SortUtils will use
+     * @param list the ObservableList the utils will sort from
+     */
+    public static SortUtils fromIngredientList(ObservableList<Ingredient> list) {
+        return SortUtils.fromOtherList(list, ListObject::fromIngredient);
+    }
+
+    /**
+     * Instantiates SortUtils with a given ObservableList of T
+     * Creates a derived ObservableList of ListObject that the SortUtils will use
+     * @param list the ObservableList the utils will sort from
+     * @param mappingFunction the function that maps values from T to ListObject
+     */
+    public static <T> SortUtils fromOtherList(ObservableList<T> list, Function<T, ListObject> mappingFunction) {
         ObservableList<ListObject> derivedList= FXCollections.observableArrayList();
         CountDownLatch latch = new CountDownLatch(1);
         runOnFx(() ->
                 derivedList.addAll(
                         list
-                            .stream()
-                            .map(ListObject::fromRecipe).toList()
+                                .stream()
+                                .map(mappingFunction).toList()
                 )
         );
         latch.countDown();
@@ -55,14 +76,14 @@ public class SortUtils {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        list.addListener((ListChangeListener<? super Recipe>) changed -> {
+        list.addListener((ListChangeListener<? super T>) changed -> {
             CountDownLatch latch2 = new CountDownLatch(1);
             runOnFx(() -> {
                 derivedList.clear();
                 derivedList.addAll(
                         list
                                 .stream()
-                                .map(ListObject::fromRecipe).toList()
+                                .map(mappingFunction).toList()
                 );
                 latch2.countDown();
             });

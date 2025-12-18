@@ -21,7 +21,8 @@ public class RecipeManager {
     private final Map<UUID, Ingredient> ingredientsMap = new ConcurrentHashMap<>();
 
     // Observable list for UI binding (JavaFX)
-    private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
+    private final ObservableList<Recipe> recipesFx = FXCollections.observableArrayList();
+    private final ObservableList<Ingredient> ingredientsFx = FXCollections.observableArrayList();
 
     private static RecipeManager instance;
 
@@ -39,12 +40,17 @@ public class RecipeManager {
 
     /** Observable list for binding to ListView (mutated on FX thread). */
     public ObservableList<Recipe> getObservableRecipes() {
-        return recipes;
+        return recipesFx;
+    }
+
+    /** Observable list for binding to ListView (mutated on FX thread). */
+    public ObservableList<Ingredient> getObservableIngredients() {
+        return ingredientsFx;
     }
 
     /** Non-JavaFX snapshot for tests / logic. */
     public List<Recipe> getRecipesSnapshot() {
-        return new ArrayList<>(recipes);
+        return new ArrayList<>(recipesFx);
     }
 
     /** Return a snapshot state (defensive copies). */
@@ -77,8 +83,8 @@ public class RecipeManager {
         CountDownLatch latch = new CountDownLatch(1);
         runOnFx(() -> {
             int idx = indexOfRecipe(recipe.getId());
-            if (idx >= 0) recipes.set(idx, recipe);
-            else recipes.add(recipe);
+            if (idx >= 0) recipesFx.set(idx, recipe);
+            else recipesFx.add(recipe);
             latch.countDown();
         });
         try {
@@ -104,8 +110,8 @@ public class RecipeManager {
         if (recipe.getId() != null) recipesMap.put(recipe.getId(), recipe);
         runOnFx(() -> {
             int idx = indexOfRecipe(recipe.getId());
-            if (idx >= 0) recipes.set(idx, recipe);
-            else recipes.add(recipe);
+            if (idx >= 0) recipesFx.set(idx, recipe);
+            else recipesFx.add(recipe);
         });
     }
 
@@ -113,13 +119,18 @@ public class RecipeManager {
         if (recipeId == null) return false;
         Recipe removed = recipesMap.remove(recipeId);
         // still remove from observable list
-        runOnFx(() -> recipes.removeIf(r -> Objects.equals(r.getId(), recipeId)));
+        runOnFx(() -> recipesFx.removeIf(r -> Objects.equals(r.getId(), recipeId)));
         return removed != null;
     }
 
     public boolean setIngredient(Ingredient ingredient) {
         if (ingredient == null || ingredient.getId() == null) return false;
         ingredientsMap.put(ingredient.getId(), ingredient);
+        runOnFx(() -> {
+            int idx = indexOfIngredient(ingredient.getId());
+            if (idx >= 0) ingredientsFx.set(idx, ingredient);
+            else ingredientsFx.add(ingredient);
+        });
         return true;
     }
 
@@ -127,8 +138,16 @@ public class RecipeManager {
 
     private int indexOfRecipe(UUID id) {
         if (id == null) return -1;
-        for (int i = 0; i < recipes.size(); i++) {
-            if (Objects.equals(recipes.get(i).getId(), id)) return i;
+        for (int i = 0; i < recipesFx.size(); i++) {
+            if (Objects.equals(recipesFx.get(i).getId(), id)) return i;
+        }
+        return -1;
+    }
+
+    private int indexOfIngredient(UUID id) {
+        if (id == null) return -1;
+        for (int i = 0; i < ingredientsFx.size(); i++) {
+            if (Objects.equals(ingredientsFx.get(i).getId(), id)) return i;
         }
         return -1;
     }
@@ -142,7 +161,7 @@ public class RecipeManager {
     private void seedSampleRecipe() {
         try {
             Ingredient sampleIngredient = new Ingredient("Honey Tester", new NutritionValues(1,1,1));
-            ingredientsMap.put(sampleIngredient.getId(), sampleIngredient);
+            setIngredient(sampleIngredient);
 
             // empty ingredient list for quick seed
             List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
@@ -159,9 +178,7 @@ public class RecipeManager {
                     preparations,
                     servingSize);
 
-            // store in maps if id exists
-            if (sampleRecipe.getId() != null) recipesMap.put(sampleRecipe.getId(), sampleRecipe);
-            recipes.add(sampleRecipe);
+            addRecipeOptimistic(sampleRecipe);
         } catch (Throwable t) {
             // do not block startup on a test seed failure
             t.printStackTrace();
@@ -174,7 +191,7 @@ public class RecipeManager {
         ingredientsMap.clear();
         CountDownLatch latch =  new CountDownLatch(1);
         runOnFx(() -> {
-            recipes.clear();
+            recipesFx.clear();
             latch.countDown();
         });
         try {
