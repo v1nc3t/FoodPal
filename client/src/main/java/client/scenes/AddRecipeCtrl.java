@@ -206,6 +206,8 @@ public class AddRecipeCtrl implements Internationalizable {
         portionsProperty.set(resourceBundle.getString("txt.portions"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+
+        refreshSelectLanguage();
         //addProperty.set(resourceBundle.getString("txt.add"));
     }
 

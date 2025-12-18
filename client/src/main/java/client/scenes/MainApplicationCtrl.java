@@ -29,6 +29,23 @@ public class MainApplicationCtrl implements Internationalizable {
 
     @FXML private ChoiceBox<String> languageOptions;
 
+    private final StringProperty showRecipesProperty = new SimpleStringProperty();
+    @FXML
+    private Label showRecipesLabel;
+
+    private final StringProperty englishProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox englishFilter;
+
+    private final StringProperty germanProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox germanFilter;
+
+    private final StringProperty dutchProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox dutchFilter;
+
+
     @FXML
     private Button addButton;
 
@@ -71,6 +88,10 @@ public class MainApplicationCtrl implements Internationalizable {
      */
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
+        showRecipesLabel.textProperty().bind(showRecipesProperty);
+        englishFilter.textProperty().bind(englishProperty);
+        germanFilter.textProperty().bind(germanProperty);
+        dutchFilter.textProperty().bind(dutchProperty);
         //addButton.textProperty().bind(addProperty);
     }
 
@@ -83,6 +104,10 @@ public class MainApplicationCtrl implements Internationalizable {
     public void setLocale(Locale newLocale) {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
+        showRecipesProperty.set(resourceBundle.getString("txt.show_recipes"));
+        englishProperty.set(resourceBundle.getString("txt.en"));
+        germanProperty.set(resourceBundle.getString("txt.de"));
+        dutchProperty.set(resourceBundle.getString("txt.nl"));
         //addProperty.set(resourceBundle.getString("txt.add"));
     }
 
