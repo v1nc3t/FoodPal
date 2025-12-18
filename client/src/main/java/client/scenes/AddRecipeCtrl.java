@@ -88,6 +88,8 @@ public class AddRecipeCtrl implements Internationalizable {
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
     private final LocaleManager localeManager;
+    @Inject
+    private RecipeManager recipeManager;
 
     // callback so MainApplicationCtrl can be notified when a recipe is added
     private java.util.function.Consumer<Recipe> onRecipeAdded;
@@ -229,10 +231,9 @@ public class AddRecipeCtrl implements Internationalizable {
         Recipe r;
         try {
             r = getRecipe();
-            RecipeManager mgr = RecipeManager.getInstance();
 
             if (editingRecipe == null) {
-                mgr.addRecipeOptimistic(r);
+                recipeManager.addRecipeOptimistic(r);
 
                 if (onRecipeAdded != null) onRecipeAdded.accept(r);
 
@@ -242,7 +243,7 @@ public class AddRecipeCtrl implements Internationalizable {
                     // Server not available / failed: keep optimistic copy.
                 }
             } else {
-                if (!mgr.setRecipe(r)) {
+                if (!recipeManager.setRecipe(r)) {
                     System.out.println("Failed to add recipe " + r);
                 }
             }
@@ -397,7 +398,7 @@ public class AddRecipeCtrl implements Internationalizable {
      * @return a horizontal box with the ingredient name and delete button
      */
     private HBox createIngredientItem(RecipeIngredient recipeIngredient) {
-        Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+        Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
 
         //TODO find newIngredient based on id
 

@@ -40,18 +40,21 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     private final StringProperty editProperty = new SimpleStringProperty();
     @FXML private Button editButton;
-    @FXML
-    private Button printButton;
+
+    private final  StringProperty printProperty = new SimpleStringProperty();
+    @FXML private Button printButton;
 
     private Recipe currentRecipe;
 
     private MainApplicationCtrl mainCtrl;
     private final LocaleManager localeManager;
+    private final RecipeManager recipeManager;
 
     @Inject
-    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager) {
+    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager, RecipeManager recipeManager) {
         this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
+        this.recipeManager = recipeManager;
 
         localeManager.register(this);
     }
@@ -68,7 +71,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         languageSuffixLabel.textProperty().bind(languageSuffixProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
-
+        editButton.textProperty().bind(editProperty);
+        printButton.textProperty().bind(printProperty);
     }
 
     @Override
@@ -80,6 +84,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
+        editProperty.set(resourceBundle.getString("txt.edit"));
+        printProperty.set(resourceBundle.getString("txt.print"));
     }
 
   /**
@@ -111,7 +117,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         var ingredients = recipe.getIngredients();
         if (ingredients != null) {
             for (var recipeIngredient : ingredients) {
-                Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+                Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
                 ingredientsList.getItems().add(ingredient.getName() + " | " +
                         recipeIngredient.getAmount().toPrettyString());
             }
