@@ -46,6 +46,9 @@ public class MainApplicationCtrl implements Internationalizable {
     private Button cloneButton;
 
     @FXML
+    private Button favouriteButton;
+
+    @FXML
     private ListView<ListObject> recipeListView;
 
     private SidebarListCtrl sidebarListCtrl;
@@ -155,6 +158,10 @@ public class MainApplicationCtrl implements Internationalizable {
         if (removeButton != null) {
             removeButton.setOnAction(e -> sidebarListCtrl.enterRemoveMode());
         }
+        if (favouriteButton != null) {
+            favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
+        }
+
         //if the currently shown recipe disappears, close viewer.
         client.services.RecipeManager.getInstance().getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
