@@ -112,6 +112,7 @@ public class RecipeManager {
 
     public boolean removeRecipe(UUID recipeId) {
         if (recipeId == null) return false;
+        favouriteRecipes.remove(recipeId); // keep favourites consistent
         Recipe removed = recipesMap.remove(recipeId);
         // still remove from observable list
         runOnFx(() -> recipes.removeIf(r -> Objects.equals(r.getId(), recipeId)));
