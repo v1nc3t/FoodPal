@@ -62,8 +62,8 @@ public class SortUtils {
                 derivedList.clear();
                 derivedList.addAll(
                         list
-                                .stream()
-                                .map(ListObject::fromRecipe).toList()
+                            .stream()
+                            .map(ListObject::fromRecipe).toList()
                 );
                 latch2.countDown();
             });
@@ -132,12 +132,15 @@ public class SortUtils {
     }
 
     /**
-     * Sorts and filters the recipes from ObservableList by creating a SortedList.
+     * Sorts and filters the recipes from the ObservableList
+     * of ListObjects by creating a SortedList.
      * @return filtered SortedList with a set comparator
      */
     public SortedList<ListObject> applyFilters() {
         SortedList<ListObject> sortedList = new SortedList<>(list
-                .filtered(recipe-> true));
+                .filtered(listObject ->
+                            listObject.language().isPresent()
+                            && languageFilters.contains(listObject.language().get())));
 
         Comparator<ListObject> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);

@@ -163,7 +163,7 @@ class SortUtilsTest {
         assertEquals(List.of(Language.DE, Language.NL), sortUtils.getLanguageFilters());
 
         ObservableList<ListObject> expectedSampleList = FXCollections.observableArrayList(
-                Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList()
+                Stream.of(sample1, sample2).map(ListObject::fromRecipe).toList()
         );
         var expected = new SortedList<>(expectedSampleList);
 
