@@ -22,7 +22,6 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     @FXML private Label titleLabel;
 
-
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML private Label ingredientsLabel;
 
@@ -35,8 +34,9 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     private final StringProperty editProperty = new SimpleStringProperty();
     @FXML private Button editButton;
-    @FXML
-    private Button printButton;
+
+    private final  StringProperty printProperty = new SimpleStringProperty();
+    @FXML private Button printButton;
 
     private Recipe currentRecipe;
 
@@ -61,7 +61,8 @@ public class RecipeViewerCtrl implements Internationalizable {
     private void bindElementsProperties() {
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
-
+        editButton.textProperty().bind(editProperty);
+        printButton.textProperty().bind(printProperty);
     }
 
     @Override
@@ -69,6 +70,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
+        editProperty.set(resourceBundle.getString("txt.edit"));
+        printProperty.set(resourceBundle.getString("txt.print"));
     }
 
   /**
