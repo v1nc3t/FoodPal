@@ -67,7 +67,7 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
 
     private void sendConfirm(WebSocketSession session, String topic) throws Exception {
         Map<String, Object> response = new HashMap<>();
-        response.put("status", "SUCCESS");
+        response.put("status", "SUBSCRIBED");
         response.put("topic", topic);
         session.sendMessage(new TextMessage(mapper.writeValueAsString(response)));
     }
