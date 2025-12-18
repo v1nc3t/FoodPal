@@ -153,7 +153,6 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private void initialize() {
         bindElementsProperties();
-
         /* For UI testing purposes, since we don't have a button
          for language selection just yet, change this line
          if you want to visualize language changes.
@@ -163,51 +162,36 @@ public class MainApplicationCtrl implements Internationalizable {
          NL: Locale.forLanguageTag("nl-NL")
         */
         setLocale(localeManager.getCurrentLocale());
-
         prepareLanguageOptions();
-
         prepareSortBy();
-
-
-
-
         sidebarListCtrl.initialize();
-
         if (recipeListView != null) {
             sidebarListCtrl.setListView(recipeListView);
-
             sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
             // open viewer on double-click, and ignore clicks when in remove mode
             recipeListView.setOnMouseClicked(evt -> {
                 if (evt.getClickCount() != 2) return; // require double-click to open
-
                 var sel = recipeListView.getSelectionModel().getSelectedItem();
                 if (sel == null) return;
-
                 // If the list is in remove mode, the click was for deleting — ignore it
                 if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
                     recipeListView.getSelectionModel().clearSelection(); // avoid visual flicker
                     evt.consume();
                     return;
                 }
-
                 // Open the viewer
                 showRecipe(recipeManager.getRecipe(sel.id()));
             });
-
             if (cloneButton != null) {
                 cloneButton.setOnAction(e -> sidebarListCtrl.enterCloneMode());
             }
-
         }
-
         if (removeButton != null) {
             removeButton.setOnAction(e -> sidebarListCtrl.enterRemoveMode());
         }
         if (favouriteButton != null) {
             favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
         }
-
         //if the currently shown recipe disappears, close viewer.
         recipeManager.getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
@@ -226,7 +210,6 @@ public class MainApplicationCtrl implements Internationalizable {
                         }
                     }
                 });
-
         sortUponSelection(sidebarListCtrl);
     }
 
