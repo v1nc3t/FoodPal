@@ -79,19 +79,18 @@ public class SidebarListCtrl {
         // Handle remove-mode and clone-mode clicks in a single event filter.
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
             if (removeMode) {
-                Recipe sel = manager.getObservableRecipes().get(listView.getSelectionModel().getSelectedIndex());
+                ListObject sel = listView.getSelectionModel().getSelectedItem();
                 if (sel == null) {
                     exitRemoveMode();
                     ev.consume();
                     return;
                 }
 
-                boolean removed = manager.removeRecipe(sel.getId());
+                boolean removed = manager.removeRecipe(sel.id());
 
                 exitRemoveMode();
 
                 listView.getSelectionModel().clearSelection();
-
 
                 ev.consume();
                 return;
@@ -99,10 +98,10 @@ public class SidebarListCtrl {
 
 
             if (cloneMode) {
-                Recipe sel = RecipeManager.getInstance().getObservableRecipes().get(listView.getSelectionModel().getSelectedIndex());
+                ListObject sel = listView.getSelectionModel().getSelectedItem();
                 if (sel != null && onCloneRequest != null) {
-
-                    onCloneRequest.accept(sel);
+                    Recipe recipe = RecipeManager.getInstance().getRecipe(sel.id());
+                    onCloneRequest.accept(recipe);
                 }
 
                 exitCloneMode();
