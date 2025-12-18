@@ -162,10 +162,12 @@ class SortUtilsTest {
         sortUtils.setLanguageFilters(List.of(Language.DE, Language.NL));
         assertEquals(List.of(Language.DE, Language.NL), sortUtils.getLanguageFilters());
 
-        ObservableList<Recipe> expectedSampleList = FXCollections.observableArrayList(sample1, sample2);
+        ObservableList<ListObject> expectedSampleList = FXCollections.observableArrayList(
+                Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList()
+        );
         var expected = new SortedList<>(expectedSampleList);
 
-        expected.setComparator(Comparator.comparing(Recipe::getTitle));
+        expected.setComparator(Comparator.comparing(ListObject::name));
         var actual = sortUtils.applyFilters();
 
         assertEquals(expected, actual, "Expected a different SortedList after applyFilters().");

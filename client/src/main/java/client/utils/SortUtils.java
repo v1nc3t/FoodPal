@@ -37,7 +37,7 @@ public class SortUtils {
 
     /**
      * Instantiates SortUtils with a given ObservableList of Recipe
-     * Creates a derived ObservableList of String that the SortUtils will use
+     * Creates a derived ObservableList of ListObject that the SortUtils will use
      * @param list the ObservableList the utils will sort from
      */
     public static SortUtils fromRecipeList(ObservableList<Recipe> list) {
@@ -152,15 +152,15 @@ public class SortUtils {
     public Comparator<ListObject> getComparator() {
         return switch (sortMethod) {
             case "Alphabetical" ->
-                    Comparator.comparing(
-                            ListObject::name,
-                            String.CASE_INSENSITIVE_ORDER
-                    );
+                Comparator.comparing(
+                        ListObject::name,
+                        String.CASE_INSENSITIVE_ORDER
+                );
             case "Most recent" ->
-                    Comparator.comparing(
-                            ListObject::name,
-                            String.CASE_INSENSITIVE_ORDER.reversed()
-                    );
+                Comparator.comparing(
+                        ListObject::name,
+                        String.CASE_INSENSITIVE_ORDER.reversed()
+                );
             default -> throw new IllegalStateException("Unexpected value: " + sortMethod);
         };
     }
