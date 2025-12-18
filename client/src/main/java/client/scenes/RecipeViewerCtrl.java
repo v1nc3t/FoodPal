@@ -42,11 +42,13 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     private MainApplicationCtrl mainCtrl;
     private final LocaleManager localeManager;
+    private final RecipeManager recipeManager;
 
     @Inject
-    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager) {
+    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager, RecipeManager recipeManager) {
         this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
+        this.recipeManager = recipeManager;
 
         localeManager.register(this);
     }
@@ -102,7 +104,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         var ingredients = recipe.getIngredients();
         if (ingredients != null) {
             for (var recipeIngredient : ingredients) {
-                Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+                Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
                 ingredientsList.getItems().add(ingredient.getName() + " | " + recipeIngredient.getAmount().toPrettyString());
             }
         }

@@ -23,7 +23,6 @@ import java.net.URISyntaxException;
 
 import client.services.LocaleManager;
 import com.google.inject.Injector;
-
 import client.config.ConfigManager;
 import client.utils.ServerUtils;
 import javafx.application.Application;

@@ -23,19 +23,10 @@ public class RecipeManager {
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
 
-    private static RecipeManager instance;
-
     public RecipeManager() {
         // Seed a test recipe so ListView shows something immediately during manual testing.
         seedSampleRecipe();
     }
-
-    public static synchronized RecipeManager getInstance() {
-        if (instance == null) instance = new RecipeManager();
-        return instance;
-    }
-
-
 
     /** Observable list for binding to ListView (mutated on FX thread). */
     public ObservableList<Recipe> getObservableRecipes() {
@@ -183,5 +174,4 @@ public class RecipeManager {
             e.printStackTrace();
         }
     }
-
 }
