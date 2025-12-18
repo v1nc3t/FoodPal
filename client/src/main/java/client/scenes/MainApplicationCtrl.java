@@ -42,9 +42,12 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private Button refreshButton;
 
+    private final StringProperty cloneProperty = new SimpleStringProperty();
+
     @FXML
     private Button cloneButton;
 
+    private final StringProperty favouriteProperty = new SimpleStringProperty();
     @FXML
     private Button favouriteButton;
 
@@ -78,6 +81,9 @@ public class MainApplicationCtrl implements Internationalizable {
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
         //addButton.textProperty().bind(addProperty);
+        favouriteButton.textProperty().bind(favouriteProperty);
+        cloneButton.textProperty().bind(cloneProperty);
+
     }
 
     /**
@@ -90,6 +96,10 @@ public class MainApplicationCtrl implements Internationalizable {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
         //addProperty.set(resourceBundle.getString("txt.add"));
+        favouriteProperty.set(resourceBundle.getString("txt.favourite"));
+        cloneProperty.set(resourceBundle.getString("txt.clone"));
+
+
     }
 
     /**
