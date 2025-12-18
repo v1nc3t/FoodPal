@@ -45,7 +45,6 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty refreshProperty = new SimpleStringProperty();
     @FXML private Button refreshButton;
 
-
     private final StringProperty cloneProperty = new SimpleStringProperty();
     @FXML private Button cloneButton;
 
@@ -83,12 +82,10 @@ public class MainApplicationCtrl implements Internationalizable {
      */
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
-        //addButton.textProperty().bind(addProperty);
-        favouriteButton.textProperty().bind(favouriteProperty);
-        cloneButton.textProperty().bind(cloneProperty);
-
         cloneButton.textProperty().bind(cloneProperty);
         searchField.promptTextProperty().bind(searchProperty);
+        //addButton.textProperty().bind(addProperty);
+        favouriteButton.textProperty().bind(favouriteProperty);
     }
 
     /**
@@ -102,10 +99,12 @@ public class MainApplicationCtrl implements Internationalizable {
 
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
         cloneProperty.set(resourceBundle.getString("txt.clone"));
+        favouriteProperty.set(resourceBundle.getString("txt.favourite"));
         searchProperty.set(resourceBundle.getString("txt.search"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
         recentProperty.set(resourceBundle.getString("txt.recent"));
+
         if (orderBy != null) {
             int selectedIndex = orderBy.getSelectionModel().getSelectedIndex();
             orderBy.getItems().setAll(
@@ -118,25 +117,20 @@ public class MainApplicationCtrl implements Internationalizable {
         englishProperty.set(resourceBundle.getString("txt.english"));
         germanProperty.set(resourceBundle.getString("txt.german"));
         dutchProperty.set(resourceBundle.getString("txt.dutch"));
+
         if (languageOptions != null) {
             int selectedIndex = languageOptions.getSelectionModel().getSelectedIndex();
-
             languageOptions.getItems().setAll(
                     englishProperty.get(),
                     germanProperty.get(),
                     dutchProperty.get()
             );
-
             if (selectedIndex >= 0) {
                 languageOptions.getSelectionModel().select(selectedIndex);
             }
         }
-        //addProperty.set(resourceBundle.getString("txt.add"));
-        favouriteProperty.set(resourceBundle.getString("txt.favourite"));
-        cloneProperty.set(resourceBundle.getString("txt.clone"));
-
-
     }
+
 
     /**
      *  This clears the current screen back to the main(blank for now)
@@ -160,11 +154,21 @@ public class MainApplicationCtrl implements Internationalizable {
     private void initialize() {
         bindElementsProperties();
 
+        /* For UI testing purposes, since we don't have a button
+         for language selection just yet, change this line
+         if you want to visualize language changes.
+         Parameter choices:
+         EN: DEFAULT_LOCALE
+         DE: Locale.GERMAN
+         NL: Locale.forLanguageTag("nl-NL")
+        */
         setLocale(localeManager.getCurrentLocale());
 
         prepareLanguageOptions();
 
         prepareSortBy();
+
+
 
 
         sidebarListCtrl.initialize();
