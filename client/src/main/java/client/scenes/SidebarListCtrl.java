@@ -22,7 +22,7 @@ public class SidebarListCtrl {
     private boolean removeMode = false;
     private boolean cloneMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
-    private final ESidebarMode currentMode = ESidebarMode.Recipe;
+    private ESidebarMode currentMode = ESidebarMode.Recipe;
 
 
     /**
@@ -35,14 +35,32 @@ public class SidebarListCtrl {
         }
     }
 
-    private void initializeSortUtils(ESidebarMode _mode) {
-        initializeRecipeSortUtils();
+    /**
+     * Initializes SortUtils for sorting and filtering
+     */
+    private void initializeSortUtils(ESidebarMode mode) {
+        switch (mode) {
+            case Recipe:
+                initializeRecipeSortUtils();
+                break;
+            case Ingredient:
+                initializeIngredientSortUtils();
+        }
+    }
+
+    /**
+     * Initializes SortUtils for sorting using Recipes from the RecipeManager
+     */
+    private void initializeRecipeSortUtils() {
+        // This makes a list which is automatically updated whenever the list of recipes changes.
+        var recipesList = manager.getObservableRecipes();
+        sortUtils = SortUtils.fromRecipeList(recipesList);
     }
 
     /**
      * Initializes SortUtils for sorting and filtering
      */
-    private void initializeRecipeSortUtils() {
+    private void initializeIngredientSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
         var recipesList = manager.getObservableRecipes();
         sortUtils = SortUtils.fromRecipeList(recipesList);

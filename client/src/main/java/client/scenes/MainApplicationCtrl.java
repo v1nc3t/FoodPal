@@ -48,6 +48,12 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private ListView<ListObject> recipeListView;
 
+    @FXML
+    private ToggleButton recipeToggleButton;
+    @FXML
+    private ToggleButton ingredientToggleButton;
+    private final ToggleGroup categoryToggleGroup = new ToggleGroup();
+
     private SidebarListCtrl sidebarListCtrl;
 
     private final MyFXML fxml;
@@ -118,6 +124,8 @@ public class MainApplicationCtrl implements Internationalizable {
         */
         setLocale(localeManager.getCurrentLocale());
 
+        initializeSidebarListCtrl();
+
         prepareLanguageOptions();
 
         prepareSortBy();
@@ -175,6 +183,14 @@ public class MainApplicationCtrl implements Internationalizable {
                 });
 
         sortUponSelection(sidebarListCtrl);
+    }
+
+    private void initializeSidebarListCtrl() {
+        recipeToggleButton.setToggleGroup(categoryToggleGroup);
+        ingredientToggleButton.setToggleGroup(categoryToggleGroup);
+        recipeToggleButton.setSelected(true);
+        categoryToggleGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
+        });
     }
 
     /**

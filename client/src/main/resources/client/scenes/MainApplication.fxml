@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ToggleButton?>
 
 <GridPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.MainApplicationCtrl">
     <columnConstraints>
@@ -30,6 +31,10 @@
                         <!---<ChoiceBox fx:id="languageOptions" layoutX="586.0" layoutY="13.0" onAction="#changeLanguage" prefHeight="25.0" prefWidth="100.0" />-->
                         <ChoiceBox fx:id="orderBy" />
                     </children>
+                </HBox>
+                <HBox>
+                    <ToggleButton fx:id="recipeToggleButton" text="Recipes" />
+                    <ToggleButton fx:id="ingredientToggleButton" text="Ingredients" />
                 </HBox>
                 <ListView fx:id="recipeListView" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
                 <HBox alignment="CENTER" spacing="8.0">
