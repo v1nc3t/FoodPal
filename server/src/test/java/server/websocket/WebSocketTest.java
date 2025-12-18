@@ -17,15 +17,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// AI has been used for the @SpringBootTest because I couldn't figure it out.
+// so  @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+//     @LocalServerPort
+//    int port;
+//    String WEB_SOCKET_URL = "ws://localhost:"+port+"/ws";
+//Were helped by AI
 
-/**
- * AI has been used for @SpringBootTest part because I couldn't get it to work so the line:
- * @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
- *  @LocalServerPort
- *     int port;
- *     String WEB_SOCKET_URL = "ws://localhost:"+port+"/ws";
- *     Were debug using AI
- */
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class WebSocketTest {
