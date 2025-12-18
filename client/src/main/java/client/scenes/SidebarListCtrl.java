@@ -23,6 +23,7 @@ public class SidebarListCtrl {
     private ListView<ListObject> listView;
     private boolean removeMode = false;
     private boolean cloneMode = false;
+    private boolean favouriteMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
     private final ESidebarMode currentMode = ESidebarMode.Recipe;
 
@@ -74,7 +75,13 @@ public class SidebarListCtrl {
             @Override
             protected void updateItem(ListObject item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.name());
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    boolean fav = recipeManager.isFavourite(item.id());
+                    setText((fav ? "★ " : "") + item.name());
+                }
+
             }
         });
 
@@ -112,6 +119,19 @@ public class SidebarListCtrl {
                 ev.consume();
                 return;
             }
+            if (favouriteMode) {
+                ListObject sel = listView.getSelectionModel().getSelectedItem();
+                if (sel != null) {
+                    recipeManager.toggleFavourite(sel.id());
+                    listView.refresh(); // redraw star
+                }
+
+                exitFavouriteMode();
+                listView.getSelectionModel().clearSelection();
+                ev.consume();
+                return;
+            }
+
 
 
         });
@@ -213,6 +233,16 @@ public class SidebarListCtrl {
 
     public void setOnRecipeCloneRequest(java.util.function.Consumer<Recipe> callback) {
         this.onCloneRequest = callback;
+    }
+    public void enterFavouriteMode() {
+        removeMode = false;
+        cloneMode = false;
+        favouriteMode = true;
+        if (listView != null) listView.requestFocus();
+    }
+
+    private void exitFavouriteMode() {
+        favouriteMode = false;
     }
 
 }

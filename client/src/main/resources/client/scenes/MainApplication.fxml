@@ -30,6 +30,7 @@
                     <Button fx:id="removeButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
                     <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refresh" text="${controller.refreshProperty}" />
                     <Button fx:id="cloneButton" mnemonicParsing="false" />
+                    <Button fx:id="favouriteButton" mnemonicParsing="false" />
                </children>
             </HBox>
          </children>

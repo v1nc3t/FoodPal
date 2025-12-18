@@ -129,4 +129,5 @@ public class LocaleManagerTest {
             return locale;
         }
     }
+
 }
