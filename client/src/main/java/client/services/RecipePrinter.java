@@ -165,20 +165,4 @@ public class RecipePrinter {
         }
         return preparationBox;
     }
-    private String extractAllText(VBox root) {
-        StringBuilder sb = new StringBuilder();
-
-        root.getChildren().forEach(node -> {
-            if (node instanceof Label label) {
-                sb.append(label.getText());
-            } else if (node instanceof Text text) {
-                sb.append(text.getText());
-            } else if (node instanceof VBox box) {
-                sb.append(extractAllText(box));
-            }
-        });
-
-        return sb.toString();
-    }
-
 }
