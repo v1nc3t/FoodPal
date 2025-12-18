@@ -19,6 +19,7 @@ public class RecipeManager {
 
     private final Map<UUID, Recipe> recipesMap = new ConcurrentHashMap<>();
     private final Map<UUID, Ingredient> ingredientsMap = new ConcurrentHashMap<>();
+    private final Set<UUID> favouriteRecipes = new HashSet<>();
 
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipes = FXCollections.observableArrayList();
@@ -102,6 +103,7 @@ public class RecipeManager {
 
     public boolean removeRecipe(UUID recipeId) {
         if (recipeId == null) return false;
+        favouriteRecipes.remove(recipeId); // keep favourites consistent
         Recipe removed = recipesMap.remove(recipeId);
         // still remove from observable list
         runOnFx(() -> recipes.removeIf(r -> Objects.equals(r.getId(), recipeId)));
@@ -176,4 +178,21 @@ public class RecipeManager {
             e.printStackTrace();
         }
     }
+    public boolean isFavourite(UUID id) {
+        return favouriteRecipes.contains(id);
+    }
+
+    public void toggleFavourite(UUID id) {
+        if (id == null) return;
+        if (favouriteRecipes.contains(id)) {
+            favouriteRecipes.remove(id);
+        } else {
+            favouriteRecipes.add(id);
+        }
+    }
+
+    public Set<UUID> getFavouriteRecipesSnapshot() {
+        return Set.copyOf(favouriteRecipes);
+    }
+
 }

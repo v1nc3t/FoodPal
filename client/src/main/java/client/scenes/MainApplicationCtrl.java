@@ -4,10 +4,9 @@ import client.MyFXML;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
 import commons.Language;
-import jakarta.inject.Inject;
+import com.google.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -63,6 +62,10 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty cloneProperty = new SimpleStringProperty();
     @FXML private Button cloneButton;
 
+    private final StringProperty favouriteProperty = new SimpleStringProperty();
+    @FXML
+    private Button favouriteButton;
+
     @FXML
     private ListView<ListObject> recipeListView;
 
@@ -99,6 +102,7 @@ public class MainApplicationCtrl implements Internationalizable {
         dutchFilter.textProperty().bind(dutchProperty);
         cloneButton.textProperty().bind(cloneProperty);
         searchField.promptTextProperty().bind(searchProperty);
+        favouriteButton.textProperty().bind(favouriteProperty);
     }
 
     /**
@@ -113,10 +117,12 @@ public class MainApplicationCtrl implements Internationalizable {
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
         showRecipesProperty.set(resourceBundle.getString("txt.show_recipes"));
         cloneProperty.set(resourceBundle.getString("txt.clone"));
+        favouriteProperty.set(resourceBundle.getString("txt.favourite"));
         searchProperty.set(resourceBundle.getString("txt.search"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
         recentProperty.set(resourceBundle.getString("txt.recent"));
+
         if (orderBy != null) {
             int selectedIndex = orderBy.getSelectionModel().getSelectedIndex();
             orderBy.getItems().setAll(
@@ -131,18 +137,17 @@ public class MainApplicationCtrl implements Internationalizable {
         dutchProperty.set(resourceBundle.getString("txt.nl"));
         if (languageOptions != null) {
             int selectedIndex = languageOptions.getSelectionModel().getSelectedIndex();
-
             languageOptions.getItems().setAll(
                     englishProperty.get(),
                     germanProperty.get(),
                     dutchProperty.get()
             );
-
             if (selectedIndex >= 0) {
                 languageOptions.getSelectionModel().select(selectedIndex);
             }
         }
     }
+
 
     /**
      *  This clears the current screen back to the main(blank for now)
@@ -167,43 +172,36 @@ public class MainApplicationCtrl implements Internationalizable {
         bindElementsProperties();
 
         setLocale(localeManager.getCurrentLocale());
-
         prepareLanguageOptions();
-
         prepareSortBy();
 
         sidebarListCtrl.initialize();
-
         if (recipeListView != null) {
             sidebarListCtrl.setListView(recipeListView);
-
             sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
             // open viewer on double-click, and ignore clicks when in remove mode
             recipeListView.setOnMouseClicked(evt -> {
                 if (evt.getClickCount() != 2) return; // require double-click to open
-
                 var sel = recipeListView.getSelectionModel().getSelectedItem();
                 if (sel == null) return;
-
                 // If the list is in remove mode, the click was for deleting — ignore it
                 if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
                     recipeListView.getSelectionModel().clearSelection(); // avoid visual flicker
                     evt.consume();
                     return;
                 }
-
                 // Open the viewer
                 showRecipe(recipeManager.getRecipe(sel.id()));
             });
-
             if (cloneButton != null) {
                 cloneButton.setOnAction(e -> sidebarListCtrl.enterCloneMode());
             }
-
         }
-
         if (removeButton != null) {
             removeButton.setOnAction(e -> sidebarListCtrl.enterRemoveMode());
+        }
+        if (favouriteButton != null) {
+            favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
         }
         //if the currently shown recipe disappears, close viewer.
         recipeManager.getObservableRecipes()
@@ -223,7 +221,6 @@ public class MainApplicationCtrl implements Internationalizable {
                         }
                     }
                 });
-
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters();
         filterUponSelection(sidebarListCtrl);
