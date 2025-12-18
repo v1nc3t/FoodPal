@@ -78,7 +78,7 @@ public class SidebarListCtrl {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    boolean fav = manager.isFavourite(item.id());
+                    boolean fav = recipeManager.isFavourite(item.id());
                     setText((fav ? "★ " : "") + item.name());
                 }
 
@@ -122,7 +122,7 @@ public class SidebarListCtrl {
             if (favouriteMode) {
                 ListObject sel = listView.getSelectionModel().getSelectedItem();
                 if (sel != null) {
-                    manager.toggleFavourite(sel.id());
+                    recipeManager.toggleFavourite(sel.id());
                     listView.refresh(); // redraw star
                 }
 
