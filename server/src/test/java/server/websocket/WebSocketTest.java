@@ -2,6 +2,8 @@ package server.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
@@ -15,9 +17,22 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
+/**
+ * AI has been used for @SpringBootTest part because I couldn't get it to work so the line:
+ * @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+ *  @LocalServerPort
+ *     int port;
+ *     String WEB_SOCKET_URL = "ws://localhost:"+port+"/ws";
+ *     Were debug using AI
+ */
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class WebSocketTest {
 
-    private static final String WEB_SOCKET_URL = "ws://localhost:8080/ws";
+    @LocalServerPort
+    int port;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
@@ -30,6 +45,8 @@ public class WebSocketTest {
                 serverResponse.complete(message.getPayload());
             }
         };
+
+        String WEB_SOCKET_URL = "ws://localhost:"+port+"/ws";
 
         WebSocketClient client = new StandardWebSocketClient();
         WebSocketSession session = client.execute(handler, WEB_SOCKET_URL).get(5, TimeUnit.SECONDS);
