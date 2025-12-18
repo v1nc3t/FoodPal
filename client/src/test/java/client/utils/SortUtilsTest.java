@@ -1,5 +1,6 @@
 package client.utils;
 
+import client.scenes.ListObject;
 import client.services.RecipeManager;
 import commons.Recipe;
 import javafx.application.Platform;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,7 +37,8 @@ class SortUtilsTest {
 
     @BeforeEach
     void beforeEach() {
-        recipeManager = RecipeManager.getInstance();
+        recipeManager = new RecipeManager();
+        recipeManager.clearForTests();
         String title1 = "Test Pancakes";
         String title2 = "A pizza";
         String title3 = "X pizza";
@@ -50,20 +53,15 @@ class SortUtilsTest {
         recipeManager.addRecipeOptimistic(sample2);
     }
 
-    @AfterEach
-    void afterEach() {
-        recipeManager.clearForTests();
-    }
-
     @Test
     void constructorTest() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertNotNull(sortUtils, "Newly initialized SortUtils should not be null.");
     }
 
     @Test
     void getLanguageFilters() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         List<String> expected = new ArrayList<>(List.of("en", "de", "nl"));
         List<String> actual = sortUtils.getLanguageFilters();
 
@@ -75,7 +73,7 @@ class SortUtilsTest {
 
     @Test
     void setLanguageFilters() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         List<String> expected = new ArrayList<>(List.of("lt"));
 
         sortUtils.setLanguageFilters(expected);
@@ -89,7 +87,7 @@ class SortUtilsTest {
 
     @Test
     void addLanguageFilter() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         List<String> expected = new ArrayList<>(List.of("en", "de", "nl", "lt"));
 
         sortUtils.addLanguageFilter("lt");
@@ -103,14 +101,14 @@ class SortUtilsTest {
 
     @Test
     void getSortMethod() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
 
         assertEquals("Alphabetical", sortUtils.getSortMethod(), "Expected a different sort method.");
     }
 
     @Test
     void setSortMethod() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         sortUtils.setSortMethod("Reverse alphabetical");
 
         assertEquals("Reverse alphabetical", sortUtils.getSortMethod(), "Expected a different sort method afer setting one.");
@@ -118,7 +116,7 @@ class SortUtilsTest {
 
     @Test
     void loadConfig() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         sortUtils.setSortMethod("Reverse alphabetical");
         sortUtils.setLanguageFilters(List.of("lt"));
         sortUtils.loadConfig();
@@ -131,27 +129,29 @@ class SortUtilsTest {
 
     @Test
     void applyFilters() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertEquals("Alphabetical", sortUtils.getSortMethod());
 
-        ObservableList<Recipe> sampleList = FXCollections.observableArrayList(sample, sample1, sample2);
-        SortedList<Recipe> expected = new SortedList<>(sampleList);
+        ObservableList<ListObject> sampleList = FXCollections.observableArrayList(
+                Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList()
+        );
+        var expected = new SortedList<>(sampleList);
 
-        expected.setComparator(Comparator.comparing(Recipe::getTitle));
-        SortedList<Recipe> actual = sortUtils.applyFilters();
+        expected.setComparator(Comparator.comparing(ListObject::name));
+        var actual = sortUtils.applyFilters();
 
         assertEquals(expected, actual, "Expected a different SortedList after applyFilters().");
     }
 
     @Test
     void getComparator() {
-        SortUtils sortUtils = new SortUtils(recipeManager);
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertEquals("Alphabetical", sortUtils.getSortMethod());
 
-        Comparator<Recipe> comparator = Comparator.comparing(Recipe::getTitle);
+        Comparator<ListObject> comparator = Comparator.comparing(ListObject::name);
 
-        List<Recipe> expected = new ArrayList<>(List.of(sample, sample1, sample2));
-        List<Recipe> actual = new ArrayList<>(List.of(sample2, sample1, sample));
+        var expected = new ArrayList<>(Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList());
+        var actual = new ArrayList<>(Stream.of(sample, sample1, sample2).map(ListObject::fromRecipe).toList());
         expected.sort(comparator);
         actual.sort(sortUtils.getComparator());
 
