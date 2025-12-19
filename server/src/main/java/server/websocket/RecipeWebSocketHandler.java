@@ -13,9 +13,9 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
     private final WebSocketHub hub;
     private final ObjectMapper mapper;
 
-    public RecipeWebSocketHandler(WebSocketHub hub) {
+    public RecipeWebSocketHandler(WebSocketHub hub, ObjectMapper mapper) {
         this.hub = hub;
-        this.mapper = new ObjectMapper();
+        this.mapper = mapper;
     }
 
     @Override
