@@ -27,6 +27,12 @@ import com.google.inject.Scopes;
 
 public class MyModule implements Module {
 
+    private final client.config.ConfigManager configManager;
+
+    public MyModule(client.config.ConfigManager configManager) {
+        this.configManager = configManager;
+    }
+
     @Override
     public void configure(Binder binder) {
         binder.bind(MainApplicationCtrl.class).in(Scopes.SINGLETON);
@@ -35,5 +41,7 @@ public class MyModule implements Module {
         binder.bind(SidebarListCtrl.class).in(Scopes.SINGLETON);
         binder.bind(LocaleManager.class).in(Scopes.SINGLETON);
         binder.bind(RecipeManager.class).in(Scopes.SINGLETON);
+        binder.bind(client.services.ShoppingListManager.class).in(Scopes.SINGLETON);
+        binder.bind(client.config.ConfigManager.class).toInstance(configManager);
     }
 }
