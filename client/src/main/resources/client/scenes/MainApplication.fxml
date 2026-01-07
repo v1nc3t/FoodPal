@@ -34,6 +34,7 @@
                     <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refresh" text="${controller.refreshProperty}" />
                     <Button fx:id="cloneButton" mnemonicParsing="false" />
                     <Button fx:id="favouriteButton" mnemonicParsing="false" />
+                    <Button fx:id="shoppingListButton" mnemonicParsing="false" onAction="#showShoppingList" text="🛒" />
                </children>
             </HBox>
          </children>
