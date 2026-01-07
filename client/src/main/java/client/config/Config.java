@@ -8,9 +8,10 @@ public class Config {
     private List<UUID> favoriteRecipeIDs;
     private String languagePreference;
     private List<String> languageFilters;
-    private List<UUID> shoppingListIngredientIDs;
+    private List<client.shoppingList.ShoppingListItem> shoppingList;
 
-    public Config() {}
+    public Config() {
+    }
 
     public String getServerAddress() {
         return serverAddress;
@@ -44,11 +45,11 @@ public class Config {
         this.languageFilters = languageFilters;
     }
 
-    public List<UUID> getShoppingListIngredientIDs() {
-        return shoppingListIngredientIDs;
+    public List<client.shoppingList.ShoppingListItem> getShoppingList() {
+        return shoppingList;
     }
 
-    public void setShoppingListIngredientIDs(List<UUID> shoppingListIngredientIDs) {
-        this.shoppingListIngredientIDs = shoppingListIngredientIDs;
+    public void setShoppingList(List<client.shoppingList.ShoppingListItem> shoppingList) {
+        this.shoppingList = shoppingList;
     }
 }

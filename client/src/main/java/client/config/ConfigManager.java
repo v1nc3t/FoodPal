@@ -21,14 +21,14 @@ public class ConfigManager {
 
     public ConfigManager(String customCfgPath) {
         this.mapper = new ObjectMapper()
-                        .enable(SerializationFeature.INDENT_OUTPUT);
+                .enable(SerializationFeature.INDENT_OUTPUT);
 
         if (customCfgPath != null) {
             this.configPath = Path.of(customCfgPath);
         } else {
             String userHome = System.getProperty("user.home");
             Path dirPath = Path.of(userHome, ".foodpal");
-            
+
             if (!Files.exists(dirPath)) {
                 try {
                     Files.createDirectories(dirPath);
@@ -46,10 +46,10 @@ public class ConfigManager {
                 createDefaultConfig();
             }
 
-            String json  = Files.readString(configPath, StandardCharsets.UTF_8);
+            String json = Files.readString(configPath, StandardCharsets.UTF_8);
             this.config = mapper.readValue(json, Config.class);
         } catch (Exception e) {
-            createDefaultConfig();       // If loading fails, create a default config
+            createDefaultConfig(); // If loading fails, create a default config
             // throw new RuntimeException("Failed to load config: " + e.getMessage(), e);
         }
     }
@@ -81,13 +81,13 @@ public class ConfigManager {
         this.config = config;
     }
 
-    private Config createDefaultConfigObject(){
+    private Config createDefaultConfigObject() {
         Config defaultConfig = new Config();
         defaultConfig.setServerAddress("http://localhost:8080");
         defaultConfig.setFavoriteRecipeIDs(java.util.Collections.emptyList());
         defaultConfig.setLanguagePreference("en");
         defaultConfig.setLanguageFilters(java.util.Collections.emptyList());
-        defaultConfig.setShoppingListIngredientIDs(java.util.Collections.emptyList());
+        defaultConfig.setShoppingList(java.util.Collections.emptyList());
         return defaultConfig;
     }
 }
