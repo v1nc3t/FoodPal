@@ -111,9 +111,12 @@ public class ShoppingListCtrl implements Internationalizable {
         ResourceBundle bundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         titleLabel.setText(bundle.getString("txt.shopping_list"));
         clearButton.setText(bundle.getString("txt.clear"));
-        printButton.setText("Print"); // missing from bundle likely, using hardcoded for now or add to bundle?
+        addManualButton.setText(bundle.getString("txt.add_item"));
+
         if (bundle.containsKey("txt.print")) {
             printButton.setText(bundle.getString("txt.print"));
+        } else {
+            printButton.setText("Print");
         }
     }
 
