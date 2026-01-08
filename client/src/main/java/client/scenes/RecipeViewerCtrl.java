@@ -52,6 +52,9 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final StringProperty printProperty = new SimpleStringProperty();
     @FXML
     private Button printButton;
+    private final StringProperty addToShoppingListProperty = new SimpleStringProperty();
+    @FXML
+    private Button addToShoppingListButton;
 
     private Recipe currentRecipe;
 
@@ -86,6 +89,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         preparationLabel.textProperty().bind(preparationProperty);
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
+        addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
     }
 
     @Override
@@ -99,6 +103,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
         editProperty.set(resourceBundle.getString("txt.edit"));
         printProperty.set(resourceBundle.getString("txt.print"));
+        addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
     }
 
     /**

@@ -14,7 +14,7 @@
                      <Font size="14.0" />
                  </font>
              </Label>
-            <Button fx:id="addToShoppingListButton" text="Add to Shopping List" mnemonicParsing="false" onAction="#addToShoppingList" />
+            <Button fx:id="addToShoppingListButton" text="${controller.addToShoppingListProperty}" mnemonicParsing="false" onAction="#addToShoppingList" />
             <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" />
          </children>
          <padding>
