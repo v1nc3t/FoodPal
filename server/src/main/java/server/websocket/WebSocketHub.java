@@ -1,44 +1,87 @@
 package server.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class WebSocketHub {
 
-    private final List<WebSocketSession> titleSubscribers = new ArrayList<>();
-    private final Map<Long, List<WebSocketSession>> recipeSubscribers = new HashMap<>();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    public synchronized void subscribeTitles(WebSocketSession session) {
+    private final CopyOnWriteArrayList<WebSocketSession> titleSubscribers = new CopyOnWriteArrayList<>();
+    private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> recipeSubscribers = new ConcurrentHashMap<>();
+
+    //private final List<WebSocketSession> titleSubscribers = new ArrayList<>();
+    //private final Map<Long, List<WebSocketSession>> recipeSubscribers = new HashMap<>();
+
+    public void subscribeTitles(WebSocketSession session) {
         if (!titleSubscribers.contains(session)) {
             titleSubscribers.add(session);
         }
     }
 
-    public synchronized void subscribeRecipe(WebSocketSession session, long recipeId) {
-        if (!recipeSubscribers.containsKey(recipeId)) {
-            recipeSubscribers.put(recipeId, new ArrayList<>());
+    public void subscribeRecipe(WebSocketSession session, UUID recipeId) {
+        recipeSubscribers.computeIfAbsent(
+                recipeId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session
+        );
+    }
+
+    public void broadcastTitleUpdate(Object allRecipes) {
+        WebSocketResponse response = new WebSocketResponse(
+                WebSocketTypes.UPDATE,
+                "recipe-titles",
+                allRecipes);
+        broadcast(titleSubscribers, response);
+    }
+
+    public void broadcastRecipeUpdate(UUID recipeId, Object recipeData) {
+        List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
+        if (sessions != null && !sessions.isEmpty()) {
+            WebSocketResponse response = new WebSocketResponse(
+                    WebSocketTypes.UPDATE,
+                    "recipe",
+                    recipeData);
+            broadcast(sessions, response);
+        }
+    }
+
+    private void broadcast(List<WebSocketSession> sessions, WebSocketResponse response) {
+        String json;
+
+        try {
+            json = mapper.writeValueAsString(response);
+        } catch (IOException e) {
+            return;
         }
 
-        List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
-        if (!sessions.contains(session)) {
-            sessions.add(session);
+        TextMessage message = new TextMessage(json);
+
+        for (WebSocketSession session : sessions) {
+            try {
+                if (session.isOpen()) {
+                    session.sendMessage(message);
+                } else {
+                    removeSessionEverywhere(session);
+                }
+            } catch (IOException e) {
+                removeSessionEverywhere(session);
+            }
         }
     }
 
     public synchronized void removeSessionEverywhere(WebSocketSession session) {
         titleSubscribers.remove(session);
 
-        for (Long id : recipeSubscribers.keySet()) {
-            List<WebSocketSession> sessions = recipeSubscribers.get(id);
-            sessions.remove(session);
-        }
-
-        recipeSubscribers.values().removeIf(List::isEmpty);
+        recipeSubscribers.values().forEach(sessions -> sessions.remove(session));
+        recipeSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);
     }
 }
