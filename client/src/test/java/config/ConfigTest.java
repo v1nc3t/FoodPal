@@ -18,9 +18,11 @@ class ConfigTest {
     UUID recId2 = UUID.randomUUID();
     String lang;
     List<String> filters;
-    List<UUID> ingredientIds;
-    UUID ingredientId = UUID.randomUUID();
-    UUID ingredientId2 = UUID.randomUUID();
+    List<client.shoppingList.ShoppingListItem> items;
+    client.shoppingList.ShoppingListItem item1 = new client.shoppingList.ShoppingListItem(UUID.randomUUID(),
+            new commons.Amount(1, "kg"));
+    client.shoppingList.ShoppingListItem item2 = new client.shoppingList.ShoppingListItem(UUID.randomUUID(),
+            new commons.Amount(2, "l"));
 
     @BeforeEach
     void setUp() {
@@ -33,13 +35,13 @@ class ConfigTest {
         config.setLanguagePreference(lang);
         filters = Arrays.asList("en", "fr");
         config.setLanguageFilters(filters);
-        ingredientIds = Arrays.asList(ingredientId, ingredientId2);
-        config.setShoppingListIngredientIDs(ingredientIds);
+        items = Arrays.asList(item1, item2);
+        config.setShoppingList(items);
     }
 
     @Test
     void testDefaultConstructor() {
-        Config config1 = new Config();   
+        Config config1 = new Config();
         assertNotNull(config1);
     }
 
@@ -83,7 +85,7 @@ class ConfigTest {
     @Test
     void getLanguageFiltersTest() {
         assertEquals(filters, config.getLanguageFilters());
-    }  
+    }
 
     @Test
     void setLanguageFiltersTest() {
@@ -93,15 +95,16 @@ class ConfigTest {
     }
 
     @Test
-    void getShoppingListIngredientIDsTest() {
-        assertEquals(ingredientIds, config.getShoppingListIngredientIDs());
+    void getShoppingListTest() {
+        assertEquals(items, config.getShoppingList());
     }
 
     @Test
-    void setShoppingListIngredientIDsTest() {
-        UUID ingredientId3 = UUID.randomUUID();
-        List<UUID> newIngredientIds = Arrays.asList(ingredientId, ingredientId2, ingredientId3);
-        config.setShoppingListIngredientIDs(newIngredientIds);
-        assertEquals(newIngredientIds, config.getShoppingListIngredientIDs());
+    void setShoppingListTest() {
+        client.shoppingList.ShoppingListItem item3 = new client.shoppingList.ShoppingListItem(UUID.randomUUID(),
+                new commons.Amount(5, "kg"));
+        List<client.shoppingList.ShoppingListItem> newItems = Arrays.asList(item1, item2, item3);
+        config.setShoppingList(newItems);
+        assertEquals(newItems, config.getShoppingList());
     }
 }

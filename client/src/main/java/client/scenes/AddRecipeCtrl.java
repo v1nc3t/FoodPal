@@ -21,6 +21,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -146,6 +147,15 @@ public class AddRecipeCtrl implements Internationalizable {
         ingredientsScrollPane.setFitToWidth(true);
 
         ingredientsList.setSpacing(5);
+
+        /* Custom tab behavior: when focus is on preparation text-area,
+        pressing tab will focus the add-preparation button */
+        preparationField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB) {
+                event.consume();          
+                addPreparationButton.requestFocus(); 
+            }
+        });
     }
 
     /**
