@@ -30,7 +30,9 @@ public class WebSocketHub {
     }
 
     public void subscribeRecipe(WebSocketSession session, UUID recipeId) {
-        recipeSubscribers.computeIfAbsent(recipeId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session);
+        recipeSubscribers.computeIfAbsent(
+                recipeId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session
+        );
     }
 
     public void broadcastTitleUpdate(Object allRecipes) {
@@ -79,10 +81,7 @@ public class WebSocketHub {
     public synchronized void removeSessionEverywhere(WebSocketSession session) {
         titleSubscribers.remove(session);
 
-        recipeSubscribers.forEach((id, sessions) -> {
-            sessions.remove(session);
-        });
-
+        recipeSubscribers.values().forEach(sessions -> sessions.remove(session));
         recipeSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);
     }
 }

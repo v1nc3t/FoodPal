@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.util.UUID;
+
 
 @Component
 public class RecipeWebSocketHandler extends TextWebSocketHandler {
@@ -59,12 +61,17 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             sendConfirm(session, "recipe-titles");
 
         } else if (topic.equals("recipe")) {
-            long id = json.path("recipeId").asLong(-1);
-            if (id == -1) {
+            String idStr = json.path("recipeId").asText(null);
+            if (idStr == null || idStr.isEmpty()) {
                 sendErrorMessage(session, "recipeId is missing");
             } else {
-                hub.subscribeRecipe(session, id);
-                sendConfirm(session, "recipe");
+                try {
+                    UUID recipeId = UUID.fromString(idStr);
+                    hub.subscribeRecipe(session, recipeId);
+                    sendConfirm(session, "recipe");
+                } catch (IllegalArgumentException e) {
+                    sendErrorMessage(session, "recipeId is not a valid UUID format");
+                }
             }
         } else {
             sendErrorMessage(session, "Unknown topic: " + topic);
