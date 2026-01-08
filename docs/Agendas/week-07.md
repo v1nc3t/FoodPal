@@ -4,7 +4,7 @@
 **Location** - online - link provided by TA on Mattermost
 **Chair** - @hiwabuchi
 **Minute Taker** - @teodormusat
-**Expected attendees** - @lzajac @hiwabuchi @teodormusat @gciobanu @kmartirosyan @emilieska
+**Expected attendees** - @lzajac @hiwabuchi @teodormusat @gciobanu @emilieska
 
 
 # Meeting plan:
