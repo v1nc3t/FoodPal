@@ -12,16 +12,17 @@ import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class ShoppingListManager {
 
     private final ObservableList<ShoppingListItem> items = FXCollections.observableArrayList();
     private final ConfigManager configManager;
+    private final RecipeManager recipeManager;
 
     @Inject
-    public ShoppingListManager(ConfigManager configManager) {
+    public ShoppingListManager(ConfigManager configManager, RecipeManager recipeManager) {
         this.configManager = configManager;
+        this.recipeManager = recipeManager;
         loadFromConfig();
     }
 
@@ -102,6 +103,17 @@ public class ShoppingListManager {
                         ri.getIngredientRef(),
                         ri.getAmount(),
                         recipe.getId());
+
+                // Snapshot the name for persistence
+                try {
+                    var ingredient = recipeManager.getIngredient(ri);
+                    if (ingredient != null) {
+                        item.setCustomName(ingredient.getName());
+                    }
+                } catch (Exception e) {
+                    // fall back to unknown/null customName
+                }
+
                 items.add(item);
             }
             saveToConfig();

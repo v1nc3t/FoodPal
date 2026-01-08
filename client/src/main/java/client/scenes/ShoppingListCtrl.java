@@ -9,7 +9,6 @@ import com.google.inject.Inject;
 import commons.Amount;
 import commons.Ingredient;
 import commons.RecipeIngredient;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -19,7 +18,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
