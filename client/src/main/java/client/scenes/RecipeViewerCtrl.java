@@ -20,6 +20,7 @@ import java.util.ResourceBundle;
 
 public class RecipeViewerCtrl implements Internationalizable {
 
+    private final StringProperty titleProperty = new SimpleStringProperty();
     @FXML
     private Label titleLabel;
 
@@ -65,8 +66,8 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final ShoppingListManager shoppingListManager;
 
     @Inject
-    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager, RecipeManager recipeManager,
-            ShoppingListManager shoppingListManager) {
+    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
+                            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
         this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
         this.recipeManager = recipeManager;
@@ -83,6 +84,7 @@ public class RecipeViewerCtrl implements Internationalizable {
     }
 
     private void bindElementsProperties() {
+        titleLabel.textProperty().bind(titleProperty);
         languageLabel.textProperty().bind(languageProperty);
         languageSuffixLabel.textProperty().bind(languageSuffixProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
@@ -98,6 +100,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         if (currentRecipe != null) {
             languageSuffixProperty.set(currentRecipe.getLanguage().proper());
         }
+        titleProperty.set(resourceBundle.getString("txt.recipe_name"));
         languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
@@ -115,14 +118,14 @@ public class RecipeViewerCtrl implements Internationalizable {
         this.currentRecipe = recipe;
 
         if (recipe == null) {
-            titleLabel.setText("");
+            titleProperty.set("");
             ingredientsList.getItems().clear();
             preparationList.getItems().clear();
             return;
         }
 
         languageSuffixProperty.set(recipe.getLanguage().proper());
-        titleLabel.setText(recipe.getTitle());
+        titleProperty.set(recipe.getTitle());
         setIngredientsList(recipe);
         setPreparationList(recipe);
     }
