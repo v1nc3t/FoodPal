@@ -2,6 +2,7 @@ package server.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.web.socket.TextMessage;
@@ -12,6 +13,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -25,40 +27,60 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 //Were helped by AI
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WebSocketTest {
 
     @LocalServerPort
     int port;
 
+    @Autowired
+    private WebSocketHub hub;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     void testSubscribeToRecipeTitles() throws Exception {
-        CompletableFuture<String> serverResponse = new CompletableFuture<>();
+        // use two futurs: confirminig subscription and recieving updates
+        CompletableFuture<String> subConfirmation = new CompletableFuture<>();
+        CompletableFuture<String> dataUpdate = new CompletableFuture<>();
 
         TextWebSocketHandler handler = new TextWebSocketHandler() {
             @Override
             protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-                serverResponse.complete(message.getPayload());
+                String payload = message.getPayload();
+                if (payload.contains("SUBSCRIBED")) {
+                    subConfirmation.complete(payload);
+                } else if (payload.contains("UPDATE")) {
+                    dataUpdate.complete(payload);
+                }
             }
         };
 
-        String WEB_SOCKET_URL = "ws://localhost:"+port+"/ws";
+        String url = "ws://localhost:" + port + "/ws";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        WebSocketSession session = client.execute(handler, url).get(5, TimeUnit.SECONDS);
 
-        WebSocketClient client = new StandardWebSocketClient();
-        WebSocketSession session = client.execute(handler, WEB_SOCKET_URL).get(5, TimeUnit.SECONDS);
+        // subscribe to a recipe
+        UUID recipeId = UUID.randomUUID();
+        Map<String, Object> subRequest = new HashMap<>();
+        subRequest.put("type", "SUBSCRIBE");
+        subRequest.put("topic", "recipe");
+        subRequest.put("recipeId", recipeId.toString());
 
-        Map<String, String> request = new HashMap<>();
-        request.put("type", "SUBSCRIBE");
-        request.put("topic", "recipe-titles");
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
 
-        session.sendMessage(new TextMessage(mapper.writeValueAsString(request)));
+        // check if confirmation is got
+        String subResult = subConfirmation.get(2, TimeUnit.SECONDS);
+        assertTrue(subResult.contains("SUBSCRIBED"));
 
-        String result = serverResponse.get(5, TimeUnit.SECONDS);
+        // update on server, simulating other user editing recipe
+        String updatedTitle = "Test Recipe Title";
+        hub.broadcastRecipeUpdate(recipeId, updatedTitle);
 
-        assertTrue(result.contains("SUBSCRIBED"));
-        assertTrue(result.contains("recipe-titles"));
+        // check if client got the notification
+        String updateResult = dataUpdate.get(5, TimeUnit.SECONDS);
+        assertTrue(updateResult.contains("UPDATE"), "Client should receive an UPDATE message");
+        assertTrue(updateResult.contains(updatedTitle), "Message should contain the new data");
 
         session.close();
     }

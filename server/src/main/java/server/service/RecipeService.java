@@ -7,6 +7,7 @@ import commons.RecipeState;
 import org.springframework.stereotype.Service;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
+import server.websocket.WebSocketHub;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -19,10 +20,14 @@ public class RecipeService implements IRecipeService {
 
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
+    private final WebSocketHub webSocketHub;
 
-    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
+    public RecipeService(RecipeRepository recipeRepository,
+                         IngredientRepository ingredientRepository,
+                         WebSocketHub webSocketHub) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
+        this.webSocketHub = webSocketHub;
 
         for (Ingredient ingredient : ingredientRepository.findAll()) {
             ingredients.put(ingredient.getId(), ingredient);
@@ -54,11 +59,16 @@ public class RecipeService implements IRecipeService {
             throw new InvalidRecipeError();
         recipes.put(recipe.getId(), recipe);
         recipeRepository.save(recipe);
+
+        webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
+        webSocketHub.broadcastTitleUpdate(getState());
     }
 
     @Override
     public void setIngredient(Ingredient ingredient) {
         ingredients.put(ingredient.getId(), ingredient);
         ingredientRepository.save(ingredient);
+
+        webSocketHub.broadcastTitleUpdate(getState());
     }
 }
