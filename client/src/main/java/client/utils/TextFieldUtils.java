@@ -70,7 +70,7 @@ public class TextFieldUtils {
         try {
             double input = Double.parseDouble(text);
             if (validated && !Double.isNaN(input) && !Double.isInfinite(input)
-                    && input > 0 && input < Double.MAX_VALUE) {
+                    && input >= 0 && input < Double.MAX_VALUE) {
                 return input;
             } else {
                 throw new NumberFormatException("Input not in a valid format.");
