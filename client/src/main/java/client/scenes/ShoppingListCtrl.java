@@ -118,6 +118,7 @@ public class ShoppingListCtrl implements Internationalizable {
         } else {
             printButton.setText("Print");
         }
+        shoppingListView.refresh();
     }
 
     private class ShoppingListCell extends ListCell<ShoppingListItem> {
@@ -149,10 +150,12 @@ public class ShoppingListCtrl implements Internationalizable {
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
 
-                Button editBtn = new Button("Edit");
+                ResourceBundle bundle = ResourceBundle.getBundle(localeManager.getBundleName(),
+                        localeManager.getCurrentLocale());
+                Button editBtn = new Button(bundle.getString("txt.edit"));
                 editBtn.setOnAction(e -> editItem(item));
 
-                Button removeBtn = new Button("X");
+                Button removeBtn = new Button("-");
                 removeBtn.setOnAction(e -> shoppingListManager.removeItem(item));
 
                 root.getChildren().addAll(nameLabel, amountLabel, spacer, editBtn, removeBtn);
