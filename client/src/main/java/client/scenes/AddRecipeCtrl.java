@@ -311,7 +311,7 @@ public class AddRecipeCtrl implements Internationalizable {
         String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
         Language language = getLanguage();
         List<String> preparations = getPreparations();
-        int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
+        int servingSize = TextFieldUtils.getPositiveIntFromField(servingSizeField,servingSizeLabel);
         if(editingRecipe == null){
             // new recipe
             return new Recipe(name, ingredients, preparations, servingSize, language);

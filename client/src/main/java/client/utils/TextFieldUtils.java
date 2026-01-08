@@ -5,6 +5,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class TextFieldUtils {
 
     /**
@@ -23,52 +26,88 @@ public class TextFieldUtils {
     }
 
     /**
-     * Extracts a non-null integer from a field
+     * Extracts a non-null positive integer from a field
      * @param textField user input
      * @param label to customize error message
-     * @return an integer of user input
-     * @throws NumberFormatException when input is null or not integer
+     * @return a positive integer of user input
+     * @throws NumberFormatException when input is null, non-positive, or not an integer
      */
-    public static int getIntFromField(TextField textField, Label label) {
+    public static int getPositiveIntFromField(TextField textField, Label label) {
         String text = textField.getText();
 
         try {
-            return Integer.parseInt(text);
+            int input = Integer.parseInt(text);
+            if (input > 0) {
+                return input;
+            }
+            else {
+                throw new NumberFormatException("Input not in a valid format.");
+            }
         } catch (NumberFormatException e) {
-            String message = label.getText() + " must be a number";
+            String message = label.getText() + " must be a positive whole number";
 
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(message);
             alert.showAndWait();
 
-            textField.clear();
             throw new NumberFormatException(message);
         }
     }
 
     /**
-     * Extract a non-null double from a field
+     * Extract a non-null positive finite double from a field
      * @param textField user input
      * @param label to customize error message
-     * @return a double of user input
-     * @throws NumberFormatException when input is null or not double
+     * @return a positive double of user input
+     * @throws NumberFormatException when input is null, non-positive, or not double
      */
-    public static double getDoubleFromField(TextField textField, Label label) {
+    public static double getPositiveDoubleFromField(TextField textField, Label label) {
         String text = textField.getText();
+        text = text.replace(',', '.');
+        boolean validated = validatePattern(text);
 
         try {
-            return Double.parseDouble(text);
+            double input = Double.parseDouble(text);
+            if (validated && !Double.isNaN(input) && !Double.isInfinite(input)
+                    && input > 0 && input < Double.MAX_VALUE) {
+                return input;
+            } else {
+                throw new NumberFormatException("Input not in a valid format.");
+            }
         } catch (NumberFormatException e) {
-            String message = label.getText() + " must be a number, with or without decimal point";
+            String message = label.getText()
+                    + " must be a positive number, with or without decimal point."
+                    + " Please use at most 5 digits after the decimal point.";
 
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
             alert.setContentText(message);
             alert.showAndWait();
 
-            textField.clear();
             throw new NumberFormatException(message);
         }
+    }
+
+    /**
+     * Validates the user input by performing a regex pattern check,
+     * allowing signs, digits, and a decimal part up to 5 digits after the decimal point.
+     * @param text user input
+     * @return true if the pattern matches, false otherwise
+     */
+    private static boolean validatePattern(String text) {
+        Pattern plainNumber = Pattern.compile("^[+-]?(\\d+)(?:\\.(\\d+))?$");
+        text = text.trim();
+        Matcher matcher = plainNumber.matcher(text);
+        if (matcher.matches()) {
+            String fractionalPart = matcher.group(2);
+            if (fractionalPart != null) {
+                return fractionalPart.length() <= 5;
+            }
+        } else {
+            return false;
+        }
+
+        return true;
     }
 }
