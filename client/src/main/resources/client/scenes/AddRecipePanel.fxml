@@ -48,8 +48,8 @@
       </ScrollPane>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-             <Label fx:id="servingSizeLabel" text="${controller.servingSizeProperty}" />
-             <TextField fx:id="servingSizeField" promptText="${controller.portionsProperty}" />
+             <Label fx:id="servingsLabel" text="${controller.portionsProperty}" />
+             <TextField fx:id="servingsField" promptText="${controller.portionsProperty}" />
              <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
              <Button fx:id="doneButton" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
          </children>

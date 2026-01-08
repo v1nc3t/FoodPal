@@ -32,6 +32,14 @@ public class RecipeViewerCtrl implements Internationalizable {
     @FXML
     private Label languageSuffixLabel;
 
+    private final StringProperty portionsProperty = new SimpleStringProperty();
+    @FXML
+    private Label portionsLabel;
+
+    private final StringProperty portionsValueProperty = new SimpleStringProperty();
+    @FXML
+    private Label portionsValueLabel;
+
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML
     private Label ingredientsLabel;
@@ -87,6 +95,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         titleLabel.textProperty().bind(titleProperty);
         languageLabel.textProperty().bind(languageProperty);
         languageSuffixLabel.textProperty().bind(languageSuffixProperty);
+        portionsLabel.textProperty().bind(portionsProperty);
+        portionsValueLabel.textProperty().bind(portionsValueProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
         editButton.textProperty().bind(editProperty);
@@ -102,6 +112,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         }
         titleProperty.set(resourceBundle.getString("txt.recipe_name"));
         languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
+        portionsProperty.set(resourceBundle.getString("txt.portions") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
         editProperty.set(resourceBundle.getString("txt.edit"));
@@ -125,6 +136,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         }
 
         languageSuffixProperty.set(recipe.getLanguage().proper());
+        portionsValueProperty.set(String.valueOf(recipe.getPortions()));
         titleProperty.set(recipe.getTitle());
         setIngredientsList(recipe);
         setPreparationList(recipe);

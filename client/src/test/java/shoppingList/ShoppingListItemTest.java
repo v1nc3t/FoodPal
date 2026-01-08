@@ -39,9 +39,9 @@ public class ShoppingListItemTest {
         String step2 = "Bake at 350 degrees for 30 minutes.";
         steps = List.of(step1, step2);
 
-        int servingSize = 4;
+        int portions = 4;
 
-        recipe = new Recipe("Cake", ingredients, steps, servingSize, Language.EN);
+        recipe = new Recipe("Cake", ingredients, steps, portions, Language.EN);
 
         shopListItem = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount, recipe.getId());
     }

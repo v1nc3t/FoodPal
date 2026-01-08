@@ -47,14 +47,14 @@ class SortUtilsTest {
         String title2 = "A pizza";
         String title3 = "X pizza";
         List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
-        int servingSize = 2;
+        int portions = 2;
         languageEN = Language.EN;
         languageDE = Language.DE;
         languageNL = Language.NL;
 
-        sample = new Recipe(title1, new ArrayList<>(), preparations, servingSize, languageEN);
-        sample1 = new Recipe(title2, new ArrayList<>(), preparations, servingSize, languageDE);
-        sample2 = new Recipe(title3, new ArrayList<>(), preparations, servingSize, languageNL);
+        sample = new Recipe(title1, new ArrayList<>(), preparations, portions, languageEN);
+        sample1 = new Recipe(title2, new ArrayList<>(), preparations, portions, languageDE);
+        sample2 = new Recipe(title3, new ArrayList<>(), preparations, portions, languageNL);
         recipeManager.addRecipeOptimistic(sample);
         recipeManager.addRecipeOptimistic(sample1);
         recipeManager.addRecipeOptimistic(sample2);

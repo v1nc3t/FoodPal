@@ -41,6 +41,8 @@
                <Label fx:id="languageLabel" text="${controller.languageProperty}" />
                <Label fx:id="languageSuffixLabel" text="${controller.languageSuffixProperty}" />
                <Region HBox.hgrow="ALWAYS" />
+               <Label fx:id="portionsLabel" text="${controller.portionsProperty}" />
+               <Label fx:id="portionsValueLabel" text="${controller.portionsValueProperty}" />
                <Button fx:id="editButton" mnemonicParsing="false" onAction="#editRecipe" >
                    <BorderPane.margin>
                        <Insets bottom="10.0" left="10.0" right="10.0" />

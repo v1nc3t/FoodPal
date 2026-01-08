@@ -140,7 +140,7 @@ public class RecipeManager {
 
             // empty ingredient list for quick seed
             List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
-            int servingSize = 2;
+            int portions = 2;
             Language language = Language.EN;
 
             Recipe sampleRecipe = new Recipe("Test Pancakes",
@@ -151,7 +151,7 @@ public class RecipeManager {
                             )
                     ),
                     preparations,
-                    servingSize,
+                    portions,
                     language);
 
             // store in maps if id exists
