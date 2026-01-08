@@ -271,12 +271,16 @@ public class AddRecipeCtrl implements Internationalizable {
         mainCtrl.showRecipeViewer(r);
     }
 
+    /**
+     * Closes the recipe viewer by discarding all changes. If changes should be saved, call
+     * clickDone() instead.
+     */
     private void closeView() {
         Recipe justSaved = editingRecipe;
         clearFields();
 
         if (justSaved != null) {
-            mainCtrl.editRecipe(justSaved);
+            mainCtrl.showRecipeViewer(justSaved);
         } else {
             mainCtrl.showMainScreen();
         }
