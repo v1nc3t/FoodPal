@@ -23,6 +23,10 @@ public class WebSocketHub {
     //private final List<WebSocketSession> titleSubscribers = new ArrayList<>();
     //private final Map<Long, List<WebSocketSession>> recipeSubscribers = new HashMap<>();
 
+    public int getTitleSubscribersCount() {
+        return titleSubscribers.size();
+    }
+
     public void subscribeTitles(WebSocketSession session) {
         if (!titleSubscribers.contains(session)) {
             titleSubscribers.add(session);
