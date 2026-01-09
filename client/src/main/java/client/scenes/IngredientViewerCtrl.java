@@ -6,6 +6,7 @@ import commons.Ingredient;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 
@@ -13,6 +14,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class IngredientViewerCtrl implements Internationalizable {
+    @FXML
+    private Button editButton;
+    private final StringProperty editButtonProperty = new SimpleStringProperty();
     @FXML
     private Label nutritionalValueLabel;
     private final StringProperty nutritionalValueProperty = new SimpleStringProperty();
@@ -36,6 +40,8 @@ public class IngredientViewerCtrl implements Internationalizable {
     @Inject
     LocaleManager localeManager;
 
+    private Ingredient ingredient;
+
     @FXML
     private void initialize() {
         bindElementsProperties();
@@ -45,6 +51,7 @@ public class IngredientViewerCtrl implements Internationalizable {
     }
 
     public void setIngredient(Ingredient ingredient) {
+        this.ingredient = ingredient;
         titleLabel.setText(ingredient.getName());
         var nv = ingredient.getNutritionValues();
         proteinValue.setText(Double.toString(nv.protein()));
@@ -57,6 +64,7 @@ public class IngredientViewerCtrl implements Internationalizable {
         fatLabel.textProperty().bind(fatProperty);
         carbsLabel.textProperty().bind(carbsProperty);
         nutritionalValueLabel.textProperty().bind(nutritionalValueProperty);
+        editButton.textProperty().bind(editButtonProperty);
     }
 
     @Override
@@ -65,6 +73,7 @@ public class IngredientViewerCtrl implements Internationalizable {
         proteinProperty.set(resourceBundle.getString("txt.protein") + ": ");
         fatProperty.set(resourceBundle.getString("txt.fat") + ": ");
         carbsProperty.set(resourceBundle.getString("txt.carbs") + ": ");
-        nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values"));
+        nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values") + " (100g)");
+        editButtonProperty.set(resourceBundle.getString("txt.edit"));
     }
 }
