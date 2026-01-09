@@ -120,6 +120,26 @@ public class RecipeManager {
         return removed != null;
     }
 
+    public boolean removeIngredient(UUID ingredientId) {
+        if (ingredientId == null) return false;
+        var usedRecipe =
+                recipesMap
+                        .values()
+                        .stream()
+                        .filter(
+                        rv -> rv
+                                .getIngredients()
+                                .stream()
+                                .anyMatch(ri -> ri.ingredientRef == ingredientId)
+                ).findAny().orElse(null);
+        if (usedRecipe != null)
+            throw new RuntimeException("Cannot remove ingredient, because it is used in recipe: " + usedRecipe.getTitle());
+        Ingredient removed = ingredientsMap.remove(ingredientId);
+        // still remove from observable list
+        runOnFx(() -> ingredientsFx.removeIf(r -> Objects.equals(r.getId(), ingredientId)));
+        return removed != null;
+    }
+
     public boolean setIngredient(Ingredient ingredient) {
         if (ingredient == null || ingredient.getId() == null) return false;
         ingredientsMap.put(ingredient.getId(), ingredient);
