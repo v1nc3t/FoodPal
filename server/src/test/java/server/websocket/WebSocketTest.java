@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // AI has been used for the @SpringBootTest because I couldn't figure it out.
@@ -39,7 +40,7 @@ public class WebSocketTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void testSubscribeToRecipeTitles() throws Exception {
+    public void testSubscribeToRecipeTitles() throws Exception {
         // use two futurs: confirminig subscription and recieving updates
         CompletableFuture<String> subConfirmation = new CompletableFuture<>();
         CompletableFuture<String> dataUpdate = new CompletableFuture<>();
@@ -66,7 +67,6 @@ public class WebSocketTest {
         subRequest.put("type", "SUBSCRIBE");
         subRequest.put("topic", "recipe");
         subRequest.put("recipeId", recipeId.toString());
-
         session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
 
         // check if confirmation is got
@@ -83,5 +83,82 @@ public class WebSocketTest {
         assertTrue(updateResult.contains(updatedTitle), "Message should contain the new data");
 
         session.close();
+    }
+
+    @Test
+    public void testUnsubscribeFromRecipe() throws Exception {
+        CompletableFuture<String> unsubConfirmation = new CompletableFuture<>();
+        CompletableFuture<String> shouldNotRecive = new CompletableFuture<>();
+
+        TextWebSocketHandler handler = new TextWebSocketHandler() {
+            @Override
+            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+                String payload = message.getPayload();
+                if (payload.contains("UNSUBSCRIBE")) {
+                    unsubConfirmation.complete(payload);
+                } else if (payload.contains("UPDATE")) {
+                    // if we gat an update after unsubscribing, this means it fails
+                    shouldNotRecive.complete(payload);
+                }
+            }
+        };
+
+        String url = "ws://localhost:" + port + "/ws";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        WebSocketSession session = client.execute(handler, url).get(5, TimeUnit.SECONDS);
+
+        UUID recipeId = UUID.randomUUID();
+
+        // subscribe
+        Map<String, Object> subRequest = new HashMap<>();
+        subRequest.put("type", "SUBSCRIBE");
+        subRequest.put("topic", "recipe");
+        subRequest.put("recipeId", recipeId.toString());
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
+
+        // unsubscribe
+        Map<String, Object> unsubRequest = new HashMap<>();
+        unsubRequest.put("type", "UNSUBSCRIBE");
+        unsubRequest.put("topic", "recipe");
+        unsubRequest.put("recipeId", recipeId.toString());
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(unsubRequest)));
+
+        // check for unsubscribe confirmation
+        String unsubResult = unsubConfirmation.get(5, TimeUnit.SECONDS);
+        assertTrue(unsubResult.contains("UNSUBSCRIBE"));
+
+        // broadcast on server
+        hub.broadcastRecipeUpdate(recipeId, "Update should be ignored");
+
+        boolean recieved = true;
+        try {
+            shouldNotRecive.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            recieved = false;
+        }
+        assertFalse(recieved, "Client should not get updates after unsubscribing");
+
+        session.close();
+    }
+
+    @Test
+    public void testCleanupOnDissconnect() throws Exception {
+        String url = "ws://localhost:" + port + "/ws";
+        WebSocketClient client = new StandardWebSocketClient();
+
+        WebSocketSession session = client.execute(new TextWebSocketHandler(), url).get(5, TimeUnit.SECONDS);
+
+        Map<String, Object> subRequest = new HashMap<>();
+        subRequest.put("type", "SUBSCRIBE");
+        subRequest.put("topic", "recipe");
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
+
+        Thread.sleep(5000);
+
+        session.close();
+
+        Thread.sleep(5000);
+
+        assertTrue(hub.getTitleSubscribersCount() == 0);
     }
 }

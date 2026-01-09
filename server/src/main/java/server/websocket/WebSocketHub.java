@@ -23,6 +23,10 @@ public class WebSocketHub {
     //private final List<WebSocketSession> titleSubscribers = new ArrayList<>();
     //private final Map<Long, List<WebSocketSession>> recipeSubscribers = new HashMap<>();
 
+    public int getTitleSubscribersCount() {
+        return titleSubscribers.size();
+    }
+
     public void subscribeTitles(WebSocketSession session) {
         if (!titleSubscribers.contains(session)) {
             titleSubscribers.add(session);
@@ -33,6 +37,21 @@ public class WebSocketHub {
         recipeSubscribers.computeIfAbsent(
                 recipeId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session
         );
+    }
+
+    public void unsubscribeTitles(WebSocketSession session) {
+        titleSubscribers.remove(session);
+    }
+
+    public void unsubscribeRecipe(WebSocketSession session, UUID recipeId) {
+        List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
+        if (sessions != null) {
+            sessions.remove(session);
+
+            if (sessions.isEmpty()) {
+                recipeSubscribers.remove(recipeId);
+            }
+        }
     }
 
     public void broadcastTitleUpdate(Object allRecipes) {
