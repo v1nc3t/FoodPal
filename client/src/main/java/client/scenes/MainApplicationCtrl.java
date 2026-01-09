@@ -76,8 +76,10 @@ public class MainApplicationCtrl implements Internationalizable {
 
     @FXML
     private ToggleButton recipeToggleButton;
+    private final StringProperty recipeToggleTextProperty = new SimpleStringProperty();
     @FXML
     private ToggleButton ingredientToggleButton;
+    private final StringProperty ingredientToggleTextProperty = new SimpleStringProperty();
     private final ToggleGroup categoryToggleGroup = new ToggleGroup();
 
     @Inject
@@ -114,6 +116,8 @@ public class MainApplicationCtrl implements Internationalizable {
         cloneButton.textProperty().bind(cloneProperty);
         searchField.promptTextProperty().bind(searchProperty);
         favouriteButton.textProperty().bind(favouriteProperty);
+        recipeToggleButton.textProperty().bind(recipeToggleTextProperty);
+        ingredientToggleButton.textProperty().bind(ingredientToggleTextProperty);
     }
 
     /**
@@ -131,6 +135,8 @@ public class MainApplicationCtrl implements Internationalizable {
         cloneProperty.set(resourceBundle.getString("txt.clone"));
         favouriteProperty.set(resourceBundle.getString("txt.favourite"));
         searchProperty.set(resourceBundle.getString("txt.search"));
+        recipeToggleTextProperty.set(resourceBundle.getString("txt.recipe"));
+        ingredientToggleTextProperty.set(resourceBundle.getString("txt.ingredient"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
         recentProperty.set(resourceBundle.getString("txt.recent"));
