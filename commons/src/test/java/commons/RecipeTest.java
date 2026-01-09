@@ -31,10 +31,10 @@ public class RecipeTest {
         String step2 = "Bake at 350 degrees for 30 minutes.";
         steps = List.of(step1, step2);
 
-        int servingSize = 4;
+        int portions = 4;
         language = Language.EN;
 
-        recipe = new Recipe("Cake", ingredients, steps, servingSize, language);
+        recipe = new Recipe("Cake", ingredients, steps, portions, language);
 
         id = recipe.getId();
     }
@@ -65,8 +65,8 @@ public class RecipeTest {
     }
 
     @Test
-    public void testGetServingSize() {
-        assertEquals(4, recipe.getServingSize());
+    public void testGetPortions() {
+        assertEquals(4, recipe.getPortions());
     }
 
     @Test

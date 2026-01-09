@@ -24,7 +24,7 @@ public class RecipeCloneTest {
         assertNotNull(cloned.getId());
         assertNotEquals(original.getId(), cloned.getId(), "IDs must differ");
         assertEquals("Clone Name", cloned.getTitle());
-        assertEquals(original.getServingSize(), cloned.getServingSize());
+        assertEquals(original.getPortions(), cloned.getPortions());
         assertEquals(original.getSteps(), cloned.getSteps());
         assertNotSame(original.getSteps(), cloned.getSteps(), "Steps list must be deep copied");
         assertEquals(original.getIngredients().size(), cloned.getIngredients().size());
