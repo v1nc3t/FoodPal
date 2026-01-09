@@ -15,16 +15,13 @@
  */
 package client;
 
-
 import static com.google.inject.Guice.createInjector;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
+import client.services.LocaleManager;
 import com.google.inject.Injector;
-
 import client.config.ConfigManager;
 import client.utils.ServerUtils;
 import javafx.application.Application;
@@ -34,11 +31,8 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    public static final String BUNDLE_NAME = "client.language";
-    public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
-
-    private static final Injector INJECTOR = createInjector(new MyModule());
-    private static final MyFXML FXML = new MyFXML(INJECTOR);
+    private static Injector INJECTOR;
+    private static MyFXML FXML;
 
     private ConfigManager configManager;
 
@@ -55,11 +49,15 @@ public class Main extends Application {
         // load config
         String cfgPath = getParameters().getNamed().get("cfg");
         configManager = new ConfigManager(cfgPath);
-
         configManager.load();
 
+        INJECTOR = createInjector(new MyModule(configManager));
+        FXML = new MyFXML(INJECTOR);
 
-        var bundle = ResourceBundle.getBundle(BUNDLE_NAME, DEFAULT_LOCALE);
+        LocaleManager localeManager = INJECTOR.getInstance(LocaleManager.class);
+        localeManager.init(configManager);
+
+        var bundle = localeManager.getCurrentBundle();
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
@@ -70,28 +68,29 @@ public class Main extends Application {
         }
 
         var pair = FXML.load(client.scenes.MainApplicationCtrl.class, bundle,
-            "client", "scenes", "MainApplication.fxml");
+                "client", "scenes", "MainApplication.fxml");
 
         Parent root = pair.getValue();
 
         primaryStage.setTitle("FoodPal");
         primaryStage.setScene(new Scene(root));
-        //primaryStage.setResizable(false);
+        // primaryStage.setResizable(false);
         primaryStage.setMinWidth(640);
         primaryStage.setMinHeight(480);
         primaryStage.show();
 
         /*
-        var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
-        var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
-
-        var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview, add);
-        */
+         * var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes",
+         * "QuoteOverview.fxml");
+         * var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
+         * 
+         * var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
+         * mainCtrl.initialize(primaryStage, overview, add);
+         */
     }
 
     @Override
     public void stop() {
-        configManager.save();       // save config on exit
+        configManager.save(); // save config on exit
     }
 }

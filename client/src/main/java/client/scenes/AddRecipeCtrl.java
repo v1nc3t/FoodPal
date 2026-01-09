@@ -6,6 +6,7 @@ import client.utils.ServerUtils;
 
 import client.utils.TextFieldUtils;
 import commons.Ingredient;
+import commons.Language;
 import commons.Recipe;
 import commons.RecipeIngredient;
 
@@ -20,6 +21,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -42,13 +44,17 @@ public class AddRecipeCtrl implements Internationalizable {
     private final StringProperty recipeNameFieldProperty = new SimpleStringProperty();
     @FXML private TextField nameField;
 
+    private final StringProperty languageProperty = new SimpleStringProperty();
+    @FXML private Label languageLabel;
+
+    @FXML private ChoiceBox<String> languageChoiceBox;
+
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML private Label ingredientsLabel;
 
     private final StringProperty selectIngredientProperty = new SimpleStringProperty();
     @FXML private ComboBox<Ingredient> ingredientsComboBox;
 
-    //private final StringProperty addProperty = new SimpleStringProperty();
     @FXML private Button addIngredientButton;
     @FXML private ScrollPane ingredientsScrollPane;
     @FXML private VBox ingredientsList;
@@ -63,11 +69,9 @@ public class AddRecipeCtrl implements Internationalizable {
     @FXML private ScrollPane preparationScrollPane;
     @FXML private VBox preparationList;
 
-    private final StringProperty servingSizeProperty = new SimpleStringProperty();
-    @FXML private Label servingSizeLabel;
-
     private final StringProperty portionsProperty = new SimpleStringProperty();
-    @FXML private TextField servingSizeField;
+    @FXML private Label servingsLabel;
+    @FXML private TextField servingsField;
 
     private final StringProperty doneProperty = new SimpleStringProperty();
     @FXML private Button doneButton;
@@ -82,6 +86,8 @@ public class AddRecipeCtrl implements Internationalizable {
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
     private final LocaleManager localeManager;
+    @Inject
+    private RecipeManager recipeManager;
 
     // callback so MainApplicationCtrl can be notified when a recipe is added
     private java.util.function.Consumer<Recipe> onRecipeAdded;
@@ -119,6 +125,8 @@ public class AddRecipeCtrl implements Internationalizable {
         */
         setLocale(localeManager.getCurrentLocale());
 
+        refreshSelectLanguage();
+
         /*
         // when user entered a prep step, clicking enter will add it to the list
         preparationField.setOnAction(e -> {
@@ -127,7 +135,7 @@ public class AddRecipeCtrl implements Internationalizable {
             }
         });
          */
-        
+
 
         preparationScrollPane.setFitToWidth(true);
 
@@ -136,6 +144,34 @@ public class AddRecipeCtrl implements Internationalizable {
         ingredientsScrollPane.setFitToWidth(true);
 
         ingredientsList.setSpacing(5);
+
+        /* Custom tab behavior: when focus is on preparation text-area,
+        pressing tab will focus the add-preparation button */
+        preparationField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB) {
+                event.consume();          
+                addPreparationButton.requestFocus(); 
+            }
+        });
+    }
+
+    /**
+     * (Re)fills the language choice box with available language 'proper' names.
+     * These names are already locale-dependent, as the enum {@link Language}
+     * has labels in accordance with locale (so when the language is changed,
+     * first the labels of the enum have to be updated,
+     * and the choice-box refreshed via this method).
+     */
+    private void refreshSelectLanguage() {
+        languageChoiceBox.getItems().clear();
+        languageChoiceBox.getItems().addAll(Language.EN.proper(),
+                Language.DE.proper(), Language.NL.proper());
+        if (editingRecipe != null) {
+            languageChoiceBox.getSelectionModel().select(editingRecipe.getLanguage().proper());
+        }
+        else {
+            languageChoiceBox.getSelectionModel().select(0);
+        }
     }
 
     /**
@@ -147,12 +183,13 @@ public class AddRecipeCtrl implements Internationalizable {
     private void bindElementsProperties() {
         nameLabel.textProperty().bind(nameProperty);
         nameField.promptTextProperty().bind(recipeNameFieldProperty);
+        languageLabel.textProperty().bind(languageProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         ingredientsComboBox.promptTextProperty().bind(selectIngredientProperty);
         preparationLabel.textProperty().bind(preparationProperty);
         preparationField.promptTextProperty().bind(addPreparationStepProperty);
-        servingSizeLabel.textProperty().bind(servingSizeProperty);
-        servingSizeField.promptTextProperty().bind(portionsProperty);
+        servingsLabel.textProperty().bind(portionsProperty);
+        servingsField.promptTextProperty().bind(portionsProperty);
         doneButton.textProperty().bind(doneProperty);
         cancelButton.textProperty().bind(cancelProperty);
         //addIngredientButton.textProperty().bind(addProperty);
@@ -169,15 +206,16 @@ public class AddRecipeCtrl implements Internationalizable {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         nameProperty.set(resourceBundle.getString("txt.name"));
         recipeNameFieldProperty.set(resourceBundle.getString("txt.recipe_name"));
+        languageProperty.set(resourceBundle.getString("txt.language"));
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         selectIngredientProperty.set(resourceBundle.getString("txt.select_ingredient"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
         addPreparationStepProperty.set(resourceBundle.getString("txt.add_preparation_step"));
-        servingSizeProperty.set(resourceBundle.getString("txt.serving_size"));
         portionsProperty.set(resourceBundle.getString("txt.portions"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
-        //addProperty.set(resourceBundle.getString("txt.add"));
+
+        refreshSelectLanguage();
     }
 
     /**
@@ -198,10 +236,9 @@ public class AddRecipeCtrl implements Internationalizable {
         Recipe r;
         try {
             r = getRecipe();
-            RecipeManager mgr = RecipeManager.getInstance();
 
             if (editingRecipe == null) {
-                mgr.addRecipeOptimistic(r);
+                recipeManager.addRecipeOptimistic(r);
 
                 if (onRecipeAdded != null) onRecipeAdded.accept(r);
 
@@ -211,7 +248,7 @@ public class AddRecipeCtrl implements Internationalizable {
                     // Server not available / failed: keep optimistic copy.
                 }
             } else {
-                if (!mgr.setRecipe(r)) {
+                if (!recipeManager.setRecipe(r)) {
                     System.out.println("Failed to add recipe " + r);
                 }
             }
@@ -229,12 +266,16 @@ public class AddRecipeCtrl implements Internationalizable {
         mainCtrl.showRecipeViewer(r);
     }
 
+    /**
+     * Closes the recipe viewer by discarding all changes. If changes should be saved, call
+     * clickDone() instead.
+     */
     private void closeView() {
         Recipe justSaved = editingRecipe;
         clearFields();
 
         if (justSaved != null) {
-            mainCtrl.editRecipe(justSaved);
+            mainCtrl.showRecipeViewer(justSaved);
         } else {
             mainCtrl.showMainScreen();
         }
@@ -245,7 +286,8 @@ public class AddRecipeCtrl implements Internationalizable {
      */
     private void clearFields() {
         nameField.clear();
-        servingSizeField.clear();
+        refreshSelectLanguage();
+        servingsField.clear();
         preparationField.clear();
         ingredients = new ArrayList<>();
 
@@ -262,14 +304,16 @@ public class AddRecipeCtrl implements Internationalizable {
      */
     private Recipe getRecipe() {
         String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
+        Language language = getLanguage();
         List<String> preparations = getPreparations();
-        int servingSize = TextFieldUtils.getIntFromField(servingSizeField,servingSizeLabel);
+        int servings = TextFieldUtils.getPositiveIntFromField(servingsField, servingsLabel);
         if(editingRecipe == null){
             // new recipe
-            return new Recipe(name, ingredients, preparations, servingSize);
+            return new Recipe(name, ingredients, preparations, servings, language);
         } else {
             // Editing one
-            return new Recipe(editingRecipe.getId(), name, ingredients, preparations, servingSize);
+            return new Recipe(editingRecipe.getId(), name, ingredients,
+                    preparations, servings, language);
         }
     }
 
@@ -285,6 +329,15 @@ public class AddRecipeCtrl implements Internationalizable {
                 .map(h -> (TextFlow) h.getChildren().getFirst())
                 .map(tf -> ((Text) tf.getChildren().getFirst()).getText())
                 .toList();
+    }
+
+    /**
+     * Gets the language enum from the language choice-box
+     * @return {@link Language} enum
+     */
+    private Language getLanguage() {
+        SingleSelectionModel<String> selectionModel = languageChoiceBox.getSelectionModel();
+        return Language.valueOfProper(selectionModel.getSelectedItem());
     }
 
     /**
@@ -354,7 +407,7 @@ public class AddRecipeCtrl implements Internationalizable {
      * @return a horizontal box with the ingredient name and delete button
      */
     private HBox createIngredientItem(RecipeIngredient recipeIngredient) {
-        Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
+        Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
 
         //TODO find newIngredient based on id
 
@@ -362,7 +415,8 @@ public class AddRecipeCtrl implements Internationalizable {
         item.setAlignment(Pos.CENTER_LEFT);
         item.setMaxWidth(Double.MAX_VALUE);
 
-        TextFlow textFlow = new TextFlow(new Text(ingredient.name + " | " + recipeIngredient.amount.toPrettyString()));
+        TextFlow textFlow = new TextFlow(new Text(ingredient.name + " | "
+                + recipeIngredient.amount.toPrettyString()));
 
         textFlow.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(textFlow, Priority.ALWAYS);
@@ -449,7 +503,10 @@ public class AddRecipeCtrl implements Internationalizable {
         this.editingRecipe = recipe;
 
         nameField.setText(recipe.getTitle());
-        servingSizeField.setText(String.valueOf(recipe.getServingSize()));
+
+        languageChoiceBox.getSelectionModel().select(recipe.getLanguage().proper());
+
+        servingsField.setText(String.valueOf(recipe.getPortions()));
 
         //needs to be changed once server side is done.
         ingredients.clear();

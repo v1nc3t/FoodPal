@@ -3,7 +3,8 @@ package client.scenes;
 import client.MyFXML;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
-import jakarta.inject.Inject;
+import commons.Language;
+import com.google.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -26,14 +27,34 @@ public class MainApplicationCtrl implements Internationalizable {
 
     @FXML
     private ChoiceBox<String> orderBy;
+    private final StringProperty alphabeticalProperty = new SimpleStringProperty();
+    private final StringProperty recentProperty = new SimpleStringProperty();
 
-    @FXML private ChoiceBox<String> languageOptions;
+    @FXML
+    private ChoiceBox<String> languageOptions;
+
+    private final StringProperty showRecipesProperty = new SimpleStringProperty();
+    @FXML
+    private Label showRecipesLabel;
+
+    private final StringProperty englishProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox englishFilter;
+
+    private final StringProperty germanProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox germanFilter;
+
+    private final StringProperty dutchProperty = new SimpleStringProperty();
+    @FXML
+    private CheckBox dutchFilter;
 
     @FXML
     private Button addButton;
 
     @FXML
     private TextField searchField;
+    private final StringProperty searchProperty = new SimpleStringProperty();
 
     @FXML
     private Button removeButton;
@@ -42,8 +63,13 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private Button refreshButton;
 
+    private final StringProperty cloneProperty = new SimpleStringProperty();
     @FXML
     private Button cloneButton;
+
+    private final StringProperty favouriteProperty = new SimpleStringProperty();
+    @FXML
+    private Button favouriteButton;
 
     @FXML
     private ListView<ListObject> sidebarListView;
@@ -54,12 +80,16 @@ public class MainApplicationCtrl implements Internationalizable {
     private ToggleButton ingredientToggleButton;
     private final ToggleGroup categoryToggleGroup = new ToggleGroup();
 
+    @Inject
     private SidebarListCtrl sidebarListCtrl;
 
     private final MyFXML fxml;
     private final LocaleManager localeManager;
 
     private Recipe currentlyShownRecipe = null;
+
+    @Inject
+    private RecipeManager recipeManager;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
@@ -77,25 +107,61 @@ public class MainApplicationCtrl implements Internationalizable {
      */
     private void bindElementsProperties() {
         refreshButton.textProperty().bind(refreshProperty);
-        //addButton.textProperty().bind(addProperty);
+        showRecipesLabel.textProperty().bind(showRecipesProperty);
+        englishFilter.textProperty().bind(englishProperty);
+        germanFilter.textProperty().bind(germanProperty);
+        dutchFilter.textProperty().bind(dutchProperty);
+        cloneButton.textProperty().bind(cloneProperty);
+        searchField.promptTextProperty().bind(searchProperty);
+        favouriteButton.textProperty().bind(favouriteProperty);
     }
 
     /**
      * Dynamically updates properties of UI elements to the language
      * of a corresponding locale
+     *
      * @param newLocale provided locale/language for UI elements
      */
     @Override
     public void setLocale(Locale newLocale) {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
+
         refreshProperty.set(resourceBundle.getString("txt.refresh"));
-        //addProperty.set(resourceBundle.getString("txt.add"));
+        showRecipesProperty.set(resourceBundle.getString("txt.show_recipes"));
+        cloneProperty.set(resourceBundle.getString("txt.clone"));
+        favouriteProperty.set(resourceBundle.getString("txt.favourite"));
+        searchProperty.set(resourceBundle.getString("txt.search"));
+
+        alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
+        recentProperty.set(resourceBundle.getString("txt.recent"));
+
+        if (orderBy != null) {
+            int selectedIndex = orderBy.getSelectionModel().getSelectedIndex();
+            orderBy.getItems().setAll(
+                    alphabeticalProperty.get(),
+                    recentProperty.get());
+            orderBy.getSelectionModel().select(selectedIndex >= 0 ? selectedIndex : 0);
+        }
+
+        englishProperty.set(resourceBundle.getString("txt.en"));
+        germanProperty.set(resourceBundle.getString("txt.de"));
+        dutchProperty.set(resourceBundle.getString("txt.nl"));
+        if (languageOptions != null) {
+            int selectedIndex = languageOptions.getSelectionModel().getSelectedIndex();
+            languageOptions.getItems().setAll(
+                    englishProperty.get(),
+                    germanProperty.get(),
+                    dutchProperty.get());
+            if (selectedIndex >= 0) {
+                languageOptions.getSelectionModel().select(selectedIndex);
+            }
+        }
     }
 
     /**
-     *  This clears the current screen back to the main(blank for now)
+     * This clears the current screen back to the main(blank for now)
      */
-    public void showMainScreen(){
+    public void showMainScreen() {
         contentPane.getChildren().clear();
     }
 
@@ -103,33 +169,25 @@ public class MainApplicationCtrl implements Internationalizable {
      * Initializes the main application UI components related to the recipe list.
      * This method is automatically called by the JavaFX runtime after FXML loading.
      * It performs the following:
-     *     Creates a new {@link SidebarListCtrl} instance, which manages the list of recipes.
-     *     Binds the existing FXML {@code ListView} to the controller
-     *     so recipe titles can be displayed.
-     *     Configures the Remove button so that clicking it puts the list into "remove mode",
-     *         meaning the next click on a recipe name will remove that specific recipe.
+     * Creates a new {@link SidebarListCtrl} instance, which manages the list of
+     * recipes.
+     * Binds the existing FXML {@code ListView} to the controller
+     * so recipe titles can be displayed.
+     * Configures the Remove button so that clicking it puts the list into "remove
+     * mode",
+     * meaning the next click on a recipe name will remove that specific recipe.
      * Only listing and remove-on-click behavior are implemented at this stage.
      */
     @FXML
     private void initialize() {
         bindElementsProperties();
 
-        /* For UI testing purposes, since we don't have a button
-         for language selection just yet, change this line
-         if you want to visualize language changes.
-         Parameter choices:
-         EN: DEFAULT_LOCALE
-         DE: Locale.GERMAN
-         NL: Locale.forLanguageTag("nl-NL")
-        */
         setLocale(localeManager.getCurrentLocale());
 
         initializeSidebarListCtrl();
 
         prepareLanguageOptions();
-
         prepareSortBy();
-        sidebarListCtrl = new SidebarListCtrl();
         sidebarListCtrl.initialize();
 
         sidebarListCtrl.setListView(sidebarListView);
@@ -150,13 +208,48 @@ public class MainApplicationCtrl implements Internationalizable {
             }
 
             // Open the viewer
-            showRecipe(RecipeManager.getInstance().getRecipe(sel.id()));
+            showRecipe(recipeManager.getRecipe(sel.id()));
         });
 
         cloneButton.setOnAction(_ -> sidebarListCtrl.enterCloneMode());
         removeButton.setOnAction(_ -> sidebarListCtrl.enterRemoveMode());
+        favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
 
         sortUponSelection(sidebarListCtrl);
+        prepareLanguageFilters();
+        filterUponSelection(sidebarListCtrl);
+    }
+
+    /**
+     * Initializes the language filter checkboxes to the default configuration.
+     * TODO: read from config instead of assuming all languages are enabled
+     */
+    private void prepareLanguageFilters() {
+        englishFilter.setSelected(true);
+        germanFilter.setSelected(true);
+        dutchFilter.setSelected(true);
+    }
+
+    /**
+     * Adds a listener for changes to language filter checkboxes,
+     * so recipe list viewer can get filtered after a selection of a filter.
+     *
+     * @param sidebarListCtrl the recipe list controller which is responsible for
+     *                        the recipe list
+     */
+    private void filterUponSelection(SidebarListCtrl sidebarListCtrl) {
+        englishFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.EN);
+        });
+        germanFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.DE);
+        });
+        dutchFilter.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleLanguageFilter(Language.NL);
+        });
     }
 
     private void initializeSidebarListCtrl() {
@@ -177,65 +270,37 @@ public class MainApplicationCtrl implements Internationalizable {
      * TODO: enable internationalization
      */
     private void prepareSortBy() {
-        orderBy.getItems().setAll("Alphabetical", "Most recent");
-        orderBy.setValue("Alphabetical");
-    }
-
-    private void prepareLanguageOptions() {
-        languageOptions.getItems().setAll("English", "German", "Dutch");
-
-        Locale currentLocale = localeManager.getCurrentLocale();
-        String currentDisplay;
-        if (currentLocale.equals(Locale.GERMAN)) {
-            currentDisplay = "German";
-        } else if (currentLocale.equals(Locale.forLanguageTag("nl-NL"))) {
-            currentDisplay = "Dutch";
-        } else {
-            currentDisplay = "English";
-        }
-
-        languageOptions.setValue(currentDisplay);
-    }
-
-    @FXML
-    private void changeLanguage() {
-        String currentDisplay = languageOptions.getValue();
-
-        Locale newLocale;
-        switch (currentDisplay) {
-            case "German":
-                newLocale = Locale.GERMAN;
-                break;
-            case "Dutch":
-                newLocale = Locale.forLanguageTag("nl-NL");
-                break;
-            case "English":
-                newLocale = Locale.ENGLISH;
-                break;
-            default:
-                return;
-        }
-
-        localeManager.setAllLocale(newLocale);
+        orderBy.getItems().setAll(
+                alphabeticalProperty.get(),
+                recentProperty.get());
+        orderBy.setValue(alphabeticalProperty.get());
     }
 
     /**
      * Adds a listener for changes to sort-by choice box,
      * so recipe list viewer can get sorted after a selection.
-     * @param sidebarListCtrl the recipe list controller which is responsible for the recipe list
+     *
+     * @param sidebarListCtrl the recipe list controller which is responsible for
+     *                        the recipe list
      */
     private void sortUponSelection(SidebarListCtrl sidebarListCtrl) {
-        SingleSelectionModel<String> selectionModel = orderBy.getSelectionModel();
-        selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) ->
-        {
-            sidebarListCtrl.setSortMethod(newValue);
+        orderBy.getSelectionModel().selectedItemProperty().addListener((
+                observable, oldValue, newValue) -> {
+            if (newValue == null)
+                return;
+
+            if (newValue.equals(alphabeticalProperty.get())) {
+                sidebarListCtrl.setSortMethod("Alphabetical");
+            } else if (newValue.equals(recentProperty.get())) {
+                sidebarListCtrl.setSortMethod("Most recent");
+            }
         });
-        //if the currently shown recipe disappears, close viewer.
-        client.services.RecipeManager.getInstance().getObservableRecipes()
+        // if the currently shown recipe disappears, close viewer.
+        recipeManager.getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
                     while (change.next()) {
                         if (change.wasRemoved() && currentlyShownRecipe != null) {
-                            boolean stillPresent = client.services.RecipeManager.getInstance()
+                            boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
                                     .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
@@ -250,13 +315,50 @@ public class MainApplicationCtrl implements Internationalizable {
                 });
     }
 
+    private void prepareLanguageOptions() {
+        languageOptions.getItems().setAll(
+                englishProperty.get(),
+                germanProperty.get(),
+                dutchProperty.get());
+
+        Locale current = localeManager.getCurrentLocale();
+        if (current.equals(LocaleManager.DE)) {
+            languageOptions.setValue(germanProperty.get());
+        } else if (current.equals(LocaleManager.NL)) {
+            languageOptions.setValue(dutchProperty.get());
+        } else {
+            languageOptions.setValue(englishProperty.get());
+        }
+    }
+
+    @FXML
+    private void changeLanguage() {
+        String currentDisplay = languageOptions.getValue();
+        if (currentDisplay == null) {
+            return;
+        }
+
+        Locale newLocale;
+        if (currentDisplay.equals(germanProperty.get())) {
+            newLocale = LocaleManager.DE;
+        } else if (currentDisplay.equals(dutchProperty.get())) {
+            newLocale = LocaleManager.NL;
+        } else {
+            newLocale = LocaleManager.EN;
+        }
+
+        if (!newLocale.equals(localeManager.getCurrentLocale())) {
+            localeManager.setAllLocale(newLocale);
+        }
+    }
+
     /**
-     *   Loads Recipe panel
+     * Loads Recipe panel
      */
     @FXML
     private void addRecipe() {
         var bundle = localeManager.getCurrentBundle();
-        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class,bundle,
+        Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
                 "client", "scenes", "AddRecipePanel.fxml");
 
         AddRecipeCtrl addRecipeCtrl = pair.getKey();
@@ -287,7 +389,7 @@ public class MainApplicationCtrl implements Internationalizable {
 
 
     public void showRecipeViewer(Recipe recipe) {
-        showRecipe(recipe);   // reuse your existing private method
+        showRecipe(recipe); // reuse your existing private method
     }
 
 
@@ -295,40 +397,20 @@ public class MainApplicationCtrl implements Internationalizable {
     /**
      * Search field for users to search up items/recipes from ist
      */
-    public void search(){
+    public void search() {
         String query = searchField.getText();
 
         // To be implemented once server side is done.
         System.out.println("Searching for '" + query);
     }
 
-    /**
-     * Adds a newly created recipe to the left-hand recipe list.
-     * This method is called by {@link AddRecipeCtrl} after the user completes the
-     * Add Recipe form and presses the Done button. It ensures that:
-     *     The recipe appears immediately in the list displayed in the left rectangle.
-     *     If the {@link SidebarListCtrl} was not initialized yet,
-     *         it will be created and linked to the FXML {@code ListView}.
-     * This method performs an in-memory update only; no server or database
-     * persistence is involved at this stage.
-     *
-     * @param r the newly created {@link Recipe} to add to the UI list
-     */
-    public void addRecipeToList(Recipe r) {
-        if (sidebarListCtrl == null) {
-            sidebarListCtrl = new SidebarListCtrl();
-            sidebarListCtrl.initialize();
-            if (sidebarListView != null) sidebarListCtrl.setListView(sidebarListView);
-        }
-        sidebarListCtrl.addRecipe(r);
-    }
-
     public void editRecipe(Recipe recipe) {
         var bundle = localeManager.getCurrentBundle();
-        if (recipe == null) return;
+        if (recipe == null)
+            return;
 
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
-            "client", "scenes", "AddRecipePanel.fxml");
+                "client", "scenes", "AddRecipePanel.fxml");
 
         AddRecipeCtrl addRecipeCtrl = pair.getKey();
         Parent addRecipeRoot = pair.getValue();
@@ -341,15 +423,18 @@ public class MainApplicationCtrl implements Internationalizable {
     /**
      * Refreshes db to get latest data
      */
-    public void refresh(){
+    public void refresh() {
         // Temp. Rewriting this once server side is done
         System.out.println("Refresh pressed (Server logic not implemented yet)");
 
         showMainScreen();
     }
+
     /**
      * Opens a modal popup asking the user to enter a name for a cloned recipe.
-     * The popup is pre-filled with {@code "<original title> (Copy)"} for convenience.
+     * The popup is pre-filled with {@code "<original title> (Copy)"} for
+     * convenience.
+     *
      * @param original the recipe to be cloned (must not be null)
      */
     private void openClonePopup(Recipe original) {
@@ -359,15 +444,29 @@ public class MainApplicationCtrl implements Internationalizable {
         dialog.setContentText("Enter a name for the cloned recipe:");
 
         var result = dialog.showAndWait();
-        if (result.isEmpty()) return;
+        if (result.isEmpty())
+            return;
 
         String newName = result.get();
 
         Recipe clone = original.cloneWithTitle(newName);
-        client.services.RecipeManager.getInstance().addRecipeOptimistic(clone);
+        recipeManager.addRecipeOptimistic(clone);
         showRecipe(clone);
 
     }
 
-}
+    @FXML
+    private void showShoppingList() {
+        var bundle = localeManager.getCurrentBundle();
+        Pair<ShoppingListCtrl, Parent> pair = fxml.load(ShoppingListCtrl.class, bundle,
+                "client", "scenes", "ShoppingList.fxml");
 
+        ShoppingListCtrl shoppingListCtrl = pair.getKey();
+        Parent shoppingListRoot = pair.getValue();
+
+        contentPane.getChildren().setAll(shoppingListRoot);
+        // Reset selection in sidebar or handle "active view" state if needed
+        currentlyShownRecipe = null;
+    }
+
+}

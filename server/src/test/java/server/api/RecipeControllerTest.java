@@ -23,7 +23,7 @@ public class RecipeControllerTest {
                     new RecipeIngredient(sugar.getId(), new Amount(1, Unit.KILOGRAM))
             ),
             preparationSteps,
-            1);
+            1, Language.EN);
     @BeforeEach
     public void setup() {
         testRecipeService = new TestRecipeService();

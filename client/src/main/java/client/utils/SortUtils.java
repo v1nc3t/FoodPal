@@ -2,6 +2,7 @@ package client.utils;
 
 import client.scenes.ListObject;
 import commons.Ingredient;
+import commons.Language;
 import commons.Recipe;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
@@ -17,7 +18,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 public class SortUtils {
-    private List<String> languageFilters;
+    private List<Language> languageFilters;
     private String sortMethod;
     private final ObservableList<ListObject> list;
 
@@ -100,7 +101,7 @@ public class SortUtils {
      * Gets the language filters.
      * @return list of language filters
      */
-    public List<String> getLanguageFilters() {
+    public List<Language> getLanguageFilters() {
         return languageFilters;
     }
 
@@ -108,7 +109,7 @@ public class SortUtils {
      * Sets the language filters.
      * @param languageFilters provided language filters
      */
-    public void setLanguageFilters(List<String> languageFilters) {
+    public void setLanguageFilters(List<Language> languageFilters) {
         this.languageFilters = languageFilters;
     }
 
@@ -116,8 +117,23 @@ public class SortUtils {
      * Adds a language to the list of language filters.
      * @param languageFilter filter language to be added
      */
-    public void addLanguageFilter(String languageFilter) {
+    public void addLanguageFilter(Language languageFilter) {
         this.languageFilters.add(languageFilter);
+    }
+
+    /**
+     * Toggles the language filter of the provided language.
+     * This means that a filter is added if it doesn't exist yet
+     * and is removed if it does exist.
+     * @param language provided language to toggle filter of
+     */
+    public void toggleLanguageFilter(Language language) {
+        if (languageFilters.contains(language)) {
+            languageFilters.remove(language);
+        }
+        else {
+            languageFilters.add(language);
+        }
     }
 
     /**
@@ -145,18 +161,22 @@ public class SortUtils {
             // TODO: try to load config for user defined filters (languages and favorites)
             throw new Exception("Mock config file failing.");
         } catch (Exception e) {
-            languageFilters = new ArrayList<>(List.of("en", "de", "nl"));
+            languageFilters = new ArrayList<>(List.of(Language.EN, Language.DE, Language.NL));
         } finally {
             sortMethod = "Alphabetical";
         }
     }
 
     /**
-     * Sorts and filters the recipes from ObservableList by creating a SortedList.
+     * Sorts and filters the recipes from the ObservableList
+     * of ListObjects by creating a SortedList.
      * @return filtered SortedList with a set comparator
      */
     public SortedList<ListObject> applyFilters() {
-        var sortedList = new SortedList<>(list);
+        SortedList<ListObject> sortedList = new SortedList<>(list
+                .filtered(listObject ->
+                            listObject.language().isPresent()
+                            && languageFilters.contains(listObject.language().get())));
 
         Comparator<ListObject> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);
@@ -171,15 +191,15 @@ public class SortUtils {
     public Comparator<ListObject> getComparator() {
         return switch (sortMethod) {
             case "Alphabetical" ->
-                    Comparator.comparing(
-                            ListObject::name,
-                            String.CASE_INSENSITIVE_ORDER
-                    );
+                Comparator.comparing(
+                        ListObject::name,
+                        String.CASE_INSENSITIVE_ORDER
+                );
             case "Most recent" ->
-                    Comparator.comparing(
-                            ListObject::name,
-                            String.CASE_INSENSITIVE_ORDER.reversed()
-                    );
+                Comparator.comparing(
+                        ListObject::name,
+                        String.CASE_INSENSITIVE_ORDER.reversed()
+                );
             default -> throw new IllegalStateException("Unexpected value: " + sortMethod);
         };
     }

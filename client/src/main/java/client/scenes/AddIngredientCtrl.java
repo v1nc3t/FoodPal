@@ -23,7 +23,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class AddIngredientCtrl implements Internationalizable {
-    RecipeManager recipeManager = RecipeManager.getInstance();
+    @Inject
+    RecipeManager recipeManager;
 
     private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML private Label nameLabel;
@@ -244,9 +245,9 @@ public class AddIngredientCtrl implements Internationalizable {
     private RecipeIngredient setRecipeIngredient() {
         String name = TextFieldUtils.getStringFromField(nameField, nameLabel);
         Amount newAmount = getAmount();
-        double protein = TextFieldUtils.getDoubleFromField(proteinField, proteinLabel);
-        double fat = TextFieldUtils.getDoubleFromField(fatField, fatLabel);
-        double carbs = TextFieldUtils.getDoubleFromField(carbsField, carbsLabel);
+        double protein = TextFieldUtils.getPositiveDoubleFromField(proteinField, proteinLabel);
+        double fat = TextFieldUtils.getPositiveDoubleFromField(fatField, fatLabel);
+        double carbs = TextFieldUtils.getPositiveDoubleFromField(carbsField, carbsLabel);
 
         NutritionValues newValues = new NutritionValues(protein, fat, carbs);
 
@@ -263,7 +264,7 @@ public class AddIngredientCtrl implements Internationalizable {
      * @return a new Amount based on input
      */
     private Amount getAmount() {
-        double quantity = TextFieldUtils.getDoubleFromField(amountField, amountLabel);
+        double quantity = TextFieldUtils.getPositiveDoubleFromField(amountField, amountLabel);
         String input = unitComboBox.getEditor().getText().trim();
 
         if (input.isEmpty()) {

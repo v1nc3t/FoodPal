@@ -19,24 +19,16 @@ public class RecipeManager {
 
     private final Map<UUID, Recipe> recipesMap = new ConcurrentHashMap<>();
     private final Map<UUID, Ingredient> ingredientsMap = new ConcurrentHashMap<>();
+    private final Set<UUID> favouriteRecipes = new HashSet<>();
 
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipesFx = FXCollections.observableArrayList();
     private final ObservableList<Ingredient> ingredientsFx = FXCollections.observableArrayList();
 
-    private static RecipeManager instance;
-
     public RecipeManager() {
         // Seed a test recipe so ListView shows something immediately during manual testing.
         seedSampleRecipe();
     }
-
-    public static synchronized RecipeManager getInstance() {
-        if (instance == null) instance = new RecipeManager();
-        return instance;
-    }
-
-
 
     /** Observable list for binding to ListView (mutated on FX thread). */
     public ObservableList<Recipe> getObservableRecipes() {
@@ -117,6 +109,7 @@ public class RecipeManager {
 
     public boolean removeRecipe(UUID recipeId) {
         if (recipeId == null) return false;
+        favouriteRecipes.remove(recipeId); // keep favourites consistent
         Recipe removed = recipesMap.remove(recipeId);
         // still remove from observable list
         runOnFx(() -> recipesFx.removeIf(r -> Objects.equals(r.getId(), recipeId)));
@@ -160,13 +153,14 @@ public class RecipeManager {
     /** Adds a single in-memory test recipe so the ListView shows an entry at startup. */
     private void seedSampleRecipe() {
         try {
-            Ingredient sampleIngredient = new Ingredient("Honey Tester", new NutritionValues(1,1,1));
+            Ingredient sampleIngredient = new Ingredient("Honey Tester",
+                    new NutritionValues(1,1,1));
             setIngredient(sampleIngredient);
 
             // empty ingredient list for quick seed
             List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
-            int servingSize = 2;
-
+            int portions = 2;
+            Language language = Language.EN;
 
             Recipe sampleRecipe = new Recipe("Test Pancakes",
                     List.of(
@@ -176,7 +170,8 @@ public class RecipeManager {
                             )
                     ),
                     preparations,
-                    servingSize);
+                    portions,
+                    language);
 
             addRecipeOptimistic(sampleRecipe);
         } catch (Throwable t) {
@@ -199,6 +194,22 @@ public class RecipeManager {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+    public boolean isFavourite(UUID id) {
+        return favouriteRecipes.contains(id);
+    }
+
+    public void toggleFavourite(UUID id) {
+        if (id == null) return;
+        if (favouriteRecipes.contains(id)) {
+            favouriteRecipes.remove(id);
+        } else {
+            favouriteRecipes.add(id);
+        }
+    }
+
+    public Set<UUID> getFavouriteRecipesSnapshot() {
+        return Set.copyOf(favouriteRecipes);
     }
 
 }

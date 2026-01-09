@@ -13,6 +13,7 @@ public class RecipeTest {
     private List<RecipeIngredient> ingredients;
     private List<String> steps;
     private UUID id;
+    private Language language;
 
     @BeforeEach
     public void setup() {
@@ -30,9 +31,10 @@ public class RecipeTest {
         String step2 = "Bake at 350 degrees for 30 minutes.";
         steps = List.of(step1, step2);
 
-        int servingSize = 4;
+        int portions = 4;
+        language = Language.EN;
 
-        recipe = new Recipe("Cake", ingredients, steps, servingSize);
+        recipe = new Recipe("Cake", ingredients, steps, portions, language);
 
         id = recipe.getId();
     }
@@ -63,8 +65,13 @@ public class RecipeTest {
     }
 
     @Test
-    public void testGetServingSize() {
-        assertEquals(4, recipe.getServingSize());
+    public void testGetPortions() {
+        assertEquals(4, recipe.getPortions());
+    }
+
+    @Test
+    public void testGetLanguage() {
+        assertEquals(language, recipe.getLanguage());
     }
 
     @Test

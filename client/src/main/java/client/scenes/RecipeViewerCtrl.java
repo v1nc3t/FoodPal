@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import client.services.ShoppingListManager;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import client.services.RecipePrinter;
@@ -13,40 +14,72 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
-
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class RecipeViewerCtrl implements Internationalizable {
 
-    @FXML private Label titleLabel;
+    private final StringProperty titleProperty = new SimpleStringProperty();
+    @FXML
+    private Label titleLabel;
 
+    private final StringProperty languageProperty = new SimpleStringProperty();
+    @FXML
+    private Label languageLabel;
+
+    private final StringProperty languageSuffixProperty = new SimpleStringProperty();
+    @FXML
+    private Label languageSuffixLabel;
+
+    private final StringProperty portionsProperty = new SimpleStringProperty();
+    @FXML
+    private Label portionsLabel;
+
+    private final StringProperty portionsValueProperty = new SimpleStringProperty();
+    @FXML
+    private Label portionsValueLabel;
 
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
-    @FXML private Label ingredientsLabel;
+    @FXML
+    private Label ingredientsLabel;
 
-    @FXML private ListView<String> ingredientsList;
+    @FXML
+    private ListView<String> ingredientsList;
 
     private final StringProperty preparationProperty = new SimpleStringProperty();
-    @FXML private Label preparationLabel;
+    @FXML
+    private Label preparationLabel;
 
-    @FXML private ListView<String> preparationList;
+    @FXML
+    private ListView<String> preparationList;
 
     private final StringProperty editProperty = new SimpleStringProperty();
-    @FXML private Button editButton;
+    @FXML
+    private Button editButton;
+
+    private final StringProperty printProperty = new SimpleStringProperty();
     @FXML
     private Button printButton;
+    private final StringProperty addToShoppingListProperty = new SimpleStringProperty();
+    @FXML
+    private Button addToShoppingListButton;
 
     private Recipe currentRecipe;
 
     private MainApplicationCtrl mainCtrl;
     private final LocaleManager localeManager;
+    private final RecipeManager recipeManager;
+
+    private final ShoppingListManager shoppingListManager;
 
     @Inject
-    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager) {
+    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
+                            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
         this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
+        this.recipeManager = recipeManager;
+        this.shoppingListManager = shoppingListManager;
 
         localeManager.register(this);
     }
@@ -59,56 +92,78 @@ public class RecipeViewerCtrl implements Internationalizable {
     }
 
     private void bindElementsProperties() {
+        titleLabel.textProperty().bind(titleProperty);
+        languageLabel.textProperty().bind(languageProperty);
+        languageSuffixLabel.textProperty().bind(languageSuffixProperty);
+        portionsLabel.textProperty().bind(portionsProperty);
+        portionsValueLabel.textProperty().bind(portionsValueProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
-
+        editButton.textProperty().bind(editProperty);
+        printButton.textProperty().bind(printProperty);
+        addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
     }
 
     @Override
     public void setLocale(Locale locale) {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
+        if (currentRecipe != null) {
+            languageSuffixProperty.set(currentRecipe.getLanguage().proper());
+        }
+        titleProperty.set(resourceBundle.getString("txt.recipe_name"));
+        languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
+        portionsProperty.set(resourceBundle.getString("txt.portions") + ": ");
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
+        editProperty.set(resourceBundle.getString("txt.edit"));
+        printProperty.set(resourceBundle.getString("txt.print"));
+        addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
     }
 
-  /**
-   * This sets the values inside the `RecipeViewer`
-   * @param recipe the recipe
-   */
+    /**
+     * This sets the values inside the `RecipeViewer`
+     * 
+     * @param recipe the recipe
+     */
     public void setRecipe(Recipe recipe) {
         this.currentRecipe = recipe;
 
         if (recipe == null) {
-            titleLabel.setText("");
+            titleProperty.set("");
             ingredientsList.getItems().clear();
             preparationList.getItems().clear();
             return;
         }
 
-        titleLabel.setText(recipe.getTitle());
+        languageSuffixProperty.set(recipe.getLanguage().proper());
+        portionsValueProperty.set(String.valueOf(recipe.getPortions()));
+        titleProperty.set(recipe.getTitle());
         setIngredientsList(recipe);
         setPreparationList(recipe);
     }
 
-  /**
-   * This sets the ingredients
-   * @param recipe the recipe
-   */
+    /**
+     * This sets the ingredients
+     * 
+     * @param recipe the recipe
+     */
     private void setIngredientsList(Recipe recipe) {
         ingredientsList.getItems().clear();
         var ingredients = recipe.getIngredients();
         if (ingredients != null) {
             for (var recipeIngredient : ingredients) {
-                Ingredient ingredient = RecipeManager.getInstance().getIngredient(recipeIngredient);
-                ingredientsList.getItems().add(ingredient.getName() + " | " + recipeIngredient.getAmount().toPrettyString());
+                Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
+                ingredientsList.getItems().add(ingredient.getName() + " | " +
+                        recipeIngredient.getAmount().toPrettyString());
             }
         }
     }
 
-  /**
-   * This sets the steps
-   * @param recipe the recipe
-   */
+    /**
+     * This sets the steps
+     * 
+     * @param recipe the recipe
+     */
     private void setPreparationList(Recipe recipe) {
         preparationList.getItems().clear();
         List<String> steps = recipe.getSteps();
@@ -137,5 +192,12 @@ public class RecipeViewerCtrl implements Internationalizable {
         }
 
         RecipePrinter.printRecipe(currentRecipe, titleLabel.getScene().getWindow());
+    }
+
+    @FXML
+    private void addToShoppingList() {
+        if (currentRecipe != null) {
+            shoppingListManager.addRecipe(currentRecipe);
+        }
     }
 }

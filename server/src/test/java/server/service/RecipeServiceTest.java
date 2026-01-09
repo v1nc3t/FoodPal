@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
+import server.websocket.WebSocketHub;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,8 @@ public class RecipeServiceTest {
     private RecipeRepository recipeRepository;
     @Mock
     private IngredientRepository ingredientRepository;
+    @Mock
+    private WebSocketHub webSocketHub;
     @InjectMocks
     private RecipeService recipeService;
 
@@ -44,7 +47,8 @@ public class RecipeServiceTest {
                     "Get yogurt",
                     "Mix"
             ),
-            67
+            67,
+            Language.EN
     );
 
     @Test
@@ -79,7 +83,8 @@ public class RecipeServiceTest {
                         )
                 ),
                 List.of(),
-                67
+                67,
+                Language.EN
         );
         assertThrows(InvalidRecipeError.class, () ->
                 recipeService.setRecipe(recipe)
@@ -120,7 +125,7 @@ public class RecipeServiceTest {
         when(recipeRepository.findAll()).thenReturn(
                 List.of(sugaredYogurt)
         );
-        var loadedService = new RecipeService(recipeRepository, ingredientRepository);
+        var loadedService = new RecipeService(recipeRepository, ingredientRepository, webSocketHub);
 
         recipeService.setIngredient(yogurt);
         recipeService.setIngredient(sugar);

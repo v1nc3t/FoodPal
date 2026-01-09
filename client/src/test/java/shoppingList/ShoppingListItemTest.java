@@ -3,21 +3,15 @@ package shoppingList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
 import java.util.UUID;
 
+import commons.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import client.shoppingList.ShoppingListItem;
-import commons.Amount;
-import commons.Ingredient;
-import commons.NutritionValues;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.Unit;
 
 public class ShoppingListItemTest {
 
@@ -31,9 +25,9 @@ public class ShoppingListItemTest {
     @BeforeEach
     public void setup() {
         NutritionValues nutritionValues1 = new NutritionValues(0.0, 0.0, 76.0);
-        NutritionValues nutritionValues2 = new NutritionValues(13.0, 11.0, 1.1);   
+        NutritionValues nutritionValues2 = new NutritionValues(13.0, 11.0, 1.1);
         Ingredient ingredient1 = new Ingredient("Flour", nutritionValues1);
-        Ingredient ingredient2 = new Ingredient("Eggs", nutritionValues2); 
+        Ingredient ingredient2 = new Ingredient("Eggs", nutritionValues2);
         formalAmount = new Amount(2.0, Unit.CUP);
         Amount informalAmount = new Amount(3.0, "large");
         recIngredient = new RecipeIngredient(ingredient1.getId(), formalAmount);
@@ -44,9 +38,9 @@ public class ShoppingListItemTest {
         String step2 = "Bake at 350 degrees for 30 minutes.";
         steps = List.of(step1, step2);
 
-        int servingSize = 4;
+        int portions = 4;
 
-        recipe = new Recipe("Cake", ingredients, steps, servingSize);
+        recipe = new Recipe("Cake", ingredients, steps, portions, Language.EN);
 
         shopListItem = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount, recipe.getId());
     }
@@ -92,10 +86,11 @@ public class ShoppingListItemTest {
 
     @Test
     public void toStringTest() {
-        assertEquals("ShoppingListItem{ingredientId=" + recIngredient.getIngredientRef() + 
-        ", amount=Amount{quantity=2.0, unit=CUP, description='null'}, sourceRecipeId=" + 
-        recipe.getId() + "}", shopListItem.toString());
-    }   
+        assertEquals("ShoppingListItem{ingredientId=" + recIngredient.getIngredientRef() +
+                ", customName='null'" +
+                ", amount=Amount{quantity=2.0, unit=CUP, description='null'}, sourceRecipeId=" +
+                recipe.getId() + "}", shopListItem.toString());
+    }
 
     @Test
     public void equalsSameObject() {
@@ -114,24 +109,20 @@ public class ShoppingListItemTest {
 
     @Test
     public void equalsSameValues() {
-        ShoppingListItem other =
-            new ShoppingListItem(
+        ShoppingListItem other = new ShoppingListItem(
                 recIngredient.getIngredientRef(),
                 formalAmount,
-                recipe.getId()
-            );
+                recipe.getId());
 
         assertEquals(shopListItem, other);
     }
 
     @Test
     public void equalsDifferentIngredient() {
-        ShoppingListItem other =
-            new ShoppingListItem(
+        ShoppingListItem other = new ShoppingListItem(
                 UUID.randomUUID(),
                 formalAmount,
-                recipe.getId()
-            );
+                recipe.getId());
 
         assertEquals(false, shopListItem.equals(other));
     }
@@ -140,58 +131,48 @@ public class ShoppingListItemTest {
     public void equalsDifferentAmount() {
         Amount otherAmount = new Amount(5.0, Unit.CUP);
 
-        ShoppingListItem other =
-            new ShoppingListItem(
+        ShoppingListItem other = new ShoppingListItem(
                 recIngredient.getIngredientRef(),
                 otherAmount,
-                recipe.getId()
-            );
+                recipe.getId());
 
         assertEquals(false, shopListItem.equals(other));
     }
 
     @Test
     public void equalsBothSourceRecipeNull() {
-        ShoppingListItem a =
-            new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
+        ShoppingListItem a = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
 
-        ShoppingListItem b =
-            new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
+        ShoppingListItem b = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
 
         assertEquals(a, b);
     }
 
     @Test
     public void equalsOneSourceRecipeNull() {
-        ShoppingListItem a =
-            new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
+        ShoppingListItem a = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
 
-        ShoppingListItem b =
-            new ShoppingListItem(
+        ShoppingListItem b = new ShoppingListItem(
                 recIngredient.getIngredientRef(),
                 formalAmount,
-                recipe.getId()
-            );
+                recipe.getId());
 
         assertEquals(false, a.equals(b));
     }
 
     @Test
     public void hashCodeEqualObjects() {
-        ShoppingListItem other =
-            new ShoppingListItem(
+        ShoppingListItem other = new ShoppingListItem(
                 recIngredient.getIngredientRef(),
                 formalAmount,
-                recipe.getId()
-            );
+                recipe.getId());
 
         assertEquals(shopListItem.hashCode(), other.hashCode());
     }
 
     @Test
     public void hashCodeWithNullSourceRecipe() {
-        ShoppingListItem item =
-            new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
+        ShoppingListItem item = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
 
         assertNotNull(item.hashCode());
     }

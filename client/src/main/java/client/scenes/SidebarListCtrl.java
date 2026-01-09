@@ -2,6 +2,8 @@ package client.scenes;
 
 import client.services.RecipeManager;
 import client.utils.SortUtils;
+import com.google.inject.Inject;
+import commons.Language;
 import commons.Recipe;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
@@ -16,13 +18,16 @@ import java.util.List;
  */
 public class SidebarListCtrl {
 
-    private final RecipeManager manager = RecipeManager.getInstance();
+    @Inject
+    private RecipeManager recipeManager;
     private SortUtils sortUtils;
     private ListView<ListObject> listView;
     private boolean removeMode = false;
     private boolean cloneMode = false;
+    private boolean favouriteMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
     private ESidebarMode currentMode = ESidebarMode.Recipe;
+
 
 
     /**
@@ -66,7 +71,7 @@ public class SidebarListCtrl {
      */
     private void initializeRecipeSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
-        var recipesList = manager.getObservableRecipes();
+        var recipesList = recipeManager.getObservableRecipes();
         sortUtils = SortUtils.fromRecipeList(recipesList);
     }
 
@@ -75,7 +80,7 @@ public class SidebarListCtrl {
      */
     private void initializeIngredientSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
-        var recipesList = manager.getObservableIngredients();
+        var recipesList = recipeManager.getObservableIngredients();
         sortUtils = SortUtils.fromIngredientList(recipesList);
     }
 
@@ -103,7 +108,13 @@ public class SidebarListCtrl {
             @Override
             protected void updateItem(ListObject item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.name());
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    boolean fav = recipeManager.isFavourite(item.id());
+                    setText((fav ? "★ " : "") + item.name());
+                }
+
             }
         });
 
@@ -117,7 +128,7 @@ public class SidebarListCtrl {
                     return;
                 }
 
-                boolean removed = manager.removeRecipe(sel.id());
+                boolean removed = recipeManager.removeRecipe(sel.id());
 
                 exitRemoveMode();
 
@@ -131,7 +142,7 @@ public class SidebarListCtrl {
             if (cloneMode) {
                 ListObject sel = listView.getSelectionModel().getSelectedItem();
                 if (sel != null && onCloneRequest != null) {
-                    Recipe recipe = RecipeManager.getInstance().getRecipe(sel.id());
+                    Recipe recipe = recipeManager.getRecipe(sel.id());
                     onCloneRequest.accept(recipe);
                 }
 
@@ -141,10 +152,19 @@ public class SidebarListCtrl {
                 ev.consume();
                 return;
             }
+            if (favouriteMode) {
+                ListObject sel = listView.getSelectionModel().getSelectedItem();
+                if (sel != null) {
+                    recipeManager.toggleFavourite(sel.id());
+                    listView.refresh(); // redraw star
+                }
 
-
+                exitFavouriteMode();
+                listView.getSelectionModel().clearSelection();
+                ev.consume();
+                return;
+            }
         });
-
 
     }
 
@@ -157,6 +177,19 @@ public class SidebarListCtrl {
             initializeSortUtils(currentMode);
         }
         listView.setItems(sortUtils.applyFilters());
+    }
+
+    /**
+     * Toggles the language filter of the provided language in SortUtils
+     * @param language provided language to toggle filter of
+     */
+    public void toggleLanguageFilter(Language language) {
+        if (sortUtils == null) {
+            initializeSortUtils(currentMode);
+        }
+
+        sortUtils.toggleLanguageFilter(language);
+        setListViewSorted();
     }
 
     /**
@@ -180,7 +213,7 @@ public class SidebarListCtrl {
      */
     public void addRecipe(Recipe r) {
         if (r == null) return;
-        manager.addRecipeOptimistic(r);
+        recipeManager.addRecipeOptimistic(r);
     }
 
     /**
@@ -190,7 +223,7 @@ public class SidebarListCtrl {
      */
     public void removeRecipe(Recipe r) {
         if (r == null) return;
-        manager.removeRecipe(r.getId());
+        recipeManager.removeRecipe(r.getId());
     }
 
     /**
@@ -224,7 +257,7 @@ public class SidebarListCtrl {
      * @return an immutable snapshot of recipes
      */
     public List<Recipe> getRecipesSnapshot() {
-        return manager.getRecipesSnapshot();
+        return recipeManager.getRecipesSnapshot();
     }
     public void enterCloneMode() {
         removeMode = false;
@@ -242,6 +275,17 @@ public class SidebarListCtrl {
 
     public void setOnRecipeCloneRequest(java.util.function.Consumer<Recipe> callback) {
         this.onCloneRequest = callback;
+    }
+
+    public void enterFavouriteMode() {
+        removeMode = false;
+        cloneMode = false;
+        favouriteMode = true;
+        if (listView != null) listView.requestFocus();
+    }
+
+    private void exitFavouriteMode() {
+        favouriteMode = false;
     }
 
 }
