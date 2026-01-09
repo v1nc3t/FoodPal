@@ -7,9 +7,11 @@ import com.google.inject.Inject;
 import commons.Language;
 import commons.Recipe;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
 
 import java.util.List;
 import java.util.Set;
@@ -55,6 +57,14 @@ public class SidebarListCtrl {
             currentMode = mode;
             setListViewSorted();
         }
+    }
+
+    /**
+     * Gets the sidebar mode
+     * @return mode that is currently set
+     */
+    public ESidebarMode getSidebarMode() {
+        return currentMode;
     }
 
     /**
@@ -119,51 +129,45 @@ public class SidebarListCtrl {
 
         // Handle remove-mode and clone-mode clicks in a single event filter.
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
-            if (removeMode) {
-                ListObject sel = listView.getSelectionModel().getSelectedItem();
-                if (sel == null) {
-                    exitRemoveMode();
-                    ev.consume();
-                    return;
-                }
-
-                boolean removed = recipeManager.removeRecipe(sel.id());
-
+            ListObject sel = listView.getSelectionModel().getSelectedItem();
+            if (sel == null
+                || (!removeMode && !cloneMode && !favouriteMode)) {
                 exitRemoveMode();
-
-                listView.getSelectionModel().clearSelection();
-
-                ev.consume();
-                return;
-            }
-
-
-            if (cloneMode) {
-                ListObject sel = listView.getSelectionModel().getSelectedItem();
-                if (sel != null && onCloneRequest != null) {
-                    Recipe recipe = recipeManager.getRecipe(sel.id());
-                    onCloneRequest.accept(recipe);
-                }
-
                 exitCloneMode();
-                listView.getSelectionModel().clearSelection();
-
-                ev.consume();
-                return;
-            }
-            if (favouriteMode) {
-                ListObject sel = listView.getSelectionModel().getSelectedItem();
-                if (sel != null) {
-                    recipeManager.toggleFavourite(sel.id());
-                    listView.refresh(); // redraw star
-                    updateFavourites(recipeManager.getFavouriteRecipesSnapshot());
-                }
-
                 exitFavouriteMode();
-                listView.getSelectionModel().clearSelection();
-                ev.consume();
                 return;
             }
+            if (removeMode) {
+                switch (currentMode) {
+                    case ESidebarMode.Recipe ->
+                            recipeManager.removeRecipe(sel.id());
+                    case ESidebarMode.Ingredient -> {
+                        try {
+                            recipeManager.removeIngredient(sel.id());
+                        }
+                        catch (Exception ex){
+                            var alert = new Alert(Alert.AlertType.ERROR);
+                            alert.initModality(Modality.APPLICATION_MODAL);
+                            alert.setContentText(ex.getMessage());
+                            alert.showAndWait();
+                        }
+                    }
+                }
+            }
+            else if (cloneMode && onCloneRequest != null)
+                onCloneRequest.accept(recipeManager.getRecipe(sel.id()));
+            else if (favouriteMode) {
+                recipeManager.toggleFavourite(sel.id());
+                listView.refresh(); // redraw star
+                updateFavourites(recipeManager.getFavouriteRecipesSnapshot());
+                exitFavouriteMode();
+            }
+
+            exitRemoveMode();
+            exitFavouriteMode();
+            exitCloneMode();
+            ev.consume();
+            listView.getSelectionModel().clearSelection();
         });
 
     }

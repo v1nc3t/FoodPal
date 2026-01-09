@@ -56,6 +56,10 @@ public class RecipeManager {
     public Ingredient getIngredient(RecipeIngredient recipeIngredient) {
         return ingredientsMap.get(recipeIngredient.getIngredientRef());
     }
+    /** Get the ingredient by ingredient id */
+    public Ingredient getIngredient(UUID id) {
+        return ingredientsMap.get(id);
+    }
 
 
 
@@ -113,6 +117,26 @@ public class RecipeManager {
         Recipe removed = recipesMap.remove(recipeId);
         // still remove from observable list
         runOnFx(() -> recipesFx.removeIf(r -> Objects.equals(r.getId(), recipeId)));
+        return removed != null;
+    }
+
+    public boolean removeIngredient(UUID ingredientId) {
+        if (ingredientId == null) return false;
+        var usedRecipe =
+                recipesMap
+                        .values()
+                        .stream()
+                        .filter(
+                        rv -> rv
+                                .getIngredients()
+                                .stream()
+                                .anyMatch(ri -> ri.ingredientRef == ingredientId)
+                ).findAny().orElse(null);
+        if (usedRecipe != null)
+            throw new RuntimeException("Cannot remove ingredient, because it is used in recipe: " + usedRecipe.getTitle());
+        Ingredient removed = ingredientsMap.remove(ingredientId);
+        // still remove from observable list
+        runOnFx(() -> ingredientsFx.removeIf(r -> Objects.equals(r.getId(), ingredientId)));
         return removed != null;
     }
 
