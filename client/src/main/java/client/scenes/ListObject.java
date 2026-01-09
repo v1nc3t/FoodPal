@@ -12,6 +12,6 @@ public record ListObject(UUID id, String name, Optional<Language> language) {
         return new ListObject(recipe.getId(), recipe.getTitle(), Optional.of(recipe.getLanguage()));
     }
     public static ListObject fromIngredient(Ingredient ingredient) {
-        return new ListObject(ingredient.getId(), ingredient.getName(), Optional.of(Language.EN));
+        return new ListObject(ingredient.getId(), ingredient.getName(), Optional.empty());
     }
 }
