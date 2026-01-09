@@ -3,6 +3,7 @@ package client.scenes;
 import client.MyFXML;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import commons.Ingredient;
 import commons.Language;
 import com.google.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
@@ -16,6 +17,7 @@ import commons.Recipe;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 public class MainApplicationCtrl implements Internationalizable {
 
@@ -88,7 +90,8 @@ public class MainApplicationCtrl implements Internationalizable {
     private final MyFXML fxml;
     private final LocaleManager localeManager;
 
-    private Recipe currentlyShownRecipe = null;
+    /// The id of the currently shown object, can be either an id of {@link Recipe}, or an id of {@link Ingredient}
+    private UUID currentlyShownId = null;
 
     @Inject
     private RecipeManager recipeManager;
@@ -214,7 +217,12 @@ public class MainApplicationCtrl implements Internationalizable {
             }
 
             // Open the viewer
-            showRecipe(recipeManager.getRecipe(sel.id()));
+            switch (sidebarListCtrl.getSidebarMode()) {
+                case ESidebarMode.Recipe ->
+                        showRecipe(recipeManager.getRecipe(sel.id()));
+                case ESidebarMode.Ingredient ->
+                        showIngredient(recipeManager.getIngredient(sel.id()));
+            }
         });
 
         cloneButton.setOnAction(_ -> sidebarListCtrl.enterCloneMode());
@@ -305,15 +313,15 @@ public class MainApplicationCtrl implements Internationalizable {
         recipeManager.getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
                     while (change.next()) {
-                        if (change.wasRemoved() && currentlyShownRecipe != null) {
+                        if (change.wasRemoved() && currentlyShownId != null && sidebarListCtrl.getSidebarMode() == ESidebarMode.Recipe) {
                             boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
-                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
+                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownId));
                             if (!stillPresent) {
                                 javafx.application.Platform.runLater(() -> {
                                     showMainScreen();
-                                    currentlyShownRecipe = null;
+                                    currentlyShownId = null;
                                 });
                             }
                         }
@@ -377,7 +385,7 @@ public class MainApplicationCtrl implements Internationalizable {
         var bundle = localeManager.getCurrentBundle();
         if (recipe == null) {
             showMainScreen();
-            currentlyShownRecipe = null;
+            currentlyShownId = null;
             return;
         }
 
@@ -390,7 +398,27 @@ public class MainApplicationCtrl implements Internationalizable {
         viewerCtrl.setRecipe(recipe);
 
         contentPane.getChildren().setAll(viewerRoot);
-        currentlyShownRecipe = recipe;
+        currentlyShownId = recipe.getId();
+    }
+
+    private void showIngredient(Ingredient ingredient) {
+        var bundle = localeManager.getCurrentBundle();
+        if (ingredient == null) {
+            showMainScreen();
+            currentlyShownId = null;
+            return;
+        }
+
+        Pair<IngredientViewerCtrl, Parent> pair = fxml.load(IngredientViewerCtrl.class, bundle,
+                "client", "scenes", "IngredientViewer.fxml");
+
+        IngredientViewerCtrl viewerCtrl = pair.getKey();
+        Parent viewerRoot = pair.getValue();
+
+        viewerCtrl.setIngredient(ingredient);
+
+        contentPane.getChildren().setAll(viewerRoot);
+        currentlyShownId = ingredient.getId();
     }
 
 
@@ -472,7 +500,7 @@ public class MainApplicationCtrl implements Internationalizable {
 
         contentPane.getChildren().setAll(shoppingListRoot);
         // Reset selection in sidebar or handle "active view" state if needed
-        currentlyShownRecipe = null;
+        currentlyShownId = null;
     }
 
 }
