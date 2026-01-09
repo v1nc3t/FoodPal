@@ -25,7 +25,8 @@ public class SidebarListCtrl {
     private RecipeManager recipeManager;
     @Inject
     private ConfigManager configManager;
-    private SortUtils sortUtils;
+    private SortUtils recipeSortUtils;
+    private SortUtils ingredientsSortUtils;
     private ListView<ListObject> listView;
     private boolean removeMode = false;
     private boolean cloneMode = false;
@@ -40,19 +41,18 @@ public class SidebarListCtrl {
      */
     @FXML
     public void initialize() {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
     }
 
     /**
-     * Sets the sidebar mode, if different, and reinitializes sort-utils if so
+     * Sets the sidebar mode, if different, and resets the list view
      * @param mode the mode to become
      */
     public void setSidebarMode(ESidebarMode mode) {
         if (currentMode != mode) {
             currentMode = mode;
-            initializeSortUtils(mode);
             setListViewSorted();
         }
     }
@@ -60,15 +60,9 @@ public class SidebarListCtrl {
     /**
      * Initializes SortUtils for sorting and filtering
      */
-    private void initializeSortUtils(ESidebarMode mode) {
-        switch (mode) {
-            case Recipe:
-                initializeRecipeSortUtils();
-                break;
-            case Ingredient:
-                initializeIngredientSortUtils();
-                break;
-        }
+    private void initializeSortUtils() {
+        if (recipeSortUtils == null) initializeRecipeSortUtils();
+        if (ingredientsSortUtils == null) initializeIngredientSortUtils();
     }
 
     /**
@@ -77,7 +71,7 @@ public class SidebarListCtrl {
     private void initializeRecipeSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
         var recipesList = recipeManager.getObservableRecipes();
-        sortUtils = SortUtils.fromRecipeList(recipesList);
+        recipeSortUtils = SortUtils.fromRecipeList(recipesList);
     }
 
     /**
@@ -85,8 +79,8 @@ public class SidebarListCtrl {
      */
     private void initializeIngredientSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
-        var recipesList = recipeManager.getObservableIngredients();
-        sortUtils = SortUtils.fromIngredientList(recipesList);
+        var ingredientsList = recipeManager.getObservableIngredients();
+        ingredientsSortUtils = SortUtils.fromIngredientList(ingredientsList);
     }
 
     /**
@@ -181,11 +175,12 @@ public class SidebarListCtrl {
      * @param favouriteRecipes list of favourite recipe UUIDs
      */
     public void updateFavourites(Set<UUID> favouriteRecipes) {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
 
-        sortUtils.setFavourites(favouriteRecipes.stream().toList());
+        recipeSortUtils.setFavourites(favouriteRecipes.stream().toList());
+
         setListViewSorted();
 
         configManager.getConfig().setFavoriteRecipeIDs(favouriteRecipes.stream().toList());
@@ -197,10 +192,19 @@ public class SidebarListCtrl {
      * (in a sorted manner through SortUtils)
      */
     private void setListViewSorted() {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
-        listView.setItems(sortUtils.applyFilters());
+
+        switch (currentMode) {
+            case Recipe:
+                listView.setItems(recipeSortUtils.applyFilters());
+                break;
+            case Ingredient:
+                listView.setItems(ingredientsSortUtils.applyFilters());
+                System.out.println(recipeManager.getObservableIngredients());
+                break;
+        }
     }
 
     /**
@@ -208,11 +212,13 @@ public class SidebarListCtrl {
      * @param language provided language to toggle filter of
      */
     public void toggleLanguageFilter(Language language) {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
 
-        sortUtils.toggleLanguageFilter(language);
+        recipeSortUtils.toggleLanguageFilter(language);
+        ingredientsSortUtils.toggleLanguageFilter(language);
+
         setListViewSorted();
     }
 
@@ -221,11 +227,13 @@ public class SidebarListCtrl {
      * @param sortMethod provided ordering manner
      */
     public void setSortMethod(String sortMethod) {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
 
-        sortUtils.setSortMethod(sortMethod);
+        recipeSortUtils.setSortMethod(sortMethod);
+        ingredientsSortUtils.setSortMethod(sortMethod);
+
         setListViewSorted();
     }
 
@@ -316,11 +324,12 @@ public class SidebarListCtrl {
      * Toggles whether sortUtils filters only favourites.
      */
     public void toggleOnlyFavourites() {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
 
-        sortUtils.setOnlyFavourites(!sortUtils.isOnlyFavourites());
+        recipeSortUtils.setOnlyFavourites(!recipeSortUtils.isOnlyFavourites());
+
         setListViewSorted();
     }
 }
