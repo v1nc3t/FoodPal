@@ -26,7 +26,10 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(
+            WebSocketSession session,
+            TextMessage message) throws Exception {
+
         String payload = message.getPayload();
         JsonNode json;
 
@@ -50,25 +53,31 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
 
         if (type == WebSocketTypes.SUBSCRIBE) {
             handleSubscription(session, topic, json);
+        } else if (type == WebSocketTypes.UNSUBSCRIBE) {
+            handleUnsubscription(session, topic, json);
         } else {
-            sendErrorMessage(session, "Only subscribe command is allowed");
+            sendErrorMessage(session, "Command not supported: " + typeString);
         }
     }
 
-    private void handleSubscription(WebSocketSession session, String topic, JsonNode json) throws Exception {
+    private void handleSubscription(
+            WebSocketSession session,
+            String topic,
+            JsonNode json) throws Exception {
+
         if (topic.equals("recipe-titles")) {
             hub.subscribeTitles(session);
-            sendConfirm(session, "recipe-titles");
+            sendSubscribeConfirm(session, "recipe-titles");
 
         } else if (topic.equals("recipe")) {
             String idStr = json.path("recipeId").asText(null);
             if (idStr == null || idStr.isEmpty()) {
-                sendErrorMessage(session, "recipeId is missing");
+                sendErrorMessage(session, "recipeId is missing for subscription");
             } else {
                 try {
                     UUID recipeId = UUID.fromString(idStr);
                     hub.subscribeRecipe(session, recipeId);
-                    sendConfirm(session, "recipe");
+                    sendSubscribeConfirm(session, "recipe");
                 } catch (IllegalArgumentException e) {
                     sendErrorMessage(session, "recipeId is not a valid UUID format");
                 }
@@ -78,8 +87,39 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void sendConfirm(WebSocketSession session, String topic) throws Exception {
+    private void handleUnsubscription(
+            WebSocketSession session,
+            String topic,
+            JsonNode josn) throws Exception {
+
+        if (topic.equals("recipe-titles")) {
+            hub.unsubscribeTitles(session);
+            sendUnsubscribeConfirm(session, "recipe-titles");
+        } else if (topic.equals("recipe")) {
+            String idStr = josn.path("recipeId").asText(null);
+            if (idStr== null || idStr.isEmpty()) {
+                sendErrorMessage(session, "recipeId is missing for unsubscription");
+            } else {
+                try {
+                    UUID recipeId = UUID.fromString(idStr);
+                    hub.unsubscribeRecipe(session, recipeId);
+                    sendUnsubscribeConfirm(session, "recipe");
+                } catch (IllegalArgumentException e) {
+                    sendErrorMessage(session, "recipeId is not a valid UUID format");
+                }
+            }
+        } else {
+            sendErrorMessage(session, "Unknown topic: " + topic);
+        }
+    }
+
+    private void sendSubscribeConfirm(WebSocketSession session, String topic) throws Exception {
         WebSocketResponse response = new WebSocketResponse(WebSocketTypes.SUBSCRIBED, topic, null);
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(response)));
+    }
+
+    private void sendUnsubscribeConfirm(WebSocketSession session, String topic) throws Exception {
+        WebSocketResponse response = new WebSocketResponse(WebSocketTypes.UNSUBSCRIBED, topic, null);
         session.sendMessage(new TextMessage(mapper.writeValueAsString(response)));
     }
 

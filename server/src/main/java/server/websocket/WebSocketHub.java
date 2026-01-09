@@ -35,6 +35,21 @@ public class WebSocketHub {
         );
     }
 
+    public void unsubscribeTitles(WebSocketSession session) {
+        titleSubscribers.remove(session);
+    }
+
+    public void unsubscribeRecipe(WebSocketSession session, UUID recipeId) {
+        List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
+        if (sessions != null) {
+            sessions.remove(session);
+
+            if (sessions.isEmpty()) {
+                recipeSubscribers.remove(recipeId);
+            }
+        }
+    }
+
     public void broadcastTitleUpdate(Object allRecipes) {
         WebSocketResponse response = new WebSocketResponse(
                 WebSocketTypes.UPDATE,
