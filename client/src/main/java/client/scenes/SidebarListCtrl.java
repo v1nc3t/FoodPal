@@ -202,7 +202,6 @@ public class SidebarListCtrl {
                 break;
             case Ingredient:
                 listView.setItems(ingredientsSortUtils.applyFilters());
-                System.out.println(recipeManager.getObservableIngredients());
                 break;
         }
     }
