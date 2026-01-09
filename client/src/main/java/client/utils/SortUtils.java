@@ -26,7 +26,7 @@ public class SortUtils {
      */
     @Inject
     public SortUtils(ObservableList<ListObject> list) {
-        loadConfig();
+        loadDefault();
         this.list = list;
     }
 
@@ -132,18 +132,11 @@ public class SortUtils {
     }
 
     /**
-     * Loads the user config and defines what filters and ordering
-     * manners SortUtils should use. Reverts to default ones in case reading fails.
+     * Reverts to default filtering (all languages) and sorting (alphabetical) manners.
      */
-    public void loadConfig() {
-        try {
-            // TODO: try to load config for user defined filters (languages and favorites)
-            throw new Exception("Mock config file failing.");
-        } catch (Exception e) {
-            languageFilters = new ArrayList<>(List.of(Language.EN, Language.DE, Language.NL));
-        } finally {
-            sortMethod = "Alphabetical";
-        }
+    public void loadDefault() {
+        languageFilters = new ArrayList<>(List.of(Language.EN, Language.DE, Language.NL));
+        sortMethod = "Alphabetical";
     }
 
     /**

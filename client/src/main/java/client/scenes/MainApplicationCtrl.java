@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.MyFXML;
+import client.config.Config;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
 import commons.Language;
@@ -14,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.util.Pair;
 import commons.Recipe;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -229,24 +231,46 @@ public class MainApplicationCtrl implements Internationalizable {
                     }
                 });
         sortUponSelection(sidebarListCtrl);
-        prepareLanguageFilters();
+        prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
     }
 
     /**
-     * Initializes the language filter checkboxes to the default configuration.
-     * TODO: read from config instead of assuming all languages are enabled
+     * Initializes the language filter checkboxes according to the config.
+     * If reading from the config fails, resorts to defaulting to all languages.
+     * @param sidebarListCtrl the recipe list controller which is responsible for
+     *                       the recipe list
      */
-    private void prepareLanguageFilters() {
-        englishFilter.setSelected(true);
-        germanFilter.setSelected(true);
-        dutchFilter.setSelected(true);
+    private void prepareLanguageFilters(SidebarListCtrl sidebarListCtrl) {
+        try {
+            Config config = localeManager.getConfigManager().getConfig();
+            List<Language> languages = config.getLanguageFilters();
+            englishFilter.setSelected(languages.contains(Language.EN));
+            germanFilter.setSelected(languages.contains(Language.DE));
+            dutchFilter.setSelected(languages.contains(Language.NL));
+
+            // propagate the config languages to the sortUtils
+            if (!languages.contains(Language.EN)) {
+                sidebarListCtrl.toggleLanguageFilter(Language.EN);
+            }
+            if (!languages.contains(Language.DE)) {
+                sidebarListCtrl.toggleLanguageFilter(Language.DE);
+            }
+            if (!languages.contains(Language.NL)) {
+                sidebarListCtrl.toggleLanguageFilter(Language.NL);
+            }
+        }
+        catch (Exception e) {
+            englishFilter.setSelected(true);
+            germanFilter.setSelected(true);
+            dutchFilter.setSelected(true);
+        }
     }
 
     /**
      * Adds a listener for changes to language filter checkboxes,
-     * so recipe list viewer can get filtered after a selection of a filter.
-     * 
+     * so the recipe list viewer can get filtered after a selection of a filter.
+     * Also propagates the checkbox changes to the config file.
      * @param sidebarListCtrl the recipe list controller which is responsible for
      *                        the recipe list
      */
@@ -254,15 +278,36 @@ public class MainApplicationCtrl implements Internationalizable {
         englishFilter.selectedProperty().addListener((
                 observable, oldValue, newValue) -> {
             sidebarListCtrl.toggleLanguageFilter(Language.EN);
+            updateConfigFilter(Language.EN);
         });
         germanFilter.selectedProperty().addListener((
                 observable, oldValue, newValue) -> {
             sidebarListCtrl.toggleLanguageFilter(Language.DE);
+            updateConfigFilter(Language.DE);
         });
         dutchFilter.selectedProperty().addListener((
                 observable, oldValue, newValue) -> {
             sidebarListCtrl.toggleLanguageFilter(Language.NL);
+            updateConfigFilter(Language.NL);
         });
+    }
+
+    /**
+     * Updates the config file by adding or removing the given language filter.
+     * @param language language to be added or removed
+     */
+    private void updateConfigFilter(Language language) {
+        Config config = localeManager.getConfigManager().getConfig();
+        List<Language> languages = config.getLanguageFilters();
+
+        if (languages.contains(language)) {
+            languages.remove(language);
+        } else {
+            languages.add(language);
+        }
+
+        config.setLanguageFilters(languages);
+        localeManager.getConfigManager().save();
     }
 
     /**

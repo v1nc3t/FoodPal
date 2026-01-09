@@ -50,6 +50,10 @@ public class LocaleManager {
         }
     }
 
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
     public Locale getCurrentLocale() {
         return currentLocale;
     }

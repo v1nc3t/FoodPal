@@ -159,11 +159,11 @@ class SortUtilsTest {
     }
 
     @Test
-    void loadConfig() {
+    void loadDefault() {
         SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         sortUtils.setSortMethod("Reverse alphabetical");
         sortUtils.setLanguageFilters(List.of(Language.NL));
-        sortUtils.loadConfig();
+        sortUtils.loadDefault();
 
         List<Language> expected = new ArrayList<>(List.of(Language.EN, Language.DE,
                 Language.NL));
