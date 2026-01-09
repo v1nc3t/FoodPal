@@ -91,6 +91,10 @@ public class RecipeViewerCtrl implements Internationalizable {
         setLocale(localeManager.getCurrentLocale());
     }
 
+    public Recipe getCurrentRecipe() {
+        return currentRecipe;
+    }
+
     private void bindElementsProperties() {
         titleLabel.textProperty().bind(titleProperty);
         languageLabel.textProperty().bind(languageProperty);

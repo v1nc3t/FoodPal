@@ -56,6 +56,10 @@ public class RecipeManager {
     public Ingredient getIngredient(RecipeIngredient recipeIngredient) {
         return ingredientsMap.get(recipeIngredient.getIngredientRef());
     }
+    /** Get the ingredient by ingredient id */
+    public Ingredient getIngredient(UUID id) {
+        return ingredientsMap.get(id);
+    }
 
 
 

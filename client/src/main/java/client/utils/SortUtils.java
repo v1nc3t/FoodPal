@@ -175,8 +175,8 @@ public class SortUtils {
     public SortedList<ListObject> applyFilters() {
         SortedList<ListObject> sortedList = new SortedList<>(list
                 .filtered(listObject ->
-                            listObject.language().isPresent()
-                            && languageFilters.contains(listObject.language().get())));
+                            listObject.language().isEmpty()
+                            || languageFilters.contains(listObject.language().get())));
 
         Comparator<ListObject> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);

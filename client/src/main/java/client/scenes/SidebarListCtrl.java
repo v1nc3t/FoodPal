@@ -53,6 +53,14 @@ public class SidebarListCtrl {
     }
 
     /**
+     * Gets the sidebar mode
+     * @return mode that is currently set
+     */
+    public ESidebarMode getSidebarMode() {
+        return currentMode;
+    }
+
+    /**
      * Initializes SortUtils for sorting and filtering
      */
     private void initializeSortUtils(ESidebarMode mode) {
