@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 public class MainApplicationCtrl implements Internationalizable {
 
     /**
-     * This is the right pane(This pane will load different screens)
+     *   This is the right pane(This pane will load different screens)
      */
     @FXML
     private Pane contentPane;
@@ -72,7 +72,15 @@ public class MainApplicationCtrl implements Internationalizable {
     private Button favouriteButton;
 
     @FXML
-    private ListView<ListObject> recipeListView;
+    private ListView<ListObject> sidebarListView;
+
+    @FXML
+    private ToggleButton recipeToggleButton;
+    private final StringProperty recipeToggleTextProperty = new SimpleStringProperty();
+    @FXML
+    private ToggleButton ingredientToggleButton;
+    private final StringProperty ingredientToggleTextProperty = new SimpleStringProperty();
+    private final ToggleGroup categoryToggleGroup = new ToggleGroup();
 
     @Inject
     private SidebarListCtrl sidebarListCtrl;
@@ -108,12 +116,14 @@ public class MainApplicationCtrl implements Internationalizable {
         cloneButton.textProperty().bind(cloneProperty);
         searchField.promptTextProperty().bind(searchProperty);
         favouriteButton.textProperty().bind(favouriteProperty);
+        recipeToggleButton.textProperty().bind(recipeToggleTextProperty);
+        ingredientToggleButton.textProperty().bind(ingredientToggleTextProperty);
     }
 
     /**
      * Dynamically updates properties of UI elements to the language
      * of a corresponding locale
-     * 
+     *
      * @param newLocale provided locale/language for UI elements
      */
     @Override
@@ -125,6 +135,8 @@ public class MainApplicationCtrl implements Internationalizable {
         cloneProperty.set(resourceBundle.getString("txt.clone"));
         favouriteProperty.set(resourceBundle.getString("txt.favourite"));
         searchProperty.set(resourceBundle.getString("txt.search"));
+        recipeToggleTextProperty.set(resourceBundle.getString("txt.recipe"));
+        ingredientToggleTextProperty.set(resourceBundle.getString("txt.ingredient"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
         recentProperty.set(resourceBundle.getString("txt.recent"));
@@ -177,57 +189,38 @@ public class MainApplicationCtrl implements Internationalizable {
         bindElementsProperties();
 
         setLocale(localeManager.getCurrentLocale());
+
+        initializeSidebarListCtrl();
+
         prepareLanguageOptions();
         prepareSortBy();
-
         sidebarListCtrl.initialize();
-        if (recipeListView != null) {
-            sidebarListCtrl.setListView(recipeListView);
-            sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
-            // open viewer on double-click, and ignore clicks when in remove mode
-            recipeListView.setOnMouseClicked(evt -> {
-                if (evt.getClickCount() != 2)
-                    return; // require double-click to open
-                var sel = recipeListView.getSelectionModel().getSelectedItem();
-                if (sel == null)
-                    return;
-                // If the list is in remove mode, the click was for deleting — ignore it
-                if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
-                    recipeListView.getSelectionModel().clearSelection(); // avoid visual flicker
-                    evt.consume();
-                    return;
-                }
-                // Open the viewer
-                showRecipe(recipeManager.getRecipe(sel.id()));
-            });
-            if (cloneButton != null) {
-                cloneButton.setOnAction(e -> sidebarListCtrl.enterCloneMode());
+
+        sidebarListCtrl.setListView(sidebarListView);
+
+        sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
+        // open viewer on double-click, and ignore clicks when in remove mode
+        sidebarListView.setOnMouseClicked(evt -> {
+            if (evt.getClickCount() != 2) return; // require double-click to open
+
+            var sel = sidebarListView.getSelectionModel().getSelectedItem();
+            if (sel == null) return;
+
+            // If the list is in remove mode, the click was for deleting — ignore it
+            if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
+                sidebarListView.getSelectionModel().clearSelection(); // avoid visual flicker
+                evt.consume();
+                return;
             }
-        }
-        if (removeButton != null) {
-            removeButton.setOnAction(e -> sidebarListCtrl.enterRemoveMode());
-        }
-        if (favouriteButton != null) {
-            favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
-        }
-        // if the currently shown recipe disappears, close viewer.
-        recipeManager.getObservableRecipes()
-                .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
-                    while (change.next()) {
-                        if (change.wasRemoved() && currentlyShownRecipe != null) {
-                            boolean stillPresent = recipeManager
-                                    .getObservableRecipes()
-                                    .stream()
-                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
-                            if (!stillPresent) {
-                                javafx.application.Platform.runLater(() -> {
-                                    showMainScreen();
-                                    currentlyShownRecipe = null;
-                                });
-                            }
-                        }
-                    }
-                });
+
+            // Open the viewer
+            showRecipe(recipeManager.getRecipe(sel.id()));
+        });
+
+        cloneButton.setOnAction(_ -> sidebarListCtrl.enterCloneMode());
+        removeButton.setOnAction(_ -> sidebarListCtrl.enterRemoveMode());
+        favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
+
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters();
         filterUponSelection(sidebarListCtrl);
@@ -246,7 +239,7 @@ public class MainApplicationCtrl implements Internationalizable {
     /**
      * Adds a listener for changes to language filter checkboxes,
      * so recipe list viewer can get filtered after a selection of a filter.
-     * 
+     *
      * @param sidebarListCtrl the recipe list controller which is responsible for
      *                        the recipe list
      */
@@ -265,8 +258,22 @@ public class MainApplicationCtrl implements Internationalizable {
         });
     }
 
+    private void initializeSidebarListCtrl() {
+        recipeToggleButton.setToggleGroup(categoryToggleGroup);
+        ingredientToggleButton.setToggleGroup(categoryToggleGroup);
+        recipeToggleButton.setSelected(true);
+        categoryToggleGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
+            if (newValue == recipeToggleButton) {
+                sidebarListCtrl.setSidebarMode(ESidebarMode.Recipe);
+            } else if  (newValue == ingredientToggleButton) {
+                sidebarListCtrl.setSidebarMode(ESidebarMode.Ingredient);
+            }
+        });
+    }
+
     /**
      * Prepares the sort-by choice box, by default sorting alphabetically.
+     * TODO: enable internationalization
      */
     private void prepareSortBy() {
         orderBy.getItems().setAll(
@@ -278,7 +285,7 @@ public class MainApplicationCtrl implements Internationalizable {
     /**
      * Adds a listener for changes to sort-by choice box,
      * so recipe list viewer can get sorted after a selection.
-     * 
+     *
      * @param sidebarListCtrl the recipe list controller which is responsible for
      *                        the recipe list
      */
@@ -386,9 +393,12 @@ public class MainApplicationCtrl implements Internationalizable {
         currentlyShownRecipe = recipe;
     }
 
+
     public void showRecipeViewer(Recipe recipe) {
         showRecipe(recipe); // reuse your existing private method
     }
+
+
 
     /**
      * Search field for users to search up items/recipes from ist
@@ -398,28 +408,6 @@ public class MainApplicationCtrl implements Internationalizable {
 
         // To be implemented once server side is done.
         System.out.println("Searching for '" + query);
-    }
-
-    /**
-     * Adds a newly created recipe to the left-hand recipe list.
-     * This method is called by {@link AddRecipeCtrl} after the user completes the
-     * Add Recipe form and presses the Done button. It ensures that:
-     * The recipe appears immediately in the list displayed in the left rectangle.
-     * If the {@link SidebarListCtrl} was not initialized yet,
-     * it will be created and linked to the FXML {@code ListView}.
-     * This method performs an in-memory update only; no server or database
-     * persistence is involved at this stage.
-     *
-     * @param r the newly created {@link Recipe} to add to the UI list
-     */
-    public void addRecipeToList(Recipe r) {
-        if (sidebarListCtrl == null) {
-            sidebarListCtrl = new SidebarListCtrl();
-            sidebarListCtrl.initialize();
-            if (recipeListView != null)
-                sidebarListCtrl.setListView(recipeListView);
-        }
-        sidebarListCtrl.addRecipe(r);
     }
 
     public void editRecipe(Recipe recipe) {
@@ -452,7 +440,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * Opens a modal popup asking the user to enter a name for a cloned recipe.
      * The popup is pre-filled with {@code "<original title> (Copy)"} for
      * convenience.
-     * 
+     *
      * @param original the recipe to be cloned (must not be null)
      */
     private void openClonePopup(Recipe original) {
