@@ -14,10 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,6 +61,43 @@ class SortUtilsTest {
     void constructorTest() {
         SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         assertNotNull(sortUtils, "Newly initialized SortUtils should not be null.");
+    }
+
+    @Test
+    void isOnlyFavouritesTest() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        assertFalse(sortUtils.isOnlyFavourites(), "By default, SortUtils should not only show favourites.");
+    }
+
+    @Test
+    void setOnlyFavouritesTest() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        assertFalse(sortUtils.isOnlyFavourites(), "By default, SortUtils should not only show favourites.");
+        sortUtils.setOnlyFavourites(true);
+        assertTrue(sortUtils.isOnlyFavourites(), "After setting onlyFavourites to true, SortUtils should only show favourites.");
+    }
+
+    @Test
+    void getFavouritesTest() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        assertEquals(0, sortUtils.getFavourites().size(), "By default, SortUtils should not have any favourites.");
+    }
+
+    @Test
+    void setFavouritesTest() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        List<UUID> favourites = List.of(sample.getId(), sample1.getId());
+        sortUtils.setFavourites(favourites);
+        assertEquals(favourites, sortUtils.getFavourites(), "After setting favourites, SortUtils should have the same favourites.");
+    }
+
+    @Test
+    void toggleFavouriteTest() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        UUID id = sample.getId();
+        sortUtils.toggleFavourite(id);
+        assertTrue(sortUtils.getFavourites().contains(id),
+                "After toggling a favourite that was previously not there, SortUtils should have the recipe UUID in the list of favourites.");
     }
 
     @Test
@@ -163,13 +197,17 @@ class SortUtilsTest {
         SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
         sortUtils.setSortMethod("Reverse alphabetical");
         sortUtils.setLanguageFilters(List.of(Language.NL));
+        sortUtils.setOnlyFavourites(true);
+        sortUtils.toggleFavourite(UUID.randomUUID());
         sortUtils.loadDefault();
 
         List<Language> expected = new ArrayList<>(List.of(Language.EN, Language.DE,
                 Language.NL));
 
-        assertEquals("Alphabetical", sortUtils.getSortMethod(), "loadConfig() should have Alphabetical sorting manner by default.");
-        assertEquals(expected, sortUtils.getLanguageFilters(), "loadConfig() should resort to default language filters");
+        assertEquals("Alphabetical", sortUtils.getSortMethod(), "loadDefault() should have Alphabetical sorting manner by default.");
+        assertEquals(expected, sortUtils.getLanguageFilters(), "loadDefault() should resort to default language filters");
+        assertFalse(sortUtils.isOnlyFavourites(), "loadDefault() should not only show favourites by default.");
+        assertEquals(0, sortUtils.getFavourites().size(), "loadDefault() should not have any favourites by default.");
     }
 
     @Test
@@ -200,6 +238,25 @@ class SortUtilsTest {
         var expected = new SortedList<>(expectedSampleList);
 
         expected.setComparator(Comparator.comparing(ListObject::name));
+        var actual = sortUtils.applyFilters();
+
+        assertEquals(expected, actual, "Expected a different SortedList after applyFilters().");
+    }
+
+    @Test
+    void applyFiltersFavouritesTest() {
+        SortUtils sortUtils = SortUtils.fromRecipeList(recipeManager.getObservableRecipes());
+        List<UUID> favourites = List.of(sample.getId(), sample1.getId());
+
+        ObservableList<ListObject> expectedSampleList = FXCollections.observableArrayList(
+                Stream.of(sample, sample1).map(ListObject::fromRecipe).toList()
+        );
+        var expected = new SortedList<>(expectedSampleList);
+
+        expected.setComparator(Comparator.comparing(ListObject::name));
+
+        sortUtils.setFavourites(favourites);
+        sortUtils.setOnlyFavourites(true);
         var actual = sortUtils.applyFilters();
 
         assertEquals(expected, actual, "Expected a different SortedList after applyFilters().");

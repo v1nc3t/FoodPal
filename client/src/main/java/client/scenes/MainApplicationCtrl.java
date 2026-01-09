@@ -12,12 +12,11 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.util.Pair;
 import commons.Recipe;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class MainApplicationCtrl implements Internationalizable {
 
@@ -50,6 +49,13 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty dutchProperty = new SimpleStringProperty();
     @FXML
     private CheckBox dutchFilter;
+
+    private final StringProperty onlyShowFavouritesProperty = new SimpleStringProperty();
+    @FXML
+    private Label onlyShowFavouritesLabel;
+
+    @FXML
+    private CheckBox onlyShowFavouritesToggle;
 
     @FXML
     private Button addButton;
@@ -107,6 +113,7 @@ public class MainApplicationCtrl implements Internationalizable {
         englishFilter.textProperty().bind(englishProperty);
         germanFilter.textProperty().bind(germanProperty);
         dutchFilter.textProperty().bind(dutchProperty);
+        onlyShowFavouritesLabel.textProperty().bind(onlyShowFavouritesProperty);
         cloneButton.textProperty().bind(cloneProperty);
         searchField.promptTextProperty().bind(searchProperty);
         favouriteButton.textProperty().bind(favouriteProperty);
@@ -127,6 +134,7 @@ public class MainApplicationCtrl implements Internationalizable {
         cloneProperty.set(resourceBundle.getString("txt.clone"));
         favouriteProperty.set(resourceBundle.getString("txt.favourite"));
         searchProperty.set(resourceBundle.getString("txt.search"));
+        onlyShowFavouritesProperty.set(resourceBundle.getString("txt.only_favourites"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
         recentProperty.set(resourceBundle.getString("txt.recent"));
@@ -220,7 +228,8 @@ public class MainApplicationCtrl implements Internationalizable {
                             boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
-                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
+                                    .anyMatch(r -> java.util.Objects.equals
+                                            (r.getId(), currentlyShownRecipe.getId()));
                             if (!stillPresent) {
                                 javafx.application.Platform.runLater(() -> {
                                     showMainScreen();
@@ -230,9 +239,43 @@ public class MainApplicationCtrl implements Internationalizable {
                         }
                     }
                 });
+        readConfigFavourites();
+
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
+    }
+
+    /**
+     * Initializes the list of favourite recipe UUIDs in the recipeManager
+     * to that given by the config. Also performs a check to see whether any favourites are missing.
+     * If this is the case, an appropriate alert is shown to the user and the config is updated.
+     * Can also be called during runtime to check whether any favourites
+     * have been deleted not by the user themselves.
+     */
+    public void readConfigFavourites() {
+        Config config = localeManager.getConfigManager().getConfig();
+        List<UUID> configFavourites = config.getFavoriteRecipeIDs();
+        List<UUID> updatedFavourites = new ArrayList<>();
+
+        for (UUID uuid : configFavourites) {
+            if (recipeManager.indexOfRecipe(uuid) == -1) {
+                // alert the user for each missing recipe
+                String message = "Your favourite recipe with ID " + uuid +
+                        " has been deleted :(";
+
+                var alert = new Alert(Alert.AlertType.WARNING);
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.setContentText(message);
+                alert.showAndWait();
+            } else {
+                recipeManager.toggleFavourite(uuid);
+                updatedFavourites.add(uuid);
+            }
+        }
+
+        config.setFavoriteRecipeIDs(updatedFavourites);
+        localeManager.getConfigManager().save();
     }
 
     /**
@@ -268,7 +311,7 @@ public class MainApplicationCtrl implements Internationalizable {
     }
 
     /**
-     * Adds a listener for changes to language filter checkboxes,
+     * Adds a listener for changes to language filter and favourites checkboxes,
      * so the recipe list viewer can get filtered after a selection of a filter.
      * Also propagates the checkbox changes to the config file.
      * @param sidebarListCtrl the recipe list controller which is responsible for
@@ -289,6 +332,10 @@ public class MainApplicationCtrl implements Internationalizable {
                 observable, oldValue, newValue) -> {
             sidebarListCtrl.toggleLanguageFilter(Language.NL);
             updateConfigFilter(Language.NL);
+        });
+        onlyShowFavouritesToggle.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleOnlyFavourites();
         });
     }
 
@@ -347,7 +394,8 @@ public class MainApplicationCtrl implements Internationalizable {
                             boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
-                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownRecipe.getId()));
+                                    .anyMatch(r -> java.util.Objects.equals
+                                            (r.getId(), currentlyShownRecipe.getId()));
                             if (!stillPresent) {
                                 javafx.application.Platform.runLater(() -> {
                                     showMainScreen();

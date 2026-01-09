@@ -118,7 +118,7 @@ public class RecipeManager {
 
 
 
-    private int indexOfRecipe(UUID id) {
+    public int indexOfRecipe(UUID id) {
         if (id == null) return -1;
         for (int i = 0; i < recipes.size(); i++) {
             if (Objects.equals(recipes.get(i).getId(), id)) return i;

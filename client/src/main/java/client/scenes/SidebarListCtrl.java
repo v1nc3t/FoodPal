@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.config.ConfigManager;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import com.google.inject.Inject;
@@ -11,6 +12,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Controller for the left-hand recipe list.
@@ -20,6 +23,8 @@ public class SidebarListCtrl {
 
     @Inject
     private RecipeManager recipeManager;
+    @Inject
+    private ConfigManager configManager;
     private SortUtils sortUtils;
     private ListView<ListObject> listView;
     private boolean removeMode = false;
@@ -125,6 +130,7 @@ public class SidebarListCtrl {
                 if (sel != null) {
                     recipeManager.toggleFavourite(sel.id());
                     listView.refresh(); // redraw star
+                    updateFavourites(recipeManager.getFavouriteRecipesSnapshot());
                 }
 
                 exitFavouriteMode();
@@ -134,6 +140,24 @@ public class SidebarListCtrl {
             }
         });
 
+    }
+
+    /**
+     * Updates the given list of favourite recipe UUIDs to sortUtils
+     * and applies filters to the list view, in case any relevant changes were made.
+     * Also updates the config to the latest list of favourites.
+     * @param favouriteRecipes list of favourite recipe UUIDs
+     */
+    public void updateFavourites(Set<UUID> favouriteRecipes) {
+        if (sortUtils == null) {
+            initializeSortUtils(currentMode);
+        }
+
+        sortUtils.setFavourites(favouriteRecipes.stream().toList());
+        setListViewSorted();
+
+        configManager.getConfig().setFavoriteRecipeIDs(favouriteRecipes.stream().toList());
+        configManager.save();
     }
 
     /**
@@ -256,4 +280,15 @@ public class SidebarListCtrl {
         favouriteMode = false;
     }
 
+    /**
+     * Toggles whether sortUtils filters only favourites.
+     */
+    public void toggleOnlyFavourites() {
+        if (sortUtils == null) {
+            initializeSortUtils(currentMode);
+        }
+
+        sortUtils.setOnlyFavourites(!sortUtils.isOnlyFavourites());
+        setListViewSorted();
+    }
 }

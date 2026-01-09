@@ -26,6 +26,10 @@
              <CheckBox fx:id="germanFilter" prefHeight="25" mnemonicParsing="false" text="${controller.germanProperty}" />
              <CheckBox fx:id="dutchFilter" prefHeight="25" mnemonicParsing="false" text="${controller.dutchProperty}" />
             </HBox>
+             <HBox alignment="CENTER_LEFT" spacing="10.0">
+                 <Label fx:id="onlyShowFavouritesLabel" prefHeight="25" text="${controller.onlyShowFavouritesProperty}" />
+                 <CheckBox fx:id="onlyShowFavouritesToggle" prefHeight="25" mnemonicParsing="false" />
+             </HBox>
               <ListView fx:id="recipeListView" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             <HBox alignment="CENTER_LEFT" spacing="8.0">
                <children>
