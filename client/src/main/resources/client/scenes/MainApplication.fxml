@@ -22,15 +22,19 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
              <Label fx:id="showRecipesLabel" prefHeight="25" text="${controller.showRecipesProperty}" />
-             <CheckBox fx:id="englishFilter" prefHeight="25" mnemonicParsing="false" text="${controller.englishProperty}" />
-             <CheckBox fx:id="germanFilter" prefHeight="25" mnemonicParsing="false" text="${controller.germanProperty}" />
+                        <CheckBox fx:id="englishFilter" prefHeight="25" mnemonicParsing="false" text="${controller.englishProperty}" />
+                    <CheckBox fx:id="germanFilter" prefHeight="25" mnemonicParsing="false" text="${controller.germanProperty}" />
              <CheckBox fx:id="dutchFilter" prefHeight="25" mnemonicParsing="false" text="${controller.dutchProperty}" />
             </HBox>
              <HBox alignment="CENTER_LEFT" spacing="10.0">
                  <Label fx:id="onlyShowFavouritesLabel" prefHeight="25" text="${controller.onlyShowFavouritesProperty}" />
                  <CheckBox fx:id="onlyShowFavouritesToggle" prefHeight="25" mnemonicParsing="false" />
              </HBox>
-              <ListView fx:id="recipeListView" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
+             <HBox>
+                 <ToggleButton fx:id="recipeToggleButton" text="Recipes" />
+                 <ToggleButton fx:id="ingredientToggleButton" text="Ingredients" />
+             </HBox>
+              <ListView fx:id="sidebarListView" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             <HBox alignment="CENTER_LEFT" spacing="8.0">
                <children>
                     <Button fx:id="addButton" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" />
