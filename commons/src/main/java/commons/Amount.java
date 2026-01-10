@@ -57,5 +57,9 @@ public record Amount( double quantity,
         result = 31 * result + (unit != null ? unit.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
-    }   
+    }
+    public Amount scale(double factor) {
+        return new Amount(quantity * factor, unit, description);
+    }
+
 }
