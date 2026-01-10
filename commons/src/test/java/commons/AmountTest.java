@@ -47,5 +47,28 @@ public class AmountTest {
     public void testEqualsSameObject() {
         assertEquals(formalAmount, formalAmount);
         assertEquals(informalAmount, informalAmount);
-    }  
+    }
+    @Test
+    public void testScaleFormalAmount() {
+        Amount scaled = formalAmount.scale(2.5);
+
+        assertEquals(5.0, scaled.quantity());
+        assertEquals(Unit.CUP, scaled.unit());
+    }
+
+    @Test
+    public void testScaleInformalAmount() {
+        Amount scaled = informalAmount.scale(3.0);
+
+        assertEquals(3.0, scaled.quantity());
+        assertEquals("a pinch", scaled.description());
+    }
+
+    @Test
+    public void testScaleDoesNotModifyOriginal() {
+        formalAmount.scale(10.0);
+
+        assertEquals(2.0, formalAmount.quantity());
+    }
+
 }
