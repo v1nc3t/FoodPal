@@ -1,5 +1,6 @@
 package client.scenes;
 
+import commons.Ingredient;
 import commons.Language;
 import commons.Recipe;
 
@@ -9,5 +10,8 @@ import java.util.UUID;
 public record ListObject(UUID id, String name, Optional<Language> language) {
     public static ListObject fromRecipe(Recipe recipe) {
         return new ListObject(recipe.getId(), recipe.getTitle(), Optional.of(recipe.getLanguage()));
+    }
+    public static ListObject fromIngredient(Ingredient ingredient) {
+        return new ListObject(ingredient.getId(), ingredient.getName(), Optional.empty());
     }
 }
