@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import commons.Language;
 
 public class ConfigManager {
 
@@ -86,7 +88,7 @@ public class ConfigManager {
         defaultConfig.setServerAddress("http://localhost:8080");
         defaultConfig.setFavoriteRecipeIDs(java.util.Collections.emptyList());
         defaultConfig.setLanguagePreference("en");
-        defaultConfig.setLanguageFilters(java.util.Collections.emptyList());
+        defaultConfig.setLanguageFilters(List.of(Language.EN, Language.DE, Language.NL));
         defaultConfig.setShoppingList(java.util.Collections.emptyList());
         return defaultConfig;
     }

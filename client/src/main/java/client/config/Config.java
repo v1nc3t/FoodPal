@@ -1,5 +1,7 @@
 package client.config;
 
+import commons.Language;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -7,7 +9,7 @@ public class Config {
     private String serverAddress;
     private List<UUID> favoriteRecipeIDs;
     private String languagePreference;
-    private List<String> languageFilters;
+    private List<Language> languageFilters;
     private List<client.shoppingList.ShoppingListItem> shoppingList;
 
     public Config() {
@@ -37,11 +39,11 @@ public class Config {
         this.languagePreference = languagePreference;
     }
 
-    public List<String> getLanguageFilters() {
+    public List<Language> getLanguageFilters() {
         return languageFilters;
     }
 
-    public void setLanguageFilters(List<String> languageFilters) {
+    public void setLanguageFilters(List<Language> languageFilters) {
         this.languageFilters = languageFilters;
     }
 

@@ -24,7 +24,6 @@ public enum Language {
     /**
      * Enum constructor that initializes possible languages
      * while also giving them the default locale (English) labels.
-     * TODO: get the default language from config instead
      */
     Language() {
         Locale defaultLocale = Locale.ENGLISH;

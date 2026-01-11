@@ -153,7 +153,7 @@ public class RecipeManager {
 
 
 
-    private int indexOfRecipe(UUID id) {
+    public int indexOfRecipe(UUID id) {
         if (id == null) return -1;
         for (int i = 0; i < recipesFx.size(); i++) {
             if (Objects.equals(recipesFx.get(i).getId(), id)) return i;

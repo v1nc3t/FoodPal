@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.config.ConfigManager;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import com.google.inject.Inject;
@@ -13,6 +14,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Controller for the left-hand recipe list.
@@ -22,7 +25,10 @@ public class SidebarListCtrl {
 
     @Inject
     private RecipeManager recipeManager;
-    private SortUtils sortUtils;
+    @Inject
+    private ConfigManager configManager;
+    private SortUtils recipeSortUtils;
+    private SortUtils ingredientsSortUtils;
     private ListView<ListObject> listView;
     private boolean removeMode = false;
     private boolean cloneMode = false;
@@ -37,19 +43,18 @@ public class SidebarListCtrl {
      */
     @FXML
     public void initialize() {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
     }
 
     /**
-     * Sets the sidebar mode, if different, and reinitializes sort-utils if so
+     * Sets the sidebar mode, if different, and resets the list view
      * @param mode the mode to become
      */
     public void setSidebarMode(ESidebarMode mode) {
         if (currentMode != mode) {
             currentMode = mode;
-            initializeSortUtils(mode);
             setListViewSorted();
         }
     }
@@ -65,15 +70,9 @@ public class SidebarListCtrl {
     /**
      * Initializes SortUtils for sorting and filtering
      */
-    private void initializeSortUtils(ESidebarMode mode) {
-        switch (mode) {
-            case Recipe:
-                initializeRecipeSortUtils();
-                break;
-            case Ingredient:
-                initializeIngredientSortUtils();
-                break;
-        }
+    private void initializeSortUtils() {
+        if (recipeSortUtils == null) initializeRecipeSortUtils();
+        if (ingredientsSortUtils == null) initializeIngredientSortUtils();
     }
 
     /**
@@ -82,7 +81,7 @@ public class SidebarListCtrl {
     private void initializeRecipeSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
         var recipesList = recipeManager.getObservableRecipes();
-        sortUtils = SortUtils.fromRecipeList(recipesList);
+        recipeSortUtils = SortUtils.fromRecipeList(recipesList);
     }
 
     /**
@@ -90,8 +89,8 @@ public class SidebarListCtrl {
      */
     private void initializeIngredientSortUtils() {
         // This makes a list which is automatically updated whenever the list of recipes changes.
-        var recipesList = recipeManager.getObservableIngredients();
-        sortUtils = SortUtils.fromIngredientList(recipesList);
+        var ingredientsList = recipeManager.getObservableIngredients();
+        ingredientsSortUtils = SortUtils.fromIngredientList(ingredientsList);
     }
 
     /**
@@ -132,7 +131,7 @@ public class SidebarListCtrl {
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
             ListObject sel = listView.getSelectionModel().getSelectedItem();
             if (sel == null
-            || (!removeMode && !cloneMode && !favouriteMode)) {
+                || (!removeMode && !cloneMode && !favouriteMode)) {
                 exitRemoveMode();
                 exitCloneMode();
                 exitFavouriteMode();
@@ -160,6 +159,7 @@ public class SidebarListCtrl {
             else if (favouriteMode) {
                 recipeManager.toggleFavourite(sel.id());
                 listView.refresh(); // redraw star
+                updateFavourites(recipeManager.getFavouriteRecipesSnapshot());
                 exitFavouriteMode();
             }
 
@@ -173,14 +173,41 @@ public class SidebarListCtrl {
     }
 
     /**
+     * Updates the given list of favourite recipe UUIDs to sortUtils
+     * and applies filters to the list view, in case any relevant changes were made.
+     * Also updates the config to the latest list of favourites.
+     * @param favouriteRecipes list of favourite recipe UUIDs
+     */
+    public void updateFavourites(Set<UUID> favouriteRecipes) {
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
+        }
+
+        recipeSortUtils.setFavourites(favouriteRecipes.stream().toList());
+
+        setListViewSorted();
+
+        configManager.getConfig().setFavoriteRecipeIDs(favouriteRecipes.stream().toList());
+        configManager.save();
+    }
+
+    /**
      * Binds the current list view items to the RecipeManager's ObservableList
      * (in a sorted manner through SortUtils)
      */
     private void setListViewSorted() {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
-        listView.setItems(sortUtils.applyFilters());
+
+        switch (currentMode) {
+            case Recipe:
+                listView.setItems(recipeSortUtils.applyFilters());
+                break;
+            case Ingredient:
+                listView.setItems(ingredientsSortUtils.applyFilters());
+                break;
+        }
     }
 
     /**
@@ -188,11 +215,13 @@ public class SidebarListCtrl {
      * @param language provided language to toggle filter of
      */
     public void toggleLanguageFilter(Language language) {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
 
-        sortUtils.toggleLanguageFilter(language);
+        recipeSortUtils.toggleLanguageFilter(language);
+        ingredientsSortUtils.toggleLanguageFilter(language);
+
         setListViewSorted();
     }
 
@@ -201,11 +230,13 @@ public class SidebarListCtrl {
      * @param sortMethod provided ordering manner
      */
     public void setSortMethod(String sortMethod) {
-        if (sortUtils == null) {
-            initializeSortUtils(currentMode);
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
         }
 
-        sortUtils.setSortMethod(sortMethod);
+        recipeSortUtils.setSortMethod(sortMethod);
+        ingredientsSortUtils.setSortMethod(sortMethod);
+
         setListViewSorted();
     }
 
@@ -292,4 +323,16 @@ public class SidebarListCtrl {
         favouriteMode = false;
     }
 
+    /**
+     * Toggles whether sortUtils filters only favourites.
+     */
+    public void toggleOnlyFavourites() {
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
+        }
+
+        recipeSortUtils.setOnlyFavourites(!recipeSortUtils.isOnlyFavourites());
+
+        setListViewSorted();
+    }
 }
