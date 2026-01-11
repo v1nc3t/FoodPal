@@ -138,4 +138,15 @@ public class RecipeServiceTest {
                 verify(webSocketHub).broadcastRecipeDelete(sugaredYogurt.getId());
                 verify(webSocketHub, atLeastOnce()).broadcastTitleUpdate(any());
         }
+
+        @Test
+        public void deleteNonExistentRecipe() {
+                UUID randomId = UUID.randomUUID();
+                recipeService.deleteRecipe(randomId);
+
+                // Verify that no repository or broadcast calls happened because the recipe
+                // wasn't found
+                verify(recipeRepository, never()).deleteById(any());
+                verify(webSocketHub, never()).broadcastRecipeDelete(any());
+        }
 }
