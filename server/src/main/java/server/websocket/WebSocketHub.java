@@ -36,13 +36,13 @@ public class WebSocketHub {
 
     public void subscribeRecipe(WebSocketSession session, UUID recipeId) {
         recipeSubscribers.computeIfAbsent(
-                recipeId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session
+                recipeId, _ -> new CopyOnWriteArrayList<>()).addIfAbsent(session
         );
     }
 
     public void subscribeIngredient(WebSocketSession session, UUID ingredientId) {
         ingredientSubscribers.computeIfAbsent(
-                ingredientId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session
+                ingredientId, _ -> new CopyOnWriteArrayList<>()).addIfAbsent(session
         );
     }
 

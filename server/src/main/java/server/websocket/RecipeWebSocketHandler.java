@@ -2,6 +2,7 @@ package server.websocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -21,13 +22,13 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session){
+    public void afterConnectionEstablished(WebSocketSession session) {
         System.out.println("debug: New user joined. Session ID: " + session.getId());
     }
 
     @Override
     protected void handleTextMessage(
-            WebSocketSession session,
+            @NonNull WebSocketSession session,
             TextMessage message) throws Exception {
 
         String payload = message.getPayload();
@@ -65,51 +66,82 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             String topic,
             JsonNode json) throws Exception {
 
-        if (topic.equals("recipe-titles")) {
-            hub.subscribeTitles(session);
-            sendSubscribeConfirm(session, "recipe-titles");
-
-        } else if (topic.equals("recipe")) {
-            String idStr = json.path("recipeId").asText(null);
-            if (idStr == null || idStr.isEmpty()) {
-                sendErrorMessage(session, "recipeId is missing for subscription");
-            } else {
-                try {
-                    UUID recipeId = UUID.fromString(idStr);
-                    hub.subscribeRecipe(session, recipeId);
-                    sendSubscribeConfirm(session, "recipe");
-                } catch (IllegalArgumentException e) {
-                    sendErrorMessage(session, "recipeId is not a valid UUID format");
+        switch (topic) {
+            case "recipe-titles" -> {
+                hub.subscribeTitles(session);
+                sendSubscribeConfirm(session, "recipe-titles");
+            }
+            case "recipe" -> {
+                String idStr = json.path("recipeId").asText(null);
+                if (idStr == null || idStr.isEmpty()) {
+                    sendErrorMessage(session, "recipeId is missing for subscription");
+                } else {
+                    try {
+                        UUID recipeId = UUID.fromString(idStr);
+                        hub.subscribeRecipe(session, recipeId);
+                        sendSubscribeConfirm(session, "recipe");
+                    } catch (IllegalArgumentException e) {
+                        sendErrorMessage(session, "recipeId is not a valid UUID format");
+                    }
                 }
             }
-        } else {
-            sendErrorMessage(session, "Unknown topic: " + topic);
+            case "ingredient" -> {
+                String idStr = json.path("ingredientId").asText(null);
+                if (idStr == null || idStr.isEmpty()) {
+                    sendErrorMessage(session, "ingredientId is missing for subscription");
+                } else {
+                    try {
+                        UUID ingredientId = UUID.fromString(idStr);
+                        hub.subscribeIngredient(session, ingredientId);
+                        sendSubscribeConfirm(session, "ingredient");
+                    } catch (IllegalArgumentException e) {
+                        sendErrorMessage(session, "ingredientId is not a valid UUID format");
+                    }
+                }
+            }
+            default -> sendErrorMessage(session, "Unknown topic: " + topic);
         }
     }
 
     private void handleUnsubscription(
             WebSocketSession session,
             String topic,
-            JsonNode josn) throws Exception {
+            JsonNode json) throws Exception {
 
-        if (topic.equals("recipe-titles")) {
-            hub.unsubscribeTitles(session);
-            sendUnsubscribeConfirm(session, "recipe-titles");
-        } else if (topic.equals("recipe")) {
-            String idStr = josn.path("recipeId").asText(null);
-            if (idStr== null || idStr.isEmpty()) {
-                sendErrorMessage(session, "recipeId is missing for unsubscription");
-            } else {
-                try {
-                    UUID recipeId = UUID.fromString(idStr);
-                    hub.unsubscribeRecipe(session, recipeId);
-                    sendUnsubscribeConfirm(session, "recipe");
-                } catch (IllegalArgumentException e) {
-                    sendErrorMessage(session, "recipeId is not a valid UUID format");
+        switch (topic) {
+            case "recipe-titles" -> {
+                hub.unsubscribeTitles(session);
+                sendUnsubscribeConfirm(session, "recipe-titles");
+            }
+            case "recipe" -> {
+                String idStr = json.path("recipeId").asText(null);
+                if (idStr == null || idStr.isEmpty()) {
+                    sendErrorMessage(session, "recipeId is missing for unsubscription");
+                } else {
+                    try {
+                        UUID recipeId = UUID.fromString(idStr);
+                        hub.unsubscribeRecipe(session, recipeId);
+                        sendUnsubscribeConfirm(session, "recipe");
+                    } catch (IllegalArgumentException e) {
+                        sendErrorMessage(session, "recipeId is not a valid UUID format");
+                    }
                 }
             }
-        } else {
-            sendErrorMessage(session, "Unknown topic: " + topic);
+            case "ingredient" -> {
+                String idStr = json.path("ingredientId").asText(null);
+                if (idStr == null || idStr.isEmpty()) {
+                    sendErrorMessage(session, "ingredientId is missing for unsubscription");
+                } else {
+                    try {
+                        UUID ingredientId = UUID.fromString(idStr);
+                        hub.unsubscribeIngredient(session, ingredientId);
+                        sendUnsubscribeConfirm(session, "ingredient");
+                    } catch (IllegalArgumentException e) {
+                        sendErrorMessage(session, "ingredientId is not a valid UUID format");
+                    }
+                }
+            }
+            default -> sendErrorMessage(session, "Unknown topic: " + topic);
         }
     }
 
@@ -119,17 +151,19 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendUnsubscribeConfirm(WebSocketSession session, String topic) throws Exception {
-        WebSocketResponse response = new WebSocketResponse(WebSocketTypes.UNSUBSCRIBED, topic, null);
+        WebSocketResponse response = new WebSocketResponse(WebSocketTypes.UNSUBSCRIBED,
+                topic, null);
         session.sendMessage(new TextMessage(mapper.writeValueAsString(response)));
     }
 
     private void sendErrorMessage(WebSocketSession session, String msg) throws Exception {
-      WebSocketResponse error = new WebSocketResponse(WebSocketTypes.ERROR, null,msg);
+        WebSocketResponse error = new WebSocketResponse(WebSocketTypes.ERROR, null, msg);
         session.sendMessage(new TextMessage(mapper.writeValueAsString(error)));
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status){
+    public void afterConnectionClosed(@NonNull WebSocketSession session,
+                                      @NonNull CloseStatus status) {
         hub.removeSessionEverywhere(session);
         System.out.println("debug: Connection closed for " + session.getId());
     }
