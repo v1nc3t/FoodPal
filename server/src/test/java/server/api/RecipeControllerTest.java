@@ -40,7 +40,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void setRecipe() throws InvalidRecipeError {
+    public void setRecipe() throws InvalidRecipeError, InvalidIngredientError {
         recipeController.setIngredient(yogurt);
         recipeController.setIngredient(sugar);
         recipeController.setRecipe(recipe);
@@ -54,7 +54,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void getState() throws InvalidRecipeError {
+    public void getState() throws InvalidRecipeError, InvalidIngredientError {
         recipeController.setIngredient(yogurt);
         recipeController.setIngredient(sugar);
         recipeController.setRecipe(recipe);

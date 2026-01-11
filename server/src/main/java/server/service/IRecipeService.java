@@ -1,9 +1,6 @@
 package server.service;
 
-import commons.Ingredient;
-import commons.InvalidRecipeError;
-import commons.Recipe;
-import commons.RecipeState;
+import commons.*;
 
 public interface IRecipeService {
     /// Get a snapshot of the current state of the `RecipeService`,
@@ -14,5 +11,5 @@ public interface IRecipeService {
     void setRecipe(Recipe recipe) throws InvalidRecipeError;
 
     /// Note: Setting an ingredient with the same id should replace the old version with the new one
-    void setIngredient(Ingredient ingredient);
+    void setIngredient(Ingredient ingredient) throws InvalidIngredientError;
 }

@@ -52,7 +52,7 @@ public class RecipeServiceTest {
     );
 
     @Test
-    public void addIngredient() {
+    public void addIngredient() throws InvalidIngredientError {
         var yogurt = new Ingredient("Yogurt", new NutritionValues(1, 2, 3));
         recipeService.setIngredient(yogurt);
         assertTrue(recipeService.getState().recipes().isEmpty());
@@ -69,6 +69,10 @@ public class RecipeServiceTest {
     @Test
     public void recipeNull() {
         assertThrows(InvalidRecipeError.class, () -> recipeService.setRecipe(null));
+    }
+    @Test
+    public void ingredientNull() {
+        assertThrows(InvalidIngredientError.class, () -> recipeService.setIngredient(null));
     }
     @Test
     public void recipeInvalidIngredient() {
@@ -91,7 +95,7 @@ public class RecipeServiceTest {
         );
     }
     @Test
-    public void addRecipe() throws InvalidRecipeError {
+    public void addRecipe() throws InvalidRecipeError, InvalidIngredientError {
         recipeService.setIngredient(yogurt);
         recipeService.setIngredient(sugar);
         recipeService.setRecipe(sugaredYogurt);
@@ -118,7 +122,7 @@ public class RecipeServiceTest {
     }
 
     @Test
-    public void loadRecipes() throws InvalidRecipeError {
+    public void loadRecipes() throws InvalidRecipeError, InvalidIngredientError {
         when(ingredientRepository.findAll()).thenReturn(
                 List.of(yogurt, sugar)
         );

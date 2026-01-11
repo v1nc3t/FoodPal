@@ -1,9 +1,6 @@
 package server.api;
 
-import commons.Ingredient;
-import commons.InvalidRecipeError;
-import commons.Recipe;
-import commons.RecipeState;
+import commons.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import server.service.IRecipeService;
@@ -31,7 +28,7 @@ public class RecipeController {
     }
 
     @PostMapping(path = "/ingredient", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void setIngredient(@RequestBody Ingredient ingredient) {
+    public void setIngredient(@RequestBody Ingredient ingredient) throws InvalidIngredientError {
         recipeService.setIngredient(ingredient);
     }
 }
