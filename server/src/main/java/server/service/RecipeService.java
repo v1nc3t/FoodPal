@@ -15,7 +15,7 @@ import java.util.UUID;
 /// Service that keeps track of recipes
 @Service
 public class RecipeService implements IRecipeService {
-    private final HashMap<UUID, Recipe> recipes =  new HashMap<>();
+    private final HashMap<UUID, Recipe> recipes = new HashMap<>();
     private final HashMap<UUID, Ingredient> ingredients = new HashMap<>();
 
     private final RecipeRepository recipeRepository;
@@ -23,8 +23,8 @@ public class RecipeService implements IRecipeService {
     private final WebSocketHub webSocketHub;
 
     public RecipeService(RecipeRepository recipeRepository,
-                         IngredientRepository ingredientRepository,
-                         WebSocketHub webSocketHub) {
+            IngredientRepository ingredientRepository,
+            WebSocketHub webSocketHub) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.webSocketHub = webSocketHub;
@@ -52,10 +52,7 @@ public class RecipeService implements IRecipeService {
         if (recipe
                 .getIngredients()
                 .stream()
-                .anyMatch(ingredient ->
-                        !ingredients.containsKey(ingredient.getIngredientRef())
-                )
-        )
+                .anyMatch(ingredient -> !ingredients.containsKey(ingredient.getIngredientRef())))
             throw new InvalidRecipeError();
         recipes.put(recipe.getId(), recipe);
         recipeRepository.save(recipe);
@@ -70,5 +67,15 @@ public class RecipeService implements IRecipeService {
         ingredientRepository.save(ingredient);
 
         webSocketHub.broadcastTitleUpdate(getState());
+    }
+
+    @Override
+    public void deleteRecipe(UUID recipeId) {
+        if (recipes.remove(recipeId) != null) {
+            recipeRepository.deleteById(recipeId);
+
+            webSocketHub.broadcastRecipeDelete(recipeId);
+            webSocketHub.broadcastTitleUpdate(getState());
+        }
     }
 }
