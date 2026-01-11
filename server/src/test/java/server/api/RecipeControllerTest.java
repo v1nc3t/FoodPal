@@ -66,6 +66,17 @@ public class RecipeControllerTest {
 
         assertEquals(expectedService.getState(), recipeController.getRecipeState());
     }
+
+    @Test
+    public void deleteRecipe() {
+        recipeController.setIngredient(yogurt);
+        recipeController.deleteRecipe(recipe.getId());
+
+        var expectedService = new TestRecipeService();
+        expectedService.setIngredient(yogurt);
+
+        assertEquals(expectedService, testRecipeService);
+    }
 }
 
 class TestRecipeService implements IRecipeService {
