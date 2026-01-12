@@ -9,6 +9,7 @@ import commons.Language;
 import com.google.inject.Inject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -33,7 +34,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty recentProperty = new SimpleStringProperty();
 
     @FXML
-    private ChoiceBox<String> languageOptions;
+    private ComboBox<Language> languageOptions;
 
     private final StringProperty showRecipesProperty = new SimpleStringProperty();
     @FXML
@@ -165,15 +166,16 @@ public class MainApplicationCtrl implements Internationalizable {
         englishProperty.set(resourceBundle.getString("txt.en"));
         germanProperty.set(resourceBundle.getString("txt.de"));
         dutchProperty.set(resourceBundle.getString("txt.nl"));
+
+        Language.reloadLocale(resourceBundle);
+
         if (languageOptions != null) {
-            int selectedIndex = languageOptions.getSelectionModel().getSelectedIndex();
-            languageOptions.getItems().setAll(
-                    englishProperty.get(),
-                    germanProperty.get(),
-                    dutchProperty.get());
-            if (selectedIndex >= 0) {
-                languageOptions.getSelectionModel().select(selectedIndex);
-            }
+            var items = languageOptions.getItems();
+            languageOptions.setItems(null);
+            languageOptions.setItems(items);
+
+            String currentCode = newLocale.getLanguage().toUpperCase();
+            languageOptions.setValue(Language.valueOf(currentCode));
         }
     }
 
@@ -436,36 +438,43 @@ public class MainApplicationCtrl implements Internationalizable {
     }
 
     private void prepareLanguageOptions() {
-        languageOptions.getItems().setAll(
-                englishProperty.get(),
-                germanProperty.get(),
-                dutchProperty.get());
+        languageOptions.setItems(FXCollections.observableArrayList(Language.values()));
 
-        Locale current = localeManager.getCurrentLocale();
-        if (current.equals(LocaleManager.DE)) {
-            languageOptions.setValue(germanProperty.get());
-        } else if (current.equals(LocaleManager.NL)) {
-            languageOptions.setValue(dutchProperty.get());
-        } else {
-            languageOptions.setValue(englishProperty.get());
+        languageOptions.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Language item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : "\uD83C\uDFF4");
+            }
+        });
+
+        languageOptions.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(Language item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.proper());
+                }
+            }
+        });
+
+        try {
+            String currentCode = localeManager.getCurrentLocale().getLanguage().toUpperCase();
+            languageOptions.setValue(Language.valueOf(currentCode));
+        } catch (Exception e) {
+            languageOptions.setValue(Language.EN);
         }
     }
 
     @FXML
     private void changeLanguage() {
-        String currentDisplay = languageOptions.getValue();
-        if (currentDisplay == null) {
-            return;
-        }
+        Language selected = languageOptions.getValue();
+        if (selected == null) return;
 
-        Locale newLocale;
-        if (currentDisplay.equals(germanProperty.get())) {
-            newLocale = LocaleManager.DE;
-        } else if (currentDisplay.equals(dutchProperty.get())) {
-            newLocale = LocaleManager.NL;
-        } else {
-            newLocale = LocaleManager.EN;
-        }
+        // Convert Enum to Locale
+        Locale newLocale = new Locale(selected.name().toLowerCase());
 
         if (!newLocale.equals(localeManager.getCurrentLocale())) {
             localeManager.setAllLocale(newLocale);
