@@ -6,6 +6,8 @@ import client.utils.SortUtils;
 import com.google.inject.Inject;
 import commons.Language;
 import commons.Recipe;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
@@ -35,6 +37,7 @@ public class SidebarListCtrl {
     private boolean favouriteMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
     private ESidebarMode currentMode = ESidebarMode.Recipe;
+    private String currentSearchQuery = "";
 
 
 
@@ -200,14 +203,52 @@ public class SidebarListCtrl {
             initializeSortUtils();
         }
 
-        switch (currentMode) {
-            case Recipe:
-                listView.setItems(recipeSortUtils.applyFilters());
-                break;
-            case Ingredient:
-                listView.setItems(ingredientsSortUtils.applyFilters());
-                break;
+        ObservableList<ListObject> baseList = (currentMode == ESidebarMode.Recipe)
+                ? recipeSortUtils.applyFilters()
+                : ingredientsSortUtils.applyFilters();
+
+        FilteredList<ListObject> filteredList = new FilteredList<>(baseList, item -> {
+            if (currentSearchQuery == null || currentSearchQuery.isEmpty()) {
+                return true;
+            }
+
+            if (currentMode == ESidebarMode.Recipe) {
+                Recipe recipe = recipeManager.getRecipe(item.id());
+                return recipeMatchQuery(recipe, currentSearchQuery);
+            } else {
+                return item.name().toLowerCase().contains(currentSearchQuery);
+            }
+        });
+
+        listView.setItems(filteredList);
+    }
+
+    public void setSearchQuery(String query) {
+        this.currentSearchQuery = query.toLowerCase().trim();
+        setListViewSorted();
+    }
+
+    private boolean recipeMatchQuery(Recipe recipe, String query) {
+        if (query == null || query.isBlank()) return true;
+
+        String[] terms = query.toLowerCase().split("\\s+");
+
+        for (String term : terms) {
+            boolean inTitle = recipe.getTitle().toLowerCase().contains(term);
+
+            boolean inSteps = recipe.steps.stream()
+                    .anyMatch(step -> step.toLowerCase().contains(term));
+
+            boolean inIngredients = recipe.ingredients.stream()
+                    .anyMatch(ri -> {
+                        var ingredient = recipeManager.getIngredient(ri.ingredientRef);
+                        return ingredient != null && ingredient.name.toLowerCase().contains(term);
+                    });
+            if (!inTitle && !inSteps && !inIngredients) {
+                return false;
+            }
         }
+        return true;
     }
 
     /**

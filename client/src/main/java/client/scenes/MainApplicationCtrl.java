@@ -207,6 +207,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
         prepareLanguageOptions();
         prepareSortBy();
+        prepareSearchField();
+
         sidebarListCtrl.initialize();
 
         sidebarListCtrl.setListView(sidebarListView);
@@ -243,6 +245,19 @@ public class MainApplicationCtrl implements Internationalizable {
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
+    }
+
+    private void prepareSearchField() {
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            sidebarListCtrl.setSearchQuery(newValue);
+        });
+
+        searchField.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                searchField.clear(); // This triggers the listener above with ""
+                contentPane.requestFocus(); // Optional: move focus away from search
+            }
+        });
     }
 
     /**
@@ -523,10 +538,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * Search field for users to search up items/recipes from ist
      */
     public void search() {
-        String query = searchField.getText();
-
-        // To be implemented once server side is done.
-        System.out.println("Searching for '" + query);
+        sidebarListCtrl.setSearchQuery(searchField.getText());
     }
 
     public void editRecipe(Recipe recipe) {
