@@ -1,5 +1,6 @@
 package config;
 
+import commons.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.Arrays;
@@ -17,7 +18,7 @@ class ConfigTest {
     UUID recId = UUID.randomUUID();
     UUID recId2 = UUID.randomUUID();
     String lang;
-    List<String> filters;
+    List<Language> filters;
     List<client.shoppingList.ShoppingListItem> items;
     client.shoppingList.ShoppingListItem item1 = new client.shoppingList.ShoppingListItem(UUID.randomUUID(),
             new commons.Amount(1, "kg"));
@@ -33,7 +34,7 @@ class ConfigTest {
         config.setServerAddress(server);
         lang = "en";
         config.setLanguagePreference(lang);
-        filters = Arrays.asList("en", "fr");
+        filters = Arrays.asList(Language.EN, Language.DE);
         config.setLanguageFilters(filters);
         items = Arrays.asList(item1, item2);
         config.setShoppingList(items);
@@ -89,7 +90,7 @@ class ConfigTest {
 
     @Test
     void setLanguageFiltersTest() {
-        List<String> newFilters = Arrays.asList("es", "de");
+        List<Language> newFilters = Arrays.asList(Language.DE, Language.NL);
         config.setLanguageFilters(newFilters);
         assertEquals(newFilters, config.getLanguageFilters());
     }

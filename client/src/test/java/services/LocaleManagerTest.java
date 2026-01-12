@@ -11,8 +11,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LocaleManagerTest {
 
@@ -115,6 +114,21 @@ public class LocaleManagerTest {
             ResourceBundle bundle = localeManager.getCurrentBundle();
             assertEquals(defaultLocale, bundle.getLocale());
         });
+    }
+
+    @Test
+    public void getNullConfigManagerTest() {
+        assertNull(localeManager.getConfigManager(),
+                "Expected localeManager to have no config manager before initialization.");
+    }
+
+    @Test
+    public void getConfigManagerTest() {
+        configManager.load();
+        localeManager.init(configManager);
+
+        assertEquals(configManager, localeManager.getConfigManager(),
+                "Expected localeManager to have a different config manager.");
     }
 
     static class TestInternationalizable implements Internationalizable {

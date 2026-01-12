@@ -14,6 +14,7 @@ import javafx.collections.transformation.SortedList;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
@@ -21,6 +22,8 @@ public class SortUtils {
     private List<Language> languageFilters;
     private String sortMethod;
     private final ObservableList<ListObject> list;
+    private boolean onlyFavourites = false;
+    private List<UUID> favourites;
 
     /**
      * Instantiates SortUtils with a given ObservableList of String
@@ -28,7 +31,7 @@ public class SortUtils {
      */
     @Inject
     public SortUtils(ObservableList<ListObject> list) {
-        loadConfig();
+        loadDefault();
         this.list = list;
     }
 
@@ -98,6 +101,52 @@ public class SortUtils {
     }
 
     /**
+     * Returns whether the sortUtils is toggled to only show favourites.
+     * @return true if only favourites are shown, false otherwise
+     */
+    public boolean isOnlyFavourites() {
+        return onlyFavourites;
+    }
+
+    /**
+     * Sets whether the sortUtils should only show favourites.
+     * @param onlyFavourites true if only favourites should be shown, false otherwise
+     */
+    public void setOnlyFavourites(boolean onlyFavourites) {
+        this.onlyFavourites = onlyFavourites;
+    }
+
+    /**
+     * Gets the list of favourite UUIDs.
+     * @return list of favourites as UUIDs
+     */
+    public List<UUID> getFavourites() {
+        return favourites;
+    }
+
+    /**
+     * Sets the list of favourite UUIDs.
+     * @param favourites list of favourites as UUIDs
+     */
+    public void setFavourites(List<UUID> favourites) {
+        this.favourites = favourites;
+    }
+
+    /**
+     * Toggles the list of favourites as UUIDs.
+     * This means that a UUID is added to the list if it doesn't exist yet
+     * and is removed if it does exist.
+     * @param id provided UUID to add or remove from favourites
+     */
+    public void toggleFavourite(UUID id) {
+        if (favourites.contains(id)) {
+            favourites.remove(id);
+        } else {
+            favourites.add(id);
+        }
+    }
+
+    /**
      * Gets the language filters.
      * @return list of language filters
      */
@@ -153,18 +202,13 @@ public class SortUtils {
     }
 
     /**
-     * Loads the user config and defines what filters and ordering
-     * manners SortUtils should use. Reverts to default ones in case reading fails.
+     * Reverts to default filtering (all languages) and sorting (alphabetical) manners.
      */
-    public void loadConfig() {
-        try {
-            // TODO: try to load config for user defined filters (languages and favorites)
-            throw new Exception("Mock config file failing.");
-        } catch (Exception e) {
-            languageFilters = new ArrayList<>(List.of(Language.EN, Language.DE, Language.NL));
-        } finally {
-            sortMethod = "Alphabetical";
-        }
+    public void loadDefault() {
+        languageFilters = new ArrayList<>(List.of(Language.EN, Language.DE, Language.NL));
+        sortMethod = "Alphabetical";
+        onlyFavourites = false;
+        favourites = new ArrayList<>();
     }
 
     /**
@@ -175,8 +219,10 @@ public class SortUtils {
     public SortedList<ListObject> applyFilters() {
         SortedList<ListObject> sortedList = new SortedList<>(list
                 .filtered(listObject ->
-                            listObject.language().isEmpty()
-                            || languageFilters.contains(listObject.language().get())));
+                        (listObject.language().isEmpty()
+                            || languageFilters.contains(listObject.language().get()))
+                            && (!onlyFavourites || favourites.contains(listObject.id()))
+                ));
 
         Comparator<ListObject> recipeComparator = getComparator();
         sortedList.setComparator(recipeComparator);

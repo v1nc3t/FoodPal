@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.MyFXML;
+import client.config.Config;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
 import commons.Ingredient;
@@ -12,12 +13,11 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.util.Pair;
 import commons.Recipe;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.UUID;
+import java.util.*;
 
 public class MainApplicationCtrl implements Internationalizable {
 
@@ -50,6 +50,13 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty dutchProperty = new SimpleStringProperty();
     @FXML
     private CheckBox dutchFilter;
+
+    private final StringProperty onlyShowFavouritesProperty = new SimpleStringProperty();
+    @FXML
+    private Label onlyShowFavouritesLabel;
+
+    @FXML
+    private CheckBox onlyShowFavouritesToggle;
 
     @FXML
     private Button addButton;
@@ -90,7 +97,8 @@ public class MainApplicationCtrl implements Internationalizable {
     private final MyFXML fxml;
     private final LocaleManager localeManager;
 
-    /// The id of the currently shown object, can be either an id of {@link Recipe}, or an id of {@link Ingredient}
+    /// The id of the currently shown object, can be either
+    /// an id of {@link Recipe}, or an id of {@link Ingredient}
     private UUID currentlyShownId = null;
 
     @Inject
@@ -116,6 +124,7 @@ public class MainApplicationCtrl implements Internationalizable {
         englishFilter.textProperty().bind(englishProperty);
         germanFilter.textProperty().bind(germanProperty);
         dutchFilter.textProperty().bind(dutchProperty);
+        onlyShowFavouritesLabel.textProperty().bind(onlyShowFavouritesProperty);
         cloneButton.textProperty().bind(cloneProperty);
         searchField.promptTextProperty().bind(searchProperty);
         favouriteButton.textProperty().bind(favouriteProperty);
@@ -138,6 +147,7 @@ public class MainApplicationCtrl implements Internationalizable {
         cloneProperty.set(resourceBundle.getString("txt.clone"));
         favouriteProperty.set(resourceBundle.getString("txt.favourite"));
         searchProperty.set(resourceBundle.getString("txt.search"));
+        onlyShowFavouritesProperty.set(resourceBundle.getString("txt.only_favourites"));
         recipeToggleTextProperty.set(resourceBundle.getString("txt.recipe"));
         ingredientToggleTextProperty.set(resourceBundle.getString("txt.ingredient"));
 
@@ -229,25 +239,80 @@ public class MainApplicationCtrl implements Internationalizable {
         removeButton.setOnAction(_ -> sidebarListCtrl.enterRemoveMode());
         favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
 
+        readConfigFavourites();
         sortUponSelection(sidebarListCtrl);
-        prepareLanguageFilters();
+        prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
     }
 
     /**
-     * Initializes the language filter checkboxes to the default configuration.
-     * TODO: read from config instead of assuming all languages are enabled
+     * Initializes the list of favourite recipe UUIDs in the recipeManager
+     * to that given by the config. Also performs a check to see whether any favourites are missing.
+     * If this is the case, an appropriate alert is shown to the user and the config is updated.
+     * Can also be called during runtime to check whether any favourites
+     * have been deleted not by the user themselves.
      */
-    private void prepareLanguageFilters() {
-        englishFilter.setSelected(true);
-        germanFilter.setSelected(true);
-        dutchFilter.setSelected(true);
+    public void readConfigFavourites() {
+        Config config = localeManager.getConfigManager().getConfig();
+        List<UUID> configFavourites = config.getFavoriteRecipeIDs();
+        List<UUID> updatedFavourites = new ArrayList<>();
+
+        for (UUID uuid : configFavourites) {
+            if (recipeManager.indexOfRecipe(uuid) == -1) {
+                // alert the user for each missing recipe
+                String message = "Your favourite recipe with ID " + uuid +
+                        " has been deleted :(";
+
+                var alert = new Alert(Alert.AlertType.WARNING);
+                alert.initModality(Modality.APPLICATION_MODAL);
+                alert.setContentText(message);
+                alert.showAndWait();
+            } else {
+                recipeManager.toggleFavourite(uuid);
+                updatedFavourites.add(uuid);
+            }
+        }
+
+        config.setFavoriteRecipeIDs(updatedFavourites);
+        localeManager.getConfigManager().save();
     }
 
     /**
-     * Adds a listener for changes to language filter checkboxes,
-     * so recipe list viewer can get filtered after a selection of a filter.
-     *
+     * Initializes the language filter checkboxes according to the config.
+     * If reading from the config fails, resorts to defaulting to all languages.
+     * @param sidebarListCtrl the recipe list controller which is responsible for
+     *                       the recipe list
+     */
+    private void prepareLanguageFilters(SidebarListCtrl sidebarListCtrl) {
+        try {
+            Config config = localeManager.getConfigManager().getConfig();
+            List<Language> languages = config.getLanguageFilters();
+            englishFilter.setSelected(languages.contains(Language.EN));
+            germanFilter.setSelected(languages.contains(Language.DE));
+            dutchFilter.setSelected(languages.contains(Language.NL));
+
+            // propagate the config languages to the sortUtils
+            if (!languages.contains(Language.EN)) {
+                sidebarListCtrl.toggleLanguageFilter(Language.EN);
+            }
+            if (!languages.contains(Language.DE)) {
+                sidebarListCtrl.toggleLanguageFilter(Language.DE);
+            }
+            if (!languages.contains(Language.NL)) {
+                sidebarListCtrl.toggleLanguageFilter(Language.NL);
+            }
+        }
+        catch (Exception e) {
+            englishFilter.setSelected(true);
+            germanFilter.setSelected(true);
+            dutchFilter.setSelected(true);
+        }
+    }
+
+    /**
+     * Adds a listener for changes to language filter and favourites checkboxes,
+     * so the recipe list viewer can get filtered after a selection of a filter.
+     * Also propagates the checkbox changes to the config file.
      * @param sidebarListCtrl the recipe list controller which is responsible for
      *                        the recipe list
      */
@@ -255,15 +320,40 @@ public class MainApplicationCtrl implements Internationalizable {
         englishFilter.selectedProperty().addListener((
                 observable, oldValue, newValue) -> {
             sidebarListCtrl.toggleLanguageFilter(Language.EN);
+            updateConfigFilter(Language.EN);
         });
         germanFilter.selectedProperty().addListener((
                 observable, oldValue, newValue) -> {
             sidebarListCtrl.toggleLanguageFilter(Language.DE);
+            updateConfigFilter(Language.DE);
         });
         dutchFilter.selectedProperty().addListener((
                 observable, oldValue, newValue) -> {
             sidebarListCtrl.toggleLanguageFilter(Language.NL);
+            updateConfigFilter(Language.NL);
         });
+        onlyShowFavouritesToggle.selectedProperty().addListener((
+                observable, oldValue, newValue) -> {
+            sidebarListCtrl.toggleOnlyFavourites();
+        });
+    }
+
+    /**
+     * Updates the config file by adding or removing the given language filter.
+     * @param language language to be added or removed
+     */
+    private void updateConfigFilter(Language language) {
+        Config config = localeManager.getConfigManager().getConfig();
+        List<Language> languages = config.getLanguageFilters();
+
+        if (languages.contains(language)) {
+            languages.remove(language);
+        } else {
+            languages.add(language);
+        }
+
+        config.setLanguageFilters(languages);
+        localeManager.getConfigManager().save();
     }
 
     private void initializeSidebarListCtrl() {
@@ -281,7 +371,6 @@ public class MainApplicationCtrl implements Internationalizable {
 
     /**
      * Prepares the sort-by choice box, by default sorting alphabetically.
-     * TODO: enable internationalization
      */
     private void prepareSortBy() {
         orderBy.getItems().setAll(
@@ -313,11 +402,13 @@ public class MainApplicationCtrl implements Internationalizable {
         recipeManager.getObservableRecipes()
                 .addListener((javafx.collections.ListChangeListener<Recipe>) change -> {
                     while (change.next()) {
-                        if (change.wasRemoved() && currentlyShownId != null && sidebarListCtrl.getSidebarMode() == ESidebarMode.Recipe) {
+                        if (change.wasRemoved() && currentlyShownId != null
+                                && sidebarListCtrl.getSidebarMode() == ESidebarMode.Recipe) {
                             boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
-                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownId));
+                                    .anyMatch(r -> java.util.Objects.equals
+                                            (r.getId(), currentlyShownId));
                             if (!stillPresent) {
                                 javafx.application.Platform.runLater(() -> {
                                     showMainScreen();
