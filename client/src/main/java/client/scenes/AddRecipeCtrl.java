@@ -79,6 +79,9 @@ public class AddRecipeCtrl implements Internationalizable {
     private final StringProperty cancelProperty = new SimpleStringProperty();
     @FXML private Button cancelButton;
 
+    private final StringProperty editProperty = new SimpleStringProperty();
+    private final StringProperty saveProperty = new SimpleStringProperty();
+
     private Recipe editingRecipe;
 
     private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
@@ -214,6 +217,8 @@ public class AddRecipeCtrl implements Internationalizable {
         portionsProperty.set(resourceBundle.getString("txt.portions"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+        editProperty.set(resourceBundle.getString("txt.edit"));
+        saveProperty.set(resourceBundle.getString("txt.save"));
 
         refreshSelectLanguage();
     }
@@ -471,7 +476,8 @@ public class AddRecipeCtrl implements Internationalizable {
         TextArea editField = new TextArea(text);
         HBox.setHgrow(editField, Priority.ALWAYS);
 
-        Button editButton = new Button("Edit");
+        Button editButton = new Button();
+        editButton.textProperty().bind(editProperty);
         Button up = new Button("↑");
         Button down = new Button("↓");
         Button delete = new Button("-");
@@ -483,18 +489,16 @@ public class AddRecipeCtrl implements Internationalizable {
         item.getChildren().addAll(textFlow, buttonGroup);
 
         editButton.setOnAction(e -> {
-            if (item.getChildren().contains(textFlow)) {
-                // edit mode
+            if (item.getChildren().contains(textFlow)) { // edit mode
                 editField.setText(((Text) textFlow.getChildren().getFirst()).getText());
                 item.getChildren().set(0, editField);
-                editButton.setText("Save");
+                editButton.textProperty().bind(saveProperty);
                 editField.requestFocus();
-            } else {
-                // display mode
+            } else { // display mode
                 String newText = editField.getText();
                 ((Text) textFlow.getChildren().getFirst()).setText(newText);
                 item.getChildren().set(0, textFlow);
-                editButton.setText("Edit");
+                editButton.textProperty().bind(editProperty);
             }
         });
 
@@ -504,7 +508,6 @@ public class AddRecipeCtrl implements Internationalizable {
                 editButton.requestFocus();
             }
         });
-
         up.setOnAction(e -> moveUp(item));
         down.setOnAction(e -> moveDown(item));
         delete.setOnAction(e -> preparationList.getChildren().remove(item));
