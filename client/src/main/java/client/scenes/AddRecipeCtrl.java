@@ -468,15 +468,42 @@ public class AddRecipeCtrl implements Internationalizable {
         textFlow.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(textFlow, Priority.ALWAYS);
 
+        TextArea editField = new TextArea(text);
+        HBox.setHgrow(editField, Priority.ALWAYS);
+
+        Button editButton = new Button("Edit");
         Button up = new Button("↑");
         Button down = new Button("↓");
         Button delete = new Button("-");
 
-        HBox buttonGroup = new HBox(5, up, down, delete);
+        HBox buttonGroup = new HBox(5, editButton, up, down, delete);
         buttonGroup.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(buttonGroup, Priority.NEVER);
 
         item.getChildren().addAll(textFlow, buttonGroup);
+
+        editButton.setOnAction(e -> {
+            if (item.getChildren().contains(textFlow)) {
+                // edit mode
+                editField.setText(((Text) textFlow.getChildren().getFirst()).getText());
+                item.getChildren().set(0, editField);
+                editButton.setText("Save");
+                editField.requestFocus();
+            } else {
+                // display mode
+                String newText = editField.getText();
+                ((Text) textFlow.getChildren().getFirst()).setText(newText);
+                item.getChildren().set(0, textFlow);
+                editButton.setText("Edit");
+            }
+        });
+
+        editField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB) {
+                event.consume();
+                editButton.requestFocus();
+            }
+        });
 
         up.setOnAction(e -> moveUp(item));
         down.setOnAction(e -> moveDown(item));
