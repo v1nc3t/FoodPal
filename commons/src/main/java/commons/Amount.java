@@ -61,5 +61,21 @@ public record Amount( double quantity,
     public Amount scale(double factor) {
         return new Amount(quantity * factor, unit, description);
     }
+    public double toGrams() {
+        if (unit == null) {
+            return quantity;
+        }
+
+        return switch (unit) {
+            case GRAM -> quantity;
+            case MILLILITER -> quantity;
+            case TABLESPOON -> quantity * 15;
+            case TEASPOON -> quantity * 5;
+            case CUP -> quantity * 240;
+            case KILOGRAM -> quantity * 1000;
+            default -> quantity;
+        };
+    }
+
 
 }

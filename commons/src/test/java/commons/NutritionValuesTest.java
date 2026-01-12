@@ -6,20 +6,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class NutritionValuesTest {
 
     @Test
-    void caloriesAreCalculatedCorrectly() {
+    void caloriesPer100gCalculatedCorrectly() {
         NutritionValues nv = new NutritionValues(1, 1, 1);
-        assertEquals(17, nv.getCalories());
+        assertEquals(17.0, nv.getKcalPer100g(), 0.001);
     }
 
     @Test
-    void zeroMacrosGiveZeroCalories() {
-        NutritionValues nv = new NutritionValues(0, 0, 0);
-        assertEquals(0, nv.getCalories());
-    }
-
-    @Test
-    void caloriesAreRoundedCorrectly() {
+    void fractionalMacrosProduceFractionalCalories() {
         NutritionValues nv = new NutritionValues(0.5, 0.5, 0.5);
-        assertEquals(9, nv.getCalories()); // 4*0.5 + 9*0.5 + 4*0.5 = 8.5 → rounds to 9
+        assertEquals(8.5, nv.getKcalPer100g(), 0.001);
     }
+
 }

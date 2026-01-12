@@ -70,5 +70,17 @@ public class AmountTest {
 
         assertEquals(2.0, formalAmount.quantity());
     }
+    @Test
+    void gramConversionWorks() {
+        Amount a = new Amount(100, Unit.GRAM);
+        assertEquals(100, a.toGrams());
+    }
+
+    @Test
+    void cupConversionWorks() {
+        Amount a = new Amount(1, Unit.CUP);
+        assertEquals(240, a.toGrams());
+    }
+
 
 }

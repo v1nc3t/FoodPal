@@ -66,5 +66,8 @@ public class RecipeIngredient {
                 this.amount.scale(factor)
         );
     }
+    public double getGrams() {
+        return amount.toGrams();
+    }
 
 }

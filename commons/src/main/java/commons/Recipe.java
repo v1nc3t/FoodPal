@@ -167,25 +167,7 @@ public class Recipe {
         cloned.title = newTitle;
         return cloned;
     }
-    public int getTotalCalories(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
-        double total = 0;
 
-        if (ingredients == null) return 0;
-
-        for (RecipeIngredient ri : ingredients) {
-            Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
-            if (ingredient == null) continue;
-
-            double factor = ri.getAmount().quantity();
-            total += ingredient.getNutritionValues().getCalories() * factor;
-        }
-
-        return (int) Math.round(total);
-    }
-    public int getCaloriesPerPortion(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
-        if (portions <= 0) return 0;
-        return getTotalCalories(ingredientResolver) / portions;
-    }
     public Recipe scaleToPortions(int newPortions) {
         if (newPortions <= 0 || this.portions <= 0) {
             return this;
@@ -206,5 +188,28 @@ public class Recipe {
                 this.language
         );
     }
+    public double getTotalCalories(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+        double total = 0.0;
+
+        if (ingredients == null) return 0.0;
+
+        for (RecipeIngredient ri : ingredients) {
+            Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
+            if (ingredient == null) continue;
+
+            double grams = ri.getGrams();
+            double kcalPer100g = ingredient.getNutritionValues().getKcalPer100g();
+
+            total += (grams / 100.0) * kcalPer100g;
+        }
+
+        return total;
+    }
+
+    public double getCaloriesPerPortion(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+        if (portions <= 0) return 0.0;
+        return getTotalCalories(ingredientResolver) / portions;
+    }
+
 
 }

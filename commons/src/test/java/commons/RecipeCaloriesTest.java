@@ -32,10 +32,9 @@ class RecipeCaloriesTest {
                 Language.EN
         );
 
-        int kcal = recipe.getCaloriesPerPortion(
-                (UUID lookup) -> ingredient
-        );
+        double kcal = recipe.getCaloriesPerPortion(uuid -> ingredient);
+        assertEquals(0.85, kcal, 0.001);
 
-        assertEquals(85, kcal); // 17 * 10 / 2
+
     }
 }

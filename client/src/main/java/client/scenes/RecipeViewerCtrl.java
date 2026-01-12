@@ -153,13 +153,12 @@ public class RecipeViewerCtrl implements Internationalizable {
         titleProperty.set(recipe.getTitle());
         setIngredientsList(recipe);
         setPreparationList(recipe);
-        int kcal = recipe.getCaloriesPerPortion(
-                id -> recipeManager.getIngredient(
-                        new RecipeIngredient(id, null)
-                )
+        double kcal = recipe.getCaloriesPerPortion(
+                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
 
-        caloriesProperty.set(kcal + " kcal");
+        caloriesProperty.set(String.format("%.1f kcal", kcal));
+
 
     }
 
