@@ -237,16 +237,12 @@ public class AddRecipeCtrl implements Internationalizable {
         try {
             r = getRecipe();
 
+            server.addRecipe(r);
+
             if (editingRecipe == null) {
                 recipeManager.addRecipeOptimistic(r);
 
                 if (onRecipeAdded != null) onRecipeAdded.accept(r);
-
-                try {
-                    server.addRecipe(r); // current project signature is void;
-                } catch (Exception e) {
-                    // Server not available / failed: keep optimistic copy.
-                }
             } else {
                 if (!recipeManager.setRecipe(r)) {
                     System.out.println("Failed to add recipe " + r);
@@ -355,8 +351,26 @@ public class AddRecipeCtrl implements Internationalizable {
         // waits for new ingredient to be made in popup
         addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
             Platform.runLater(() -> {
-                ingredients.add(newIngredient);
-                refreshIngredientsList();
+                /*ingredients.add(newIngredient);
+                refreshIngredientsList();*/
+
+                try {
+                    Ingredient base = recipeManager.getIngredient(newIngredient.ingredientRef);
+
+                    if (base != null) {
+                        server.addIngredient(base);
+
+                        ingredients.add(newIngredient);
+                        refreshIngredientsList();
+                    } else {
+                        System.err.println("Error: Ingredient details not found in manager.");
+                    }
+                } catch (Exception e) {
+                    new Alert(
+                            Alert.AlertType.ERROR,
+                            "Failed to save ingredient to server"
+                    ).show();
+                }
             });
         });
         var scene = new Scene(addIngredientRoot);

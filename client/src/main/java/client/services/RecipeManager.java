@@ -62,6 +62,22 @@ public class RecipeManager {
     }
 
 
+    public void sync(List<Recipe> recipes, List<Ingredient> ingredients) {
+        runOnFx(() -> {
+            recipesMap.clear();
+            ingredientsMap.clear();
+
+            for (Ingredient ingredient : ingredients) {
+                ingredientsMap.put(ingredient.getId(), ingredient);
+            }
+            ingredientsFx.setAll(ingredients);
+
+            for (Recipe recipe : recipes) {
+                recipesMap.put(recipe.getId(), recipe);
+            }
+            recipesFx.setAll(recipes);
+        });
+    }
 
     /**
      Returns true if stored, false if invalid input.
