@@ -20,8 +20,9 @@ public class WebSocketHub {
     private final CopyOnWriteArrayList<WebSocketSession> titleSubscribers = new CopyOnWriteArrayList<>();
     private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> recipeSubscribers = new ConcurrentHashMap<>();
 
-    //private final List<WebSocketSession> titleSubscribers = new ArrayList<>();
-    //private final Map<Long, List<WebSocketSession>> recipeSubscribers = new HashMap<>();
+    // private final List<WebSocketSession> titleSubscribers = new ArrayList<>();
+    // private final Map<Long, List<WebSocketSession>> recipeSubscribers = new
+    // HashMap<>();
 
     public int getTitleSubscribersCount() {
         return titleSubscribers.size();
@@ -35,8 +36,7 @@ public class WebSocketHub {
 
     public void subscribeRecipe(WebSocketSession session, UUID recipeId) {
         recipeSubscribers.computeIfAbsent(
-                recipeId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session
-        );
+                recipeId, k -> new CopyOnWriteArrayList<>()).addIfAbsent(session);
     }
 
     public void unsubscribeTitles(WebSocketSession session) {
@@ -69,6 +69,17 @@ public class WebSocketHub {
                     WebSocketTypes.UPDATE,
                     "recipe",
                     recipeData);
+            broadcast(sessions, response);
+        }
+    }
+
+    public void broadcastRecipeDelete(UUID recipeId) {
+        List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
+        if (sessions != null && !sessions.isEmpty()) {
+            WebSocketResponse response = new WebSocketResponse(
+                    WebSocketTypes.DELETE,
+                    "recipe",
+                    recipeId);
             broadcast(sessions, response);
         }
     }
