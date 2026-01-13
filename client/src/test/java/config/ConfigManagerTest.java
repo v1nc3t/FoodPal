@@ -61,6 +61,18 @@ class ConfigManagerTest {
     }
 
     @Test
+    void testLoadThrowsExceptionIfCustomPathIsDirectory() throws IOException {
+        Path customDirPath = tempDir.resolve("invalid_dir");
+        Files.createDirectories(customDirPath);
+
+        ConfigManager manager = new ConfigManager(customDirPath.toString());
+
+        // This should fail because it can't write/read to a directory as a file
+        assertThrows(RuntimeException.class, manager::load,
+                "Should throw RuntimeException if the custom path is a directory");
+    }
+
+    @Test
     void testConstructorWithNullCreatesDefaultDirectory() {
         // Test the "if (customCfgPath != null)" ELSE branch
         // We mock user.home to prevent writing to your actual disk
