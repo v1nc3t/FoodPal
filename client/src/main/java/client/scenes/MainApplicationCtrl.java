@@ -610,8 +610,14 @@ public class MainApplicationCtrl implements Internationalizable {
 
         Recipe clone = original.cloneWithTitle(newName);
         recipeManager.addRecipeOptimistic(clone);
-        showRecipe(clone);
 
+        try {
+            serverUtils.addRecipe(clone);
+        } catch (Exception e) {
+            System.err.println("Failed to save clone to server: " + e.getMessage());
+        }
+
+        showRecipe(clone);
     }
 
     @FXML

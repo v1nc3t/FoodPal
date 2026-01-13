@@ -444,7 +444,10 @@ public class AddRecipeCtrl implements Internationalizable {
 
         item.getChildren().addAll(textFlow, buttonGroup);
 
-        delete.setOnAction(e -> ingredientsList.getChildren().remove(item));
+        delete.setOnAction(e -> {
+            ingredients.remove(recipeIngredient);
+            refreshIngredientsList();
+        });
         edit.setOnAction(e -> clickEditIngredient(recipeIngredient));
 
         return item;
