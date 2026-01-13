@@ -67,9 +67,9 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             JsonNode json) throws Exception {
 
         switch (topic) {
-            case "recipe-titles" -> {
-                hub.subscribeTitles(session);
-                sendSubscribeConfirm(session, "recipe-titles");
+            case "recipe-state" -> {
+                hub.subscribeState(session);
+                sendSubscribeConfirm(session, "recipe-state");
             }
             case "recipe" -> {
                 String idStr = json.path("recipeId").asText(null);
@@ -109,9 +109,9 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             JsonNode json) throws Exception {
 
         switch (topic) {
-            case "recipe-titles" -> {
-                hub.unsubscribeTitles(session);
-                sendUnsubscribeConfirm(session, "recipe-titles");
+            case "recipe-state" -> {
+                hub.unsubscribeState(session);
+                sendUnsubscribeConfirm(session, "recipe-state");
             }
             case "recipe" -> {
                 String idStr = json.path("recipeId").asText(null);

@@ -17,7 +17,7 @@ public class WebSocketHub {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final CopyOnWriteArrayList<WebSocketSession> titleSubscribers =
+    private final CopyOnWriteArrayList<WebSocketSession> stateSubscribers =
             new CopyOnWriteArrayList<>();
     private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> recipeSubscribers =
             new ConcurrentHashMap<>();
@@ -25,12 +25,12 @@ public class WebSocketHub {
             new ConcurrentHashMap<>();
 
     public int getTitleSubscribersCount() {
-        return titleSubscribers.size();
+        return stateSubscribers.size();
     }
 
-    public void subscribeTitles(WebSocketSession session) {
-        if (!titleSubscribers.contains(session)) {
-            titleSubscribers.add(session);
+    public void subscribeState(WebSocketSession session) {
+        if (!stateSubscribers.contains(session)) {
+            stateSubscribers.add(session);
         }
     }
 
@@ -44,8 +44,8 @@ public class WebSocketHub {
                 ingredientId, _ -> new CopyOnWriteArrayList<>()).addIfAbsent(session);
     }
 
-    public void unsubscribeTitles(WebSocketSession session) {
-        titleSubscribers.remove(session);
+    public void unsubscribeState(WebSocketSession session) {
+        stateSubscribers.remove(session);
     }
 
     public void unsubscribeRecipe(WebSocketSession session, UUID recipeId) {
@@ -70,12 +70,12 @@ public class WebSocketHub {
         }
     }
 
-    public void broadcastTitleUpdate(Object allRecipes) {
+    public void broadcastStateUpdate(Object allRecipes) {
         WebSocketResponse response = new WebSocketResponse(
                 WebSocketTypes.UPDATE,
-                "recipe-titles",
+                "recipe-state",
                 allRecipes);
-        broadcast(titleSubscribers, response);
+        broadcast(stateSubscribers, response);
     }
 
     public void broadcastRecipeUpdate(UUID recipeId, Object recipeData) {
@@ -97,6 +97,9 @@ public class WebSocketHub {
                     "recipe",
                     recipeId);
             broadcast(sessions, response);
+
+            // The recipe is gone, so remove the subscribers as well
+            recipeSubscribers.remove(recipeId);
         }
     }
 
@@ -136,7 +139,7 @@ public class WebSocketHub {
     }
 
     public synchronized void removeSessionEverywhere(WebSocketSession session) {
-        titleSubscribers.remove(session);
+        stateSubscribers.remove(session);
 
         recipeSubscribers.values().forEach(sessions -> sessions.remove(session));
         recipeSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);

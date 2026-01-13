@@ -68,7 +68,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void deleteRecipe() {
+    public void deleteRecipe() throws InvalidIngredientError {
         recipeController.setIngredient(yogurt);
         recipeController.deleteRecipe(recipe.getId());
 

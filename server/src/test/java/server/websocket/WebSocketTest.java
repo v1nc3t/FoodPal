@@ -317,9 +317,9 @@ public class WebSocketTest {
     }
 
     @Test
-    public void testTitleUpdateOnDeletion() throws Exception {
+    public void testStateUpdate() throws Exception {
         CompletableFuture<String> subConfirmation = new CompletableFuture<>();
-        CompletableFuture<String> titleUpdate = new CompletableFuture<>();
+        CompletableFuture<String> stateUpdate = new CompletableFuture<>();
 
         TextWebSocketHandler handler = new TextWebSocketHandler() {
             @Override
@@ -327,8 +327,8 @@ public class WebSocketTest {
                 String payload = message.getPayload();
                 if (payload.contains("SUBSCRIBED")) {
                     subConfirmation.complete(payload);
-                } else if (payload.contains("UPDATE") && payload.contains("recipe-titles")) {
-                    titleUpdate.complete(payload);
+                } else if (payload.contains("UPDATE") && payload.contains("recipe-state")) {
+                    stateUpdate.complete(payload);
                 }
             }
         };
@@ -339,17 +339,17 @@ public class WebSocketTest {
 
         Map<String, Object> subRequest = new HashMap<>();
         subRequest.put("type", "SUBSCRIBE");
-        subRequest.put("topic", "recipe-titles");
+        subRequest.put("topic", "recipe-state");
         session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
 
         subConfirmation.get(5, TimeUnit.SECONDS);
 
-        hub.broadcastTitleUpdate("new state after deletion");
+        hub.broadcastStateUpdate("New state after recipe state change");
 
-        String result = titleUpdate.get(5, TimeUnit.SECONDS);
+        String result = stateUpdate.get(5, TimeUnit.SECONDS);
         assertTrue(result.contains("UPDATE"));
-        assertTrue(result.contains("recipe-titles"));
-        assertTrue(result.contains("new state after deletion"));
+        assertTrue(result.contains("recipe-state"));
+        assertTrue(result.contains("New state after recipe state change"));
 
         session.close();
     }
