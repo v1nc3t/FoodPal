@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import server.service.IRecipeService;
 
+import java.util.Collection;
+
 @RestController
 @RequestMapping("/api/recipes")
 public class RecipeController {
@@ -20,12 +22,17 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     public RecipeState getRecipeState() {
         return recipeService.getState();
     }
 
-    @PostMapping("/")
+    @GetMapping("/all")
+    public Collection<Recipe> getAllRecipes() {
+        return recipeService.getState().recipes();
+    }
+
+    @PostMapping("")
     public void setRecipe(@RequestBody Recipe recipe) throws InvalidRecipeError {
         recipeService.setRecipe(recipe);
     }

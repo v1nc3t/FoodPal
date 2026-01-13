@@ -5,6 +5,7 @@ import commons.InvalidRecipeError;
 import commons.Recipe;
 import commons.RecipeState;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 import server.websocket.WebSocketHub;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 /// Service that keeps track of recipes
 @Service
+@Transactional
 public class RecipeService implements IRecipeService {
     private final HashMap<UUID, Recipe> recipes =  new HashMap<>();
     private final HashMap<UUID, Ingredient> ingredients = new HashMap<>();
