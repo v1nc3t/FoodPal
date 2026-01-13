@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 //    String WEB_SOCKET_URL = "ws://localhost:"+port+"/ws";
 //Were helped by AI
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WebSocketTest {
 
@@ -271,5 +270,87 @@ public class WebSocketTest {
         Thread.sleep(3000);
 
         assertEquals(0, hub.getTitleSubscribersCount());
+    }
+
+    @Test
+    public void testRecipeDeleteNotification() throws Exception {
+        CompletableFuture<String> subConfirmation = new CompletableFuture<>();
+        CompletableFuture<String> deleteNotification = new CompletableFuture<>();
+
+        TextWebSocketHandler handler = new TextWebSocketHandler() {
+            @Override
+            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+                String payload = message.getPayload();
+                if (payload.contains("SUBSCRIBED")) {
+                    subConfirmation.complete(payload);
+                } else if (payload.contains("DELETE")) {
+                    deleteNotification.complete(payload);
+                }
+            }
+        };
+
+        String url = "ws://localhost:" + port + "/ws";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        WebSocketSession session = client.execute(handler, url).get(5, TimeUnit.SECONDS);
+
+        UUID recipeId = UUID.randomUUID();
+
+        // Subscribe to recipe
+        Map<String, Object> subRequest = new HashMap<>();
+        subRequest.put("type", "SUBSCRIBE");
+        subRequest.put("topic", "recipe");
+        subRequest.put("recipeId", recipeId.toString());
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
+
+        // Wait for confirmation
+        subConfirmation.get(5, TimeUnit.SECONDS);
+
+        // Simulate deletion on server
+        hub.broadcastRecipeDelete(recipeId);
+
+        // Check for delete notification
+        String result = deleteNotification.get(5, TimeUnit.SECONDS);
+        assertTrue(result.contains("DELETE"));
+        assertTrue(result.contains(recipeId.toString()));
+
+        session.close();
+    }
+
+    @Test
+    public void testTitleUpdateOnDeletion() throws Exception {
+        CompletableFuture<String> subConfirmation = new CompletableFuture<>();
+        CompletableFuture<String> titleUpdate = new CompletableFuture<>();
+
+        TextWebSocketHandler handler = new TextWebSocketHandler() {
+            @Override
+            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+                String payload = message.getPayload();
+                if (payload.contains("SUBSCRIBED")) {
+                    subConfirmation.complete(payload);
+                } else if (payload.contains("UPDATE") && payload.contains("recipe-titles")) {
+                    titleUpdate.complete(payload);
+                }
+            }
+        };
+
+        String url = "ws://localhost:" + port + "/ws";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        WebSocketSession session = client.execute(handler, url).get(5, TimeUnit.SECONDS);
+
+        Map<String, Object> subRequest = new HashMap<>();
+        subRequest.put("type", "SUBSCRIBE");
+        subRequest.put("topic", "recipe-titles");
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
+
+        subConfirmation.get(5, TimeUnit.SECONDS);
+
+        hub.broadcastTitleUpdate("new state after deletion");
+
+        String result = titleUpdate.get(5, TimeUnit.SECONDS);
+        assertTrue(result.contains("UPDATE"));
+        assertTrue(result.contains("recipe-titles"));
+        assertTrue(result.contains("new state after deletion"));
+
+        session.close();
     }
 }

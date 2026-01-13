@@ -15,15 +15,15 @@ public class RecipeControllerTest {
     RecipeController recipeController;
     TestRecipeService testRecipeService;
     Ingredient yogurt = new Ingredient("Yogurt", new NutritionValues(1, 2, 3));
-    Ingredient sugar  = new Ingredient("Sugar", new NutritionValues(1, 2, 3));
+    Ingredient sugar = new Ingredient("Sugar", new NutritionValues(1, 2, 3));
     List<String> preparationSteps = List.of("Melt sugar", "Freeze yogurt", "Blend");
     Recipe recipe = new Recipe("Sugared Yogurt",
             List.of(
                     new RecipeIngredient(yogurt.getId(), new Amount(1, Unit.CUP)),
-                    new RecipeIngredient(sugar.getId(), new Amount(1, Unit.KILOGRAM))
-            ),
+                    new RecipeIngredient(sugar.getId(), new Amount(1, Unit.KILOGRAM))),
             preparationSteps,
             1, Language.EN);
+
     @BeforeEach
     public void setup() {
         testRecipeService = new TestRecipeService();
@@ -66,10 +66,21 @@ public class RecipeControllerTest {
 
         assertEquals(expectedService.getState(), recipeController.getRecipeState());
     }
+
+    @Test
+    public void deleteRecipe() {
+        recipeController.setIngredient(yogurt);
+        recipeController.deleteRecipe(recipe.getId());
+
+        var expectedService = new TestRecipeService();
+        expectedService.setIngredient(yogurt);
+
+        assertEquals(expectedService, testRecipeService);
+    }
 }
 
 class TestRecipeService implements IRecipeService {
-    public final HashMap<UUID, Recipe> recipes =  new HashMap<>();
+    public final HashMap<UUID, Recipe> recipes = new HashMap<>();
     public final HashMap<UUID, Ingredient> ingredients = new HashMap<>();
 
     @Override
@@ -84,10 +95,7 @@ class TestRecipeService implements IRecipeService {
         if (recipe
                 .getIngredients()
                 .stream()
-                .anyMatch(ingredient ->
-                        !ingredients.containsKey(ingredient.getIngredientRef())
-                )
-        )
+                .anyMatch(ingredient -> !ingredients.containsKey(ingredient.getIngredientRef())))
             throw new InvalidRecipeError();
         recipes.put(recipe.getId(), recipe);
     }
@@ -98,8 +106,14 @@ class TestRecipeService implements IRecipeService {
     }
 
     @Override
+    public void deleteRecipe(UUID recipeId) {
+        recipes.remove(recipeId);
+    }
+
+    @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         TestRecipeService that = (TestRecipeService) o;
         return recipes.equals(that.recipes) && ingredients.equals(that.ingredients);
     }
@@ -109,4 +123,3 @@ class TestRecipeService implements IRecipeService {
         return Objects.hash(recipes, ingredients);
     }
 }
-
