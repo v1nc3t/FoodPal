@@ -46,6 +46,21 @@ class ConfigManagerTest {
     }
 
     @Test
+    void testSaveToCustomPathUpdatesFile() throws IOException {
+        Path customPath = tempDir.resolve("save_custom.json");
+        ConfigManager manager = new ConfigManager(customPath.toString());
+        manager.load();
+
+        Config cfg = manager.getConfig();
+        cfg.setServerAddress("http://updated-custom.com");
+        manager.save();
+
+        String content = Files.readString(customPath);
+        assertTrue(content.contains("http://updated-custom.com"),
+                "The file at the custom path should contain the updated server address");
+    }
+
+    @Test
     void testConstructorWithNullCreatesDefaultDirectory() {
         // Test the "if (customCfgPath != null)" ELSE branch
         // We mock user.home to prevent writing to your actual disk
@@ -204,9 +219,7 @@ class ConfigManagerTest {
         assertTrue(ex.getMessage().contains("Failed to save config"));
     }
 
-    // =========================================================================
     // GROUP 4: CONFIG OBJECT & ACCESSORS
-    // =========================================================================
 
     @Test
     void testSetConfigManually() {
