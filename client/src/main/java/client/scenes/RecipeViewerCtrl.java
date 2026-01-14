@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import commons.Ingredient;
 import client.services.RecipePrinter;
 import commons.Recipe;
+import commons.RecipeIngredient;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -68,8 +69,12 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     private Recipe currentRecipe;
 
-    private Consumer<Recipe> onRecipeEdit;
+    private final StringProperty caloriesProperty = new SimpleStringProperty();
 
+    @FXML
+    private Label caloriesLabel;
+
+    private Consumer<Recipe> onRecipeEdit;
     private final LocaleManager localeManager;
     private final RecipeManager recipeManager;
 
@@ -111,6 +116,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
+        caloriesLabel.textProperty().bind(caloriesProperty);
     }
 
     @Override
@@ -127,6 +133,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         editProperty.set(resourceBundle.getString("txt.edit"));
         printProperty.set(resourceBundle.getString("txt.print"));
         addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
+        caloriesProperty.set(resourceBundle.getString("txt.calories_per_portion"));
+
     }
 
     /**
@@ -149,6 +157,13 @@ public class RecipeViewerCtrl implements Internationalizable {
         titleProperty.set(recipe.getTitle());
         setIngredientsList(recipe);
         setPreparationList(recipe);
+        double kcal = recipe.getCaloriesPerPortion(
+                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
+        );
+
+        caloriesProperty.set(String.format("%.1f kcal", kcal));
+
+
     }
 
     /**

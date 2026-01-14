@@ -1,6 +1,5 @@
 package client.scenes;
 
-import client.MyFXML;
 import client.services.LocaleManager;
 import com.google.inject.Inject;
 import commons.Ingredient;
