@@ -1,5 +1,7 @@
 package client.services;
 
+import client.utils.ServerUtils;
+import com.google.inject.Inject;
 import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -24,6 +26,9 @@ public class RecipeManager {
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipesFx = FXCollections.observableArrayList();
     private final ObservableList<Ingredient> ingredientsFx = FXCollections.observableArrayList();
+
+    @Inject
+    private ServerUtils server;
 
     public RecipeManager() {
         // Seed a test recipe so ListView shows something immediately during manual testing.
@@ -129,30 +134,44 @@ public class RecipeManager {
 
     public boolean removeRecipe(UUID recipeId) {
         if (recipeId == null) return false;
-        favouriteRecipes.remove(recipeId); // keep favourites consistent
+
+        server.removeRecipe(recipeId);
+
+        // keep favourites consistent
+        favouriteRecipes.remove(recipeId);
         Recipe removed = recipesMap.remove(recipeId);
+
         // still remove from observable list
         runOnFx(() -> recipesFx.removeIf(r -> Objects.equals(r.getId(), recipeId)));
+
         return removed != null;
     }
 
     public boolean removeIngredient(UUID ingredientId) {
         if (ingredientId == null) return false;
-        var usedRecipe =
-                recipesMap
+
+        var usedRecipe = recipesMap
                         .values()
                         .stream()
-                        .filter(
-                        rv -> rv
+                        .filter(rv -> rv
                                 .getIngredients()
                                 .stream()
                                 .anyMatch(ri -> ri.ingredientRef == ingredientId)
-                ).findAny().orElse(null);
+                        ).findAny().orElse(null);
+
         if (usedRecipe != null)
-            throw new RuntimeException("Cannot remove ingredient, because it is used in recipe: " + usedRecipe.getTitle());
+            throw new RuntimeException(
+                    "Cannot remove ingredient, because it is used in recipe: " +
+                            usedRecipe.getTitle()
+            );
+
+        server.removeIngredient(ingredientId);
+
         Ingredient removed = ingredientsMap.remove(ingredientId);
+
         // still remove from observable list
         runOnFx(() -> ingredientsFx.removeIf(r -> Objects.equals(r.getId(), ingredientId)));
+        
         return removed != null;
     }
 

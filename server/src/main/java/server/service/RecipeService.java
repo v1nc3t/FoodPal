@@ -80,4 +80,11 @@ public class RecipeService implements IRecipeService {
             webSocketHub.broadcastTitleUpdate(getState());
         }
     }
+
+    @Override
+    public void deleteIngredient(UUID ingredientId) {
+        if (ingredients.remove(ingredientId) != null) {
+            ingredientRepository.deleteById(ingredientId);
+        }
+    }
 }

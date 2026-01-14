@@ -25,7 +25,7 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @GetMapping("/")
+    @GetMapping(path = { "", "/" })
     public RecipeState getRecipeState() {
         return recipeService.getState();
     }
@@ -35,7 +35,7 @@ public class RecipeController {
         return recipeService.getState().recipes();
     }
 
-    @PostMapping("/")
+    @PostMapping(path = { "", "/" })
     public void setRecipe(@RequestBody Recipe recipe) throws InvalidRecipeError {
         recipeService.setRecipe(recipe);
     }
@@ -48,5 +48,10 @@ public class RecipeController {
     @DeleteMapping("/{id}")
     public void deleteRecipe(@PathVariable UUID id) {
         recipeService.deleteRecipe(id);
+    }
+
+    @DeleteMapping("/ingredient/{id}")
+    public void deleteIngredient(@PathVariable UUID id) {
+        recipeService.deleteIngredient(id);
     }
 }

@@ -15,6 +15,7 @@ import org.glassfish.jersey.client.ClientConfig;
 
 import java.net.ConnectException;
 import java.util.List;
+import java.util.UUID;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -62,6 +63,20 @@ public class ServerUtils implements IServerUtils {
                 .path("api/recipes/ingredient")
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(ingredient, APPLICATION_JSON), Ingredient.class);
+    }
+
+    public void removeRecipe(UUID reciepId) {
+        client.target(getServerURL())
+                .path("api/recipes/" + reciepId)
+                .request(APPLICATION_JSON)
+                .delete();
+    }
+
+    public void removeIngredient(UUID ingredientId) {
+        client.target(getServerURL())
+                .path("api/recipes/ingredient/" + ingredientId)
+                .request(APPLICATION_JSON)
+                .delete();
     }
 
     public boolean isServerAvailable() {

@@ -22,4 +22,7 @@ public interface IRecipeService {
 
     /// Deletes a recipe based on its unique identifier.
     void deleteRecipe(UUID recipeId);
+
+    ///  Deletes an ingredient based on its unique identifier
+    void deleteIngredient(UUID ingredientId);
 }
