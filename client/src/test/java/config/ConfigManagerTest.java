@@ -111,7 +111,7 @@ class ConfigManagerTest {
         manager.load();
 
         assertTrue(Files.exists(jsonPath), "File should be created if it didn't exist");
-        assertEquals("http://localhost:8080", manager.getConfig().getServerAddress());
+        assertEquals("http://localhost:8080/", manager.getConfig().getServerAddress());
     }
 
     @Test
