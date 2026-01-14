@@ -6,5 +6,6 @@ public enum WebSocketTypes {
     UNSUBSCRIBE,
     UNSUBSCRIBED,
     UPDATE,
+    DELETE,
     ERROR
 }

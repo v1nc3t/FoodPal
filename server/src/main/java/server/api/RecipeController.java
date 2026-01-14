@@ -8,12 +8,15 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import server.service.IRecipeService;
 
+import java.util.UUID;
+
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/api/recipes")
 public class RecipeController {
     private final IRecipeService recipeService;
+
     /// Creates a Recipe RestController which uses the provided interface service
     /// for resolving requests.
     ///
@@ -22,7 +25,7 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @GetMapping("")
+    @GetMapping("/")
     public RecipeState getRecipeState() {
         return recipeService.getState();
     }
@@ -32,7 +35,7 @@ public class RecipeController {
         return recipeService.getState().recipes();
     }
 
-    @PostMapping("")
+    @PostMapping("/")
     public void setRecipe(@RequestBody Recipe recipe) throws InvalidRecipeError {
         recipeService.setRecipe(recipe);
     }
@@ -40,5 +43,10 @@ public class RecipeController {
     @PostMapping(path = "/ingredient", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void setIngredient(@RequestBody Ingredient ingredient) {
         recipeService.setIngredient(ingredient);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteRecipe(@PathVariable UUID id) {
+        recipeService.deleteRecipe(id);
     }
 }
