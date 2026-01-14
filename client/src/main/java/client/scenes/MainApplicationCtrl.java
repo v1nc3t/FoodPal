@@ -493,6 +493,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 "client", "scenes", "RecipeViewer.fxml");
 
         RecipeViewerCtrl viewerCtrl = pair.getKey();
+        viewerCtrl.setOnRecipeEdit(this::editRecipe);
         Parent viewerRoot = pair.getValue();
 
         viewerCtrl.setRecipe(recipe);
@@ -513,10 +514,27 @@ public class MainApplicationCtrl implements Internationalizable {
                 "client", "scenes", "IngredientViewer.fxml");
 
         IngredientViewerCtrl viewerCtrl = pair.getKey();
-        Parent viewerRoot = pair.getValue();
-
+        viewerCtrl.setOnIngredientEdit(this::editIngredient);
         viewerCtrl.setIngredient(ingredient);
 
+        Parent viewerRoot = pair.getValue();
+
+        contentPane.getChildren().setAll(viewerRoot);
+        currentlyShownId = ingredient.getId();
+    }
+
+    private void editIngredient(Ingredient ingredient) {
+        var bundle = localeManager.getCurrentBundle();
+        Pair<EditIngredientCtrl, Parent> editIngredientPair = fxml.load(EditIngredientCtrl.class,
+                bundle,"client", "scenes", "EditIngredient.fxml");
+
+        EditIngredientCtrl editIngredientCtrl = editIngredientPair.getKey();
+        Parent editIngredientRoot = editIngredientPair.getValue();
+
+        editIngredientCtrl.setIngredient(ingredient);
+        editIngredientCtrl.setOnShowIngredient(this::showIngredient);
+
+        Parent viewerRoot = editIngredientPair.getValue();
         contentPane.getChildren().setAll(viewerRoot);
         currentlyShownId = ingredient.getId();
     }

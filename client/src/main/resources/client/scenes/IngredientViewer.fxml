@@ -39,7 +39,7 @@
     </top>
     <bottom>
         <HBox>
-            <Button fx:id="editButton" />
+            <Button fx:id="editButton" onAction="#clickEdit" />
         </HBox>
     </bottom>
 </BorderPane>

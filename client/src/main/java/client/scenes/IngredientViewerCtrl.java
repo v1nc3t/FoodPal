@@ -1,10 +1,12 @@
 package client.scenes;
 
+import client.MyFXML;
 import client.services.LocaleManager;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,6 +14,7 @@ import javafx.scene.text.Text;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class IngredientViewerCtrl implements Internationalizable {
     @FXML
@@ -39,6 +42,11 @@ public class IngredientViewerCtrl implements Internationalizable {
     private final StringProperty carbsProperty = new SimpleStringProperty();
     @Inject
     LocaleManager localeManager;
+
+    private Consumer<Ingredient> onIngredientEdit;
+    public void setOnIngredientEdit(Consumer<Ingredient> cb) {
+        onIngredientEdit = cb;
+    }
 
     private Ingredient ingredient;
 
@@ -76,4 +84,12 @@ public class IngredientViewerCtrl implements Internationalizable {
         nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values") + " (100g)");
         editButtonProperty.set(resourceBundle.getString("txt.edit"));
     }
+
+    public void clickEdit(ActionEvent _action) {
+        if (ingredient != null && onIngredientEdit != null) {
+            onIngredientEdit.accept(ingredient);
+
+        }
+    }
+
 }
