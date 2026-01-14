@@ -41,6 +41,16 @@ public class RecipeViewerCtrl implements Internationalizable {
     @FXML
     private Label portionsValueLabel;
 
+    @FXML
+    private Button scaleUpButton;
+
+    @FXML
+    private Button scaleDownButton;
+
+    private final StringProperty resetProperty = new SimpleStringProperty();
+    @FXML
+    private Button resetScaleButton;
+
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML
     private Label ingredientsLabel;
@@ -69,9 +79,12 @@ public class RecipeViewerCtrl implements Internationalizable {
     private Recipe currentRecipe;
 
     private final StringProperty caloriesProperty = new SimpleStringProperty();
-
     @FXML
     private Label caloriesLabel;
+
+    private final StringProperty servingSizeProperty = new SimpleStringProperty();
+    @FXML
+    private Label servingSizeLabel;
 
     private MainApplicationCtrl mainCtrl;
     private final LocaleManager localeManager;
@@ -107,11 +120,13 @@ public class RecipeViewerCtrl implements Internationalizable {
         languageSuffixLabel.textProperty().bind(languageSuffixProperty);
         portionsLabel.textProperty().bind(portionsProperty);
         portionsValueLabel.textProperty().bind(portionsValueProperty);
+        resetScaleButton.textProperty().bind(resetProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
+        servingSizeLabel.textProperty().bind(servingSizeProperty);
         caloriesLabel.textProperty().bind(caloriesProperty);
     }
 
@@ -122,14 +137,15 @@ public class RecipeViewerCtrl implements Internationalizable {
             languageSuffixProperty.set(currentRecipe.getLanguage().proper());
         }
         titleProperty.set(resourceBundle.getString("txt.recipe_name"));
-        languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
-        portionsProperty.set(resourceBundle.getString("txt.portions") + ": ");
+        languageProperty.set(resourceBundle.getString("txt.recipe_language") + ":");
+        portionsProperty.set(resourceBundle.getString("txt.portions") + ":");
+        resetProperty.set(resourceBundle.getString("txt.reset"));
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
         editProperty.set(resourceBundle.getString("txt.edit"));
         printProperty.set(resourceBundle.getString("txt.print"));
         addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
-        caloriesProperty.set(resourceBundle.getString("txt.calories_per_portion"));
+        servingSizeProperty.set(resourceBundle.getString("txt.serving_size") + ":");
 
     }
 
