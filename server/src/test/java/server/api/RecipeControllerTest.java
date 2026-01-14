@@ -111,6 +111,11 @@ class TestRecipeService implements IRecipeService {
     }
 
     @Override
+    public void deleteIngredient(UUID ingredientId) {
+        ingredients.remove(ingredientId);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass())
             return false;
