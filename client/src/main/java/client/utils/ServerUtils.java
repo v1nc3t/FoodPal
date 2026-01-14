@@ -58,8 +58,8 @@ public class ServerUtils implements IServerUtils {
                 .post(Entity.entity(recipe, APPLICATION_JSON), Recipe.class);
     }
 
-    public void setIngredient(Ingredient ingredient) {
-        client.target(getServerURL())
+    public Ingredient setIngredient(Ingredient ingredient) {
+        return client.target(getServerURL())
                 .path("api/recipes/ingredient")
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(ingredient, APPLICATION_JSON), Ingredient.class);
