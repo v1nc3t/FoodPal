@@ -1,9 +1,6 @@
 package server.service;
 
-import commons.Ingredient;
-import commons.InvalidRecipeError;
-import commons.Recipe;
-import commons.RecipeState;
+import commons.*;
 import org.springframework.stereotype.Service;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
@@ -58,15 +55,26 @@ public class RecipeService implements IRecipeService {
         recipeRepository.save(recipe);
 
         webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
-        webSocketHub.broadcastTitleUpdate(getState());
+        webSocketHub.broadcastStateUpdate(getState());
     }
 
     @Override
-    public void setIngredient(Ingredient ingredient) {
+    public void setIngredient(Ingredient ingredient) throws InvalidIngredientError {
+        if (ingredient == null) {
+            throw new InvalidIngredientError();
+        }
         ingredients.put(ingredient.getId(), ingredient);
         ingredientRepository.save(ingredient);
 
-        webSocketHub.broadcastTitleUpdate(getState());
+        webSocketHub.broadcastIngredientUpdate(ingredient.getId(), ingredient);
+        // also broadcast changes to relevant recipes
+        recipes.values().stream().filter(
+                recipe -> recipe.getIngredients()
+                                .stream()
+                                .anyMatch(ri -> ri.getIngredientRef().equals(ingredient.getId())))
+                .forEach(recipe -> webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe));
+
+        webSocketHub.broadcastStateUpdate(getState());
     }
 
     @Override
@@ -75,7 +83,7 @@ public class RecipeService implements IRecipeService {
             recipeRepository.deleteById(recipeId);
 
             webSocketHub.broadcastRecipeDelete(recipeId);
-            webSocketHub.broadcastTitleUpdate(getState());
+            webSocketHub.broadcastStateUpdate(getState());
         }
     }
 }
