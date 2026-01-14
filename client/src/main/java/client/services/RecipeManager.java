@@ -6,6 +6,7 @@ import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,22 +95,27 @@ public class RecipeManager {
                 .allMatch(ri -> ingredientsMap.containsKey(ri.getIngredientRef()));
         if (!allRefsExist) return false;
 
-        // store
-        if (recipe.getId() != null) recipesMap.put(recipe.getId(), recipe);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        runOnFx(() -> {
-            int idx = indexOfRecipe(recipe.getId());
-            if (idx >= 0) recipesFx.set(idx, recipe);
-            else recipesFx.add(recipe);
-            latch.countDown();
-        });
         try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            server.setRecipe(recipe);
+
+            if (recipe.getId() != null) {
+                recipesMap.put(recipe.getId(), recipe);
+            }
+
+            runOnFx(() -> {
+                int idx = indexOfRecipe(recipe.getId());
+                if (idx >= 0) {
+                    recipesFx.set(idx, recipe);
+                } else {
+                    recipesFx.add(recipe);
+                }
+            });
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to save recipe to server: " + e.getMessage());
+            return false;
         }
-        return true;
     }
 
     /**
@@ -147,6 +153,27 @@ public class RecipeManager {
         return removed != null;
     }
 
+    public boolean setIngredient(Ingredient ingredient) {
+        if (ingredient == null || ingredient.getId() == null) return false;
+
+        try {
+            server.setIngredient(ingredient);
+
+            ingredientsMap.put(ingredient.getId(), ingredient);
+
+            runOnFx(() -> {
+                int idx = indexOfIngredient(ingredient.getId());
+                if (idx >= 0) ingredientsFx.set(idx, ingredient);
+                else ingredientsFx.add(ingredient);
+            });
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to save ingredient to server: " + e.getMessage());
+            return false;
+        }
+    }
+
     public boolean removeIngredient(UUID ingredientId) {
         if (ingredientId == null) return false;
 
@@ -173,17 +200,6 @@ public class RecipeManager {
         runOnFx(() -> ingredientsFx.removeIf(r -> Objects.equals(r.getId(), ingredientId)));
         
         return removed != null;
-    }
-
-    public boolean setIngredient(Ingredient ingredient) {
-        if (ingredient == null || ingredient.getId() == null) return false;
-        ingredientsMap.put(ingredient.getId(), ingredient);
-        runOnFx(() -> {
-            int idx = indexOfIngredient(ingredient.getId());
-            if (idx >= 0) ingredientsFx.set(idx, ingredient);
-            else ingredientsFx.add(ingredient);
-        });
-        return true;
     }
 
 

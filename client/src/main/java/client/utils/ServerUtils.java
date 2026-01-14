@@ -51,14 +51,14 @@ public class ServerUtils implements IServerUtils {
         return state.ingredients().stream().toList();
     }
 
-    public Recipe addRecipe(Recipe recipe) {
+    public Recipe setRecipe(Recipe recipe) {
         return client.target(getServerURL())
                 .path("api/recipes")
                 .request(APPLICATION_JSON)
                 .post(Entity.entity(recipe, APPLICATION_JSON), Recipe.class);
     }
 
-    public void addIngredient(Ingredient ingredient) {
+    public void setIngredient(Ingredient ingredient) {
         client.target(getServerURL())
                 .path("api/recipes/ingredient")
                 .request(APPLICATION_JSON)

@@ -615,7 +615,7 @@ public class MainApplicationCtrl implements Internationalizable {
         recipeManager.addRecipeOptimistic(clone);
 
         try {
-            serverUtils.addRecipe(clone);
+            recipeManager.setRecipe(clone);
         } catch (Exception e) {
             System.err.println("Failed to save clone to server: " + e.getMessage());
         }

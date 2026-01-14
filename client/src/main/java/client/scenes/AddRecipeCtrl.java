@@ -237,7 +237,8 @@ public class AddRecipeCtrl implements Internationalizable {
         try {
             r = getRecipe();
 
-            server.addRecipe(r);
+            recipeManager.setRecipe(r);
+            //server.setRecipe(r);
 
             if (editingRecipe == null) {
                 recipeManager.addRecipeOptimistic(r);
@@ -349,22 +350,17 @@ public class AddRecipeCtrl implements Internationalizable {
         Parent addIngredientRoot = addIngredientPair.getValue();
 
         // waits for new ingredient to be made in popup
-        addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
+        addIngredientCtrl.setIngredientAddedCb(newRecipeIngredient -> {
             Platform.runLater(() -> {
-                /*ingredients.add(newIngredient);
-                refreshIngredientsList();*/
-
                 try {
-                    Ingredient base = recipeManager.getIngredient(newIngredient.ingredientRef);
+                    Ingredient base = recipeManager.getIngredient(
+                            newRecipeIngredient.ingredientRef
+                    );
 
-                    if (base != null) {
-                        server.addIngredient(base);
+                    recipeManager.setIngredient(base);
 
-                        ingredients.add(newIngredient);
-                        refreshIngredientsList();
-                    } else {
-                        System.err.println("Error: Ingredient details not found in manager.");
-                    }
+                    ingredients.add(newRecipeIngredient);
+                    refreshIngredientsList();
                 } catch (Exception e) {
                     new Alert(
                             Alert.AlertType.ERROR,
