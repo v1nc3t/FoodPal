@@ -38,5 +38,34 @@ public class RecipeIngredientTest {
     public void testEqualsSameObject() {
         assertEquals(recipeIngredient, recipeIngredient);
     }
+    @Test
+    public void testScaleIngredientAmount() {
+        RecipeIngredient scaled = recipeIngredient.scale(2.0);
+
+        assertEquals(
+                amount.quantity() * 2.0,
+                scaled.getAmount().quantity()
+        );
+    }
+
+    @Test
+    public void testScaleKeepsSameIngredientReference() {
+        RecipeIngredient scaled = recipeIngredient.scale(3.0);
+
+        assertEquals(
+                recipeIngredient.getIngredientRef(),
+                scaled.getIngredientRef()
+        );
+    }
+
+    @Test
+    public void testScaleDoesNotModifyOriginal() {
+        recipeIngredient.scale(5.0);
+
+        assertEquals(
+                500,
+                recipeIngredient.getAmount().quantity()
+        );
+    }
 
 }

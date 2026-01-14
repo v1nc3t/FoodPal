@@ -167,4 +167,49 @@ public class Recipe {
         cloned.title = newTitle;
         return cloned;
     }
+
+    public Recipe scaleToPortions(int newPortions) {
+        if (newPortions <= 0 || this.portions <= 0) {
+            return this;
+        }
+
+        double factor = (double) newPortions / this.portions;
+
+        List<RecipeIngredient> scaledIngredients = ingredients.stream()
+                .map(ri -> ri.scale(factor))
+                .collect(Collectors.toList());
+
+        return new Recipe(
+                this.id,
+                this.title,
+                scaledIngredients,
+                new ArrayList<>(this.steps),
+                newPortions,
+                this.language
+        );
+    }
+    public double getTotalCalories(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+        double total = 0.0;
+
+        if (ingredients == null) return 0.0;
+
+        for (RecipeIngredient ri : ingredients) {
+            Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
+            if (ingredient == null) continue;
+
+            double grams = ri.getGrams();
+            double kcalPer100g = ingredient.getNutritionValues().getKcalPer100g();
+
+            total += (grams / 100.0) * kcalPer100g;
+        }
+
+        return total;
+    }
+
+    public double getCaloriesPerPortion(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+        if (portions <= 0) return 0.0;
+        return getTotalCalories(ingredientResolver) / portions;
+    }
+
+
 }

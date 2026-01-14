@@ -47,7 +47,7 @@ public class RecipeServiceTest {
                         Language.EN);
 
         @Test
-        public void addIngredient() {
+        public void addIngredient() throws InvalidIngredientError {
                 var yogurt = new Ingredient("Yogurt", new NutritionValues(1, 2, 3));
                 recipeService.setIngredient(yogurt);
                 assertTrue(recipeService.getState().recipes().isEmpty());
@@ -68,6 +68,11 @@ public class RecipeServiceTest {
         }
 
         @Test
+        public void ingredientNull() {
+            assertThrows(InvalidIngredientError.class, () -> recipeService.setIngredient(null));
+        }
+
+        @Test
         public void recipeInvalidIngredient() {
                 var recipe = new Recipe(
                                 "Evil yogurt",
@@ -84,49 +89,49 @@ public class RecipeServiceTest {
         }
 
         @Test
-        public void addRecipe() throws InvalidRecipeError {
-                recipeService.setIngredient(yogurt);
-                recipeService.setIngredient(sugar);
-                recipeService.setRecipe(sugaredYogurt);
-                assertEquals(1, recipeService.getState().recipes().size());
-                assertEquals(2, recipeService.getState().ingredients().size());
-                var firstRecipe = recipeService
-                                .getState()
-                                .recipes()
-                                .stream()
-                                .findFirst();
-                assertTrue(firstRecipe.isPresent());
-                assertEquals(2, firstRecipe.get().getIngredients().size());
-                assertTrue(firstRecipe
-                                .get()
-                                .getIngredients()
-                                .stream()
-                                .anyMatch(v -> v.getIngredientRef() == yogurt.getId()));
-                assertTrue(firstRecipe
-                                .get()
-                                .getIngredients()
-                                .stream()
-                                .anyMatch(v -> v.getIngredientRef() == sugar.getId()));
-                assertEquals(sugaredYogurt, firstRecipe.get());
+        public void addRecipe() throws InvalidRecipeError, InvalidIngredientError {
+            recipeService.setIngredient(yogurt);
+            recipeService.setIngredient(sugar);
+            recipeService.setRecipe(sugaredYogurt);
+            assertEquals(1, recipeService.getState().recipes().size());
+            assertEquals(2, recipeService.getState().ingredients().size());
+            var firstRecipe = recipeService
+                    .getState()
+                    .recipes()
+                    .stream()
+                    .findFirst();
+            assertTrue(firstRecipe.isPresent());
+            assertEquals(2, firstRecipe.get().getIngredients().size());
+            assertTrue(firstRecipe
+                    .get()
+                    .getIngredients()
+                    .stream()
+                    .anyMatch(v -> v.getIngredientRef() == yogurt.getId()));
+            assertTrue(firstRecipe
+                    .get()
+                    .getIngredients()
+                    .stream()
+                    .anyMatch(v -> v.getIngredientRef() == sugar.getId()));
+            assertEquals(sugaredYogurt, firstRecipe.get());
+        }
+
+    @Test
+        public void loadRecipes() throws InvalidRecipeError, InvalidIngredientError {
+            when(ingredientRepository.findAll()).thenReturn(
+                    List.of(yogurt, sugar));
+            when(recipeRepository.findAll()).thenReturn(
+                    List.of(sugaredYogurt));
+            var loadedService = new RecipeService(recipeRepository, ingredientRepository, webSocketHub);
+
+            recipeService.setIngredient(yogurt);
+            recipeService.setIngredient(sugar);
+            recipeService.setRecipe(sugaredYogurt);
+
+            assertEquals(recipeService.getState(), loadedService.getState());
         }
 
         @Test
-        public void loadRecipes() throws InvalidRecipeError {
-                when(ingredientRepository.findAll()).thenReturn(
-                                List.of(yogurt, sugar));
-                when(recipeRepository.findAll()).thenReturn(
-                                List.of(sugaredYogurt));
-                var loadedService = new RecipeService(recipeRepository, ingredientRepository, webSocketHub);
-
-                recipeService.setIngredient(yogurt);
-                recipeService.setIngredient(sugar);
-                recipeService.setRecipe(sugaredYogurt);
-
-                assertEquals(recipeService.getState(), loadedService.getState());
-        }
-
-        @Test
-        public void deleteRecipe() throws InvalidRecipeError {
+        public void deleteRecipe() throws InvalidRecipeError, InvalidIngredientError {
                 recipeService.setIngredient(yogurt);
                 recipeService.setIngredient(sugar);
                 recipeService.setRecipe(sugaredYogurt);
@@ -136,7 +141,7 @@ public class RecipeServiceTest {
                 assertTrue(recipeService.getState().recipes().isEmpty());
                 verify(recipeRepository).deleteById(sugaredYogurt.getId());
                 verify(webSocketHub).broadcastRecipeDelete(sugaredYogurt.getId());
-                verify(webSocketHub, atLeastOnce()).broadcastTitleUpdate(any());
+                verify(webSocketHub, atLeastOnce()).broadcastStateUpdate(any());
         }
 
         @Test

@@ -79,6 +79,9 @@ public class AddRecipeCtrl implements Internationalizable {
     private final StringProperty cancelProperty = new SimpleStringProperty();
     @FXML private Button cancelButton;
 
+    private final StringProperty editProperty = new SimpleStringProperty();
+    private final StringProperty saveProperty = new SimpleStringProperty();
+
     private Recipe editingRecipe;
 
     private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
@@ -214,6 +217,8 @@ public class AddRecipeCtrl implements Internationalizable {
         portionsProperty.set(resourceBundle.getString("txt.portions"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+        editProperty.set(resourceBundle.getString("txt.edit"));
+        saveProperty.set(resourceBundle.getString("txt.save"));
 
         refreshSelectLanguage();
     }
@@ -233,6 +238,19 @@ public class AddRecipeCtrl implements Internationalizable {
      * And after clear all fields and main app stops showing add recipe panel
      */
     public void clickDone() {
+        boolean isEditing = preparationList.getChildren().stream()
+                .map(node -> (HBox) node)
+                .anyMatch(hbox -> hbox.getChildren().getFirst() instanceof TextArea);
+
+        if (isEditing) {
+            var alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText(null);
+            alert.setContentText("Please save or cancel your preparation step before finishing.");
+            alert.showAndWait();
+            return;
+        }
+
         Recipe r;
         try {
             r = getRecipe();
@@ -481,16 +499,41 @@ public class AddRecipeCtrl implements Internationalizable {
         textFlow.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(textFlow, Priority.ALWAYS);
 
+        TextArea editField = new TextArea(text);
+        HBox.setHgrow(editField, Priority.ALWAYS);
+
+        Button editButton = new Button();
+        editButton.textProperty().bind(editProperty);
         Button up = new Button("↑");
         Button down = new Button("↓");
         Button delete = new Button("-");
 
-        HBox buttonGroup = new HBox(5, up, down, delete);
+        HBox buttonGroup = new HBox(5, editButton, up, down, delete);
         buttonGroup.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(buttonGroup, Priority.NEVER);
 
         item.getChildren().addAll(textFlow, buttonGroup);
 
+        editButton.setOnAction(e -> {
+            if (item.getChildren().contains(textFlow)) { // edit mode
+                editField.setText(((Text) textFlow.getChildren().getFirst()).getText());
+                item.getChildren().set(0, editField);
+                editButton.textProperty().bind(saveProperty);
+                editField.requestFocus();
+            } else { // display mode
+                String newText = editField.getText();
+                ((Text) textFlow.getChildren().getFirst()).setText(newText);
+                item.getChildren().set(0, textFlow);
+                editButton.textProperty().bind(editProperty);
+            }
+        });
+
+        editField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB) {
+                event.consume();
+                editButton.requestFocus();
+            }
+        });
         up.setOnAction(e -> moveUp(item));
         down.setOnAction(e -> moveDown(item));
         delete.setOnAction(e -> preparationList.getChildren().remove(item));
