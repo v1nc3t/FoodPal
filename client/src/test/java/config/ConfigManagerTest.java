@@ -3,7 +3,6 @@ package config;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -138,7 +137,7 @@ class ConfigManagerTest {
         // This should trigger the catch block, which calls createDefaultConfig()
         manager.load();
 
-        assertEquals("http://localhost:8080", manager.getConfig().getServerAddress(), "Should reset to defaults");
+        assertEquals("http://localhost:8080/", manager.getConfig().getServerAddress(), "Should reset to defaults");
     }
 
     @Test
