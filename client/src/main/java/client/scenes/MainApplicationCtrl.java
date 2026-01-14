@@ -8,6 +8,7 @@ import client.utils.ServerUtils;
 import commons.Ingredient;
 import commons.Language;
 import com.google.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -249,6 +250,8 @@ public class MainApplicationCtrl implements Internationalizable {
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
+
+        Platform.runLater(this::refresh);
     }
 
     /**

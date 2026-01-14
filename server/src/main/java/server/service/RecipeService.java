@@ -11,6 +11,7 @@ import server.database.RecipeRepository;
 import server.websocket.WebSocketHub;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 /// Service that keeps track of recipes
@@ -86,5 +87,16 @@ public class RecipeService implements IRecipeService {
         if (ingredients.remove(ingredientId) != null) {
             ingredientRepository.deleteById(ingredientId);
         }
+
+        for (Recipe recipe : recipes.values()) {
+            boolean wasModified = recipe.getIngredients().removeIf(ir ->
+                    Objects.equals(ir.getIngredientRef(), ingredientId));
+
+            if (wasModified) {
+                recipeRepository.save(recipe);
+                // webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
+            }
+        }
+        // webSocketHub.broadcastTitleUpdate(getState());
     }
 }
