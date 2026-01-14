@@ -238,6 +238,19 @@ public class AddRecipeCtrl implements Internationalizable {
      * And after clear all fields and main app stops showing add recipe panel
      */
     public void clickDone() {
+        boolean isEditing = preparationList.getChildren().stream()
+                .map(node -> (HBox) node)
+                .anyMatch(hbox -> hbox.getChildren().getFirst() instanceof TextArea);
+
+        if (isEditing) {
+            var alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText(null);
+            alert.setContentText("Please save or cancel your preparation step before finishing.");
+            alert.showAndWait();
+            return;
+        }
+
         Recipe r;
         try {
             r = getRecipe();
