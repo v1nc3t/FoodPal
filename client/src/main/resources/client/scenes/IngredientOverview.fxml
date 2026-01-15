@@ -28,6 +28,9 @@
       </TableView>
       <HBox alignment="CENTER_RIGHT" spacing="10.0">
          <children>
+            <Button mnemonicParsing="false" onAction="#addItem" text="Add Item" />
+            <Button mnemonicParsing="false" onAction="#removeItem" text="Remove Item" />
+            <Region HBox.hgrow="ALWAYS" />
             <Button mnemonicParsing="false" onAction="#cancel" text="Cancel" />
             <Button mnemonicParsing="false" onAction="#confirm" text="Add to Shopping List" />
          </children>

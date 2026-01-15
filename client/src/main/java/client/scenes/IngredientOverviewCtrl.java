@@ -14,6 +14,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
 import java.util.List;
+import javafx.scene.control.TextInputDialog;
 
 public class IngredientOverviewCtrl {
 
@@ -110,6 +111,35 @@ public class IngredientOverviewCtrl {
             // Or maybe 1? Let's use 0 quantity and the whole string as description for
             // safety:)
             return new Amount(0, input);
+        }
+    }
+
+    @FXML
+    private void addItem() {
+        TextInputDialog nameDialog = new TextInputDialog();
+        nameDialog.setTitle("Add Item");
+        nameDialog.setHeaderText("Enter item name:");
+        nameDialog.setContentText("Name:");
+
+        nameDialog.showAndWait().ifPresent(name -> {
+            TextInputDialog amountDialog = new TextInputDialog("1");
+            amountDialog.setTitle("Add Item");
+            amountDialog.setHeaderText("Enter amount (e.g., '1 kg', '2 pieces'):");
+            amountDialog.setContentText("Amount:");
+
+            amountDialog.showAndWait().ifPresent(amountStr -> {
+                Amount amount = parseAmount(amountStr);
+                ShoppingListItem newItem = new ShoppingListItem(name, amount);
+                ingredientsTable.getItems().add(newItem);
+            });
+        });
+    }
+
+    @FXML
+    private void removeItem() {
+        ShoppingListItem selected = ingredientsTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            ingredientsTable.getItems().remove(selected);
         }
     }
 }
