@@ -31,7 +31,7 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private ChoiceBox<String> orderBy;
     private final StringProperty alphabeticalProperty = new SimpleStringProperty();
-    private final StringProperty recentProperty = new SimpleStringProperty();
+    private final StringProperty reverseAlphabeticalProperty = new SimpleStringProperty();
 
     @FXML
     private ComboBox<Language> languageOptions;
@@ -153,13 +153,13 @@ public class MainApplicationCtrl implements Internationalizable {
         ingredientToggleTextProperty.set(resourceBundle.getString("txt.ingredient"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
-        recentProperty.set(resourceBundle.getString("txt.recent"));
+        reverseAlphabeticalProperty.set(resourceBundle.getString("txt.reverse_alphabetical"));
 
         if (orderBy != null) {
             int selectedIndex = orderBy.getSelectionModel().getSelectedIndex();
             orderBy.getItems().setAll(
                     alphabeticalProperty.get(),
-                    recentProperty.get());
+                    reverseAlphabeticalProperty.get());
             orderBy.getSelectionModel().select(selectedIndex >= 0 ? selectedIndex : 0);
         }
 
@@ -380,8 +380,20 @@ public class MainApplicationCtrl implements Internationalizable {
         categoryToggleGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
             if (newValue == recipeToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Recipe);
+                cloneButton.setDisable(false);
+                favouriteButton.setDisable(false);
+                onlyShowFavouritesToggle.setDisable(false);
+                englishFilter.setDisable(false);
+                dutchFilter.setDisable(false);
+                germanFilter.setDisable(false);
             } else if  (newValue == ingredientToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Ingredient);
+                cloneButton.setDisable(true);
+                favouriteButton.setDisable(true);
+                onlyShowFavouritesToggle.setDisable(true);
+                englishFilter.setDisable(true);
+                dutchFilter.setDisable(true);
+                germanFilter.setDisable(true);
             }
         });
     }
@@ -392,7 +404,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private void prepareSortBy() {
         orderBy.getItems().setAll(
                 alphabeticalProperty.get(),
-                recentProperty.get());
+                reverseAlphabeticalProperty.get());
         orderBy.setValue(alphabeticalProperty.get());
     }
 
@@ -411,8 +423,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
             if (newValue.equals(alphabeticalProperty.get())) {
                 sidebarListCtrl.setSortMethod("Alphabetical");
-            } else if (newValue.equals(recentProperty.get())) {
-                sidebarListCtrl.setSortMethod("Most recent");
+            } else if (newValue.equals(reverseAlphabeticalProperty.get())) {
+                sidebarListCtrl.setSortMethod("Reverse alphabetical");
             }
         });
         // if the currently shown recipe disappears, close viewer.
