@@ -75,7 +75,7 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     @Inject
     public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
-                            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
+            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
         this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
         this.recipeManager = recipeManager;
@@ -201,7 +201,8 @@ public class RecipeViewerCtrl implements Internationalizable {
     @FXML
     private void addToShoppingList() {
         if (currentRecipe != null) {
-            shoppingListManager.addRecipe(currentRecipe);
+            var items = shoppingListManager.getRecipeItems(currentRecipe);
+            mainCtrl.showIngredientOverview(items);
         }
     }
 }
