@@ -93,29 +93,46 @@ public class ShoppingListManager {
     public void addRecipe(Recipe recipe) {
         if (recipe == null)
             return;
+
+        List<ShoppingListItem> newItems = getRecipeItems(recipe);
+        addItems(newItems);
+    }
+
+    public List<ShoppingListItem> getRecipeItems(Recipe recipe) {
+        List<ShoppingListItem> itemsList = new ArrayList<>();
+        if (recipe == null)
+            return itemsList;
+
         List<RecipeIngredient> ingredients = recipe.getIngredients();
         if (ingredients == null)
+            return itemsList;
+
+        for (RecipeIngredient ri : ingredients) {
+            ShoppingListItem item = new ShoppingListItem(
+                    ri.getIngredientRef(),
+                    ri.getAmount(),
+                    recipe.getId());
+
+            // Snapshot the name for persistence
+            try {
+                var ingredient = recipeManager.getIngredient(ri);
+                if (ingredient != null) {
+                    item.setCustomName(ingredient.getName());
+                }
+            } catch (Exception e) {
+                // fall back to unknown/null customName
+            }
+            itemsList.add(item);
+        }
+        return itemsList;
+    }
+
+    public void addItems(List<ShoppingListItem> newItems) {
+        if (newItems == null || newItems.isEmpty())
             return;
 
         runOnFx(() -> {
-            for (RecipeIngredient ri : ingredients) {
-                ShoppingListItem item = new ShoppingListItem(
-                        ri.getIngredientRef(),
-                        ri.getAmount(),
-                        recipe.getId());
-
-                // Snapshot the name for persistence
-                try {
-                    var ingredient = recipeManager.getIngredient(ri);
-                    if (ingredient != null) {
-                        item.setCustomName(ingredient.getName());
-                    }
-                } catch (Exception e) {
-                    // fall back to unknown/null customName
-                }
-
-                items.add(item);
-            }
+            items.addAll(newItems);
             saveToConfig();
         });
     }
