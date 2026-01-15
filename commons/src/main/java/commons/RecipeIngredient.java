@@ -60,5 +60,14 @@ public class RecipeIngredient {
     public int hashCode() {
         return Objects.hash(ingredientRef, amount);
     }
-    
+    public RecipeIngredient scale(double factor) {
+        return new RecipeIngredient(
+                this.ingredientRef,
+                this.amount.scale(factor)
+        );
+    }
+    public double getGrams() {
+        return amount.toGrams();
+    }
+
 }

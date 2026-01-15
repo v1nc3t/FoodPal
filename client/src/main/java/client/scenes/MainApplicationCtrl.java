@@ -34,7 +34,7 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private ChoiceBox<String> orderBy;
     private final StringProperty alphabeticalProperty = new SimpleStringProperty();
-    private final StringProperty recentProperty = new SimpleStringProperty();
+    private final StringProperty reverseAlphabeticalProperty = new SimpleStringProperty();
 
     @FXML
     private ComboBox<Language> languageOptions;
@@ -156,13 +156,13 @@ public class MainApplicationCtrl implements Internationalizable {
         ingredientToggleTextProperty.set(resourceBundle.getString("txt.ingredient"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
-        recentProperty.set(resourceBundle.getString("txt.recent"));
+        reverseAlphabeticalProperty.set(resourceBundle.getString("txt.reverse_alphabetical"));
 
         if (orderBy != null) {
             int selectedIndex = orderBy.getSelectionModel().getSelectedIndex();
             orderBy.getItems().setAll(
                     alphabeticalProperty.get(),
-                    recentProperty.get());
+                    reverseAlphabeticalProperty.get());
             orderBy.getSelectionModel().select(selectedIndex >= 0 ? selectedIndex : 0);
         }
 
@@ -212,6 +212,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
         prepareLanguageOptions();
         prepareSortBy();
+        prepareSearchField();
+
         sidebarListCtrl.initialize();
 
         sidebarListCtrl.setListView(sidebarListView);
@@ -250,6 +252,19 @@ public class MainApplicationCtrl implements Internationalizable {
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
+    }
+
+    private void prepareSearchField() {
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            sidebarListCtrl.setSearchQuery(newValue);
+        });
+
+        searchField.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                searchField.clear(); // This triggers the listener above with ""
+                contentPane.requestFocus(); // Optional: move focus away from search
+            }
+        });
     }
 
     /**
@@ -374,8 +389,20 @@ public class MainApplicationCtrl implements Internationalizable {
         categoryToggleGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
             if (newValue == recipeToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Recipe);
-            } else if (newValue == ingredientToggleButton) {
+                cloneButton.setDisable(false);
+                favouriteButton.setDisable(false);
+                onlyShowFavouritesToggle.setDisable(false);
+                englishFilter.setDisable(false);
+                dutchFilter.setDisable(false);
+                germanFilter.setDisable(false);
+            } else if  (newValue == ingredientToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Ingredient);
+                cloneButton.setDisable(true);
+                favouriteButton.setDisable(true);
+                onlyShowFavouritesToggle.setDisable(true);
+                englishFilter.setDisable(true);
+                dutchFilter.setDisable(true);
+                germanFilter.setDisable(true);
             }
         });
     }
@@ -386,7 +413,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private void prepareSortBy() {
         orderBy.getItems().setAll(
                 alphabeticalProperty.get(),
-                recentProperty.get());
+                reverseAlphabeticalProperty.get());
         orderBy.setValue(alphabeticalProperty.get());
     }
 
@@ -405,8 +432,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
             if (newValue.equals(alphabeticalProperty.get())) {
                 sidebarListCtrl.setSortMethod("Alphabetical");
-            } else if (newValue.equals(recentProperty.get())) {
-                sidebarListCtrl.setSortMethod("Most recent");
+            } else if (newValue.equals(reverseAlphabeticalProperty.get())) {
+                sidebarListCtrl.setSortMethod("Reverse alphabetical");
             }
         });
         // if the currently shown recipe disappears, close viewer.
@@ -538,10 +565,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * Search field for users to search up items/recipes from ist
      */
     public void search() {
-        String query = searchField.getText();
-
-        // To be implemented once server side is done.
-        System.out.println("Searching for '" + query);
+        sidebarListCtrl.setSearchQuery(searchField.getText());
     }
 
     public void editRecipe(Recipe recipe) {
