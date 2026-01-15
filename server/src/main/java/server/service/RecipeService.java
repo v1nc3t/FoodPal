@@ -1,9 +1,6 @@
 package server.service;
 
-import commons.Ingredient;
-import commons.InvalidRecipeError;
-import commons.Recipe;
-import commons.RecipeState;
+import commons.*;
 import org.springframework.stereotype.Service;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
@@ -15,7 +12,7 @@ import java.util.UUID;
 /// Service that keeps track of recipes
 @Service
 public class RecipeService implements IRecipeService {
-    private final HashMap<UUID, Recipe> recipes =  new HashMap<>();
+    private final HashMap<UUID, Recipe> recipes = new HashMap<>();
     private final HashMap<UUID, Ingredient> ingredients = new HashMap<>();
 
     private final RecipeRepository recipeRepository;
@@ -23,8 +20,8 @@ public class RecipeService implements IRecipeService {
     private final WebSocketHub webSocketHub;
 
     public RecipeService(RecipeRepository recipeRepository,
-                         IngredientRepository ingredientRepository,
-                         WebSocketHub webSocketHub) {
+            IngredientRepository ingredientRepository,
+            WebSocketHub webSocketHub) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.webSocketHub = webSocketHub;
@@ -52,23 +49,41 @@ public class RecipeService implements IRecipeService {
         if (recipe
                 .getIngredients()
                 .stream()
-                .anyMatch(ingredient ->
-                        !ingredients.containsKey(ingredient.getIngredientRef())
-                )
-        )
+                .anyMatch(ingredient -> !ingredients.containsKey(ingredient.getIngredientRef())))
             throw new InvalidRecipeError();
         recipes.put(recipe.getId(), recipe);
         recipeRepository.save(recipe);
 
         webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
-        webSocketHub.broadcastTitleUpdate(getState());
+        webSocketHub.broadcastStateUpdate(getState());
     }
 
     @Override
-    public void setIngredient(Ingredient ingredient) {
+    public void setIngredient(Ingredient ingredient) throws InvalidIngredientError {
+        if (ingredient == null) {
+            throw new InvalidIngredientError();
+        }
         ingredients.put(ingredient.getId(), ingredient);
         ingredientRepository.save(ingredient);
 
-        webSocketHub.broadcastTitleUpdate(getState());
+        webSocketHub.broadcastIngredientUpdate(ingredient.getId(), ingredient);
+        // also broadcast changes to relevant recipes
+        recipes.values().stream().filter(
+                recipe -> recipe.getIngredients()
+                                .stream()
+                                .anyMatch(ri -> ri.getIngredientRef().equals(ingredient.getId())))
+                .forEach(recipe -> webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe));
+
+        webSocketHub.broadcastStateUpdate(getState());
+    }
+
+    @Override
+    public void deleteRecipe(UUID recipeId) {
+        if (recipes.remove(recipeId) != null) {
+            recipeRepository.deleteById(recipeId);
+
+            webSocketHub.broadcastRecipeDelete(recipeId);
+            webSocketHub.broadcastStateUpdate(getState());
+        }
     }
 }

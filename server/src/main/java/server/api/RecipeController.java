@@ -1,17 +1,17 @@
 package server.api;
 
-import commons.Ingredient;
-import commons.InvalidRecipeError;
-import commons.Recipe;
-import commons.RecipeState;
+import commons.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import server.service.IRecipeService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/recipes")
 public class RecipeController {
     private final IRecipeService recipeService;
+
     /// Creates a Recipe RestController which uses the provided interface service
     /// for resolving requests.
     ///
@@ -31,7 +31,12 @@ public class RecipeController {
     }
 
     @PostMapping(path = "/ingredient", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void setIngredient(@RequestBody Ingredient ingredient) {
+    public void setIngredient(@RequestBody Ingredient ingredient) throws InvalidIngredientError {
         recipeService.setIngredient(ingredient);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteRecipe(@PathVariable UUID id) {
+        recipeService.deleteRecipe(id);
     }
 }
