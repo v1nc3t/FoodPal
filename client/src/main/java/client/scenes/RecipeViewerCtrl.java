@@ -165,6 +165,12 @@ public class RecipeViewerCtrl implements Internationalizable {
 
         languageSuffixProperty.set(recipe.getLanguage().proper());
         titleProperty.set(recipe.getTitle());
+        setPreparationList(recipe);
+
+        double kcal = recipe.getCaloriesPerPortion(
+                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
+        );
+        caloriesProperty.set(String.format("%.1f kcal", kcal));
 
         boolean scaled = recipeManager.isScaled(recipe.getId());
 
@@ -176,20 +182,16 @@ public class RecipeViewerCtrl implements Internationalizable {
         resetScaleButton.setDisable(!scaled);
         scaleDownButton.setDisable(calculateScaledPortions() < 2);
 
+        double scaleFactor = 0;
         if (scaled) {
             portionsValueProperty.set("~" + calculateScaledPortions());
+            scaleFactor = calculateScaledPortions() / (double) recipe.getPortions();
+            setIngredientsList(recipe, scaleFactor);
         }
         else {
             portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
+            setIngredientsList(recipe);
         }
-
-        setIngredientsList(recipe);
-        setPreparationList(recipe);
-
-        double kcal = recipe.getCaloriesPerPortion(
-                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
-        );
-        caloriesProperty.set(String.format("%.1f kcal", kcal));
     }
 
     /**
@@ -205,6 +207,23 @@ public class RecipeViewerCtrl implements Internationalizable {
                 Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
                 ingredientsList.getItems().add(ingredient.getName() + " | " +
                         recipeIngredient.getAmount().toPrettyString());
+            }
+        }
+    }
+
+    /**
+     * This sets the ingredients with a scaling factor.
+     * @param recipe the recipe
+     * @param scaleFactor the scaling factor
+     */
+    private void setIngredientsList(Recipe recipe, double scaleFactor) {
+        ingredientsList.getItems().clear();
+        var ingredients = recipe.getIngredients();
+        if (ingredients != null) {
+            for (var recipeIngredient : ingredients) {
+                Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
+                ingredientsList.getItems().add(ingredient.getName() + " | " +
+                        recipeIngredient.getAmount().scale(scaleFactor).toNormalizedString());
             }
         }
     }

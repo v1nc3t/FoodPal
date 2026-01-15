@@ -82,5 +82,53 @@ public class AmountTest {
         assertEquals(240, a.toGrams());
     }
 
+    @Test
+    void gramNormalizationWorks() {
+        Amount grams = new Amount(100, Unit.GRAM);
+        assertEquals(0.1, grams.toNormalizedAmount());
+    }
+
+    @Test
+    void teaspoonNormalizationWorks() {
+        Amount teaspoons = new Amount(50, Unit.TEASPOON);
+        assertEquals(0.25, teaspoons.toNormalizedAmount());
+    }
+
+    @Test
+    void gramUnitNormalizationWorks() {
+        Amount grams = new Amount(100, Unit.GRAM);
+        assertEquals(Unit.KILOGRAM, grams.toNormalizedUnit());
+    }
+
+    @Test
+    void cupUnitNormalizationWorks() {
+        Amount cups = new Amount(1, Unit.CUP);
+        assertEquals(Unit.LITER, cups.toNormalizedUnit());
+    }
+
+    @Test
+    void testPrettyStringRepresentationFormal() {
+        String expected = "2.0 CUP";
+        assertEquals(expected, formalAmount.toPrettyString(), "Expected a different string representation of a formal amount.");
+    }
+
+    @Test
+    void testPrettyStringRepresentationInformal() {
+        String expected = "1.0 a pinch";
+        assertEquals(expected, informalAmount.toPrettyString(), "Expected a different string representation of an informal amount.");
+    }
+
+    @Test
+    void testNormalizedStringRepresentationFormal() {
+        String expected = "0.48 LITER";
+        assertEquals(expected, formalAmount.toNormalizedString(), "Expected a different normalization of the formal amount CUP.");
+    }
+
+    @Test
+    void testNormalizedStringRepresentationInformal() {
+        String expected = "1.0 a pinch";
+        assertEquals(expected, informalAmount.toNormalizedString(), "Informal amounts do not need to be normalized.");
+    }
+
 
 }

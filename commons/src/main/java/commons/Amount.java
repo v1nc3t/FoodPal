@@ -38,7 +38,18 @@ public record Amount( double quantity,
         if (unit != null && description == null)
             return quantity + " " + unit.name();
         else
-            return quantity + " " + description();
+            return quantity + " " + description;
+    }
+
+    /**
+     * Returns a pretty string representation of the amount, normalized in kilograms or liters.
+     * @return normalized (kg or L) human-readable string of the amount
+     */
+    public String toNormalizedString() {
+        if (unit != null && description == null)
+            return toNormalizedAmount() + " " + toNormalizedUnit().name();
+        else
+            return quantity + " " + description;
     }
 
     @Override
@@ -48,7 +59,8 @@ public record Amount( double quantity,
         Amount that = (Amount) obj;
         return quantity == that.quantity &&
                ((unit == null && that.unit == null) || (unit != null && unit.equals(that.unit))) &&
-               ((description == null && that.description == null) || (description != null && description.equals(that.description)));
+               ((description == null && that.description == null)
+                       || (description != null && description.equals(that.description)));
     }
 
     @Override
@@ -68,14 +80,42 @@ public record Amount( double quantity,
 
         return switch (unit) {
             case GRAM -> quantity;
+            case LITER -> quantity * 1000;
             case MILLILITER -> quantity;
             case TABLESPOON -> quantity * 15;
             case TEASPOON -> quantity * 5;
             case CUP -> quantity * 240;
             case KILOGRAM -> quantity * 1000;
-            default -> quantity;
         };
     }
 
+    /**
+     * Returns the amount in normalized (kilograms or liters) units.
+     * @return the amount in kilograms or liters
+     */
+    public double toNormalizedAmount() {
+        if (unit == null) {
+            return quantity;
+        }
 
+        return switch (unit) {
+            case GRAM -> quantity / 1000;
+            case LITER -> quantity;
+            case MILLILITER -> quantity / 1000;
+            case TABLESPOON -> (quantity * 15) / 1000;
+            case TEASPOON -> (quantity * 5) / 1000;
+            case CUP -> (quantity * 240) / 1000;
+            case KILOGRAM -> quantity;
+        };
+    }
+
+    /**
+     * Returns the normalized unit (kilograms or liters) of the amount unit.
+     * @return {@link Unit#KILOGRAM} if the unit is {@link Unit#GRAM} or {@link Unit#KILOGRAM},
+     * {@link Unit#LITER} otherwise.
+     */
+    public Unit toNormalizedUnit() {
+        if (unit == Unit.GRAM || unit == Unit.KILOGRAM) return Unit.KILOGRAM;
+        return Unit.LITER;
+    }
 }
