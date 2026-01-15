@@ -111,7 +111,8 @@ public class ShoppingListManager {
             ShoppingListItem item = new ShoppingListItem(
                     ri.getIngredientRef(),
                     ri.getAmount(),
-                    recipe.getId());
+                    recipe.getId(),
+                    recipe.getTitle());
 
             // Snapshot the name for persistence
             try {
