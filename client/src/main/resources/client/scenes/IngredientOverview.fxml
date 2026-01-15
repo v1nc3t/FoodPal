@@ -20,6 +20,7 @@
         <columns>
           <TableColumn fx:id="nameColumn" prefWidth="300.0" text="Ingredient" />
           <TableColumn fx:id="amountColumn" prefWidth="150.0" text="Amount" />
+          <TableColumn fx:id="sourceColumn" prefWidth="150.0" text="Source Recipe" />
         </columns>
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

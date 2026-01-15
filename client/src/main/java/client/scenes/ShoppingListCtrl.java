@@ -144,6 +144,10 @@ public class ShoppingListCtrl implements Internationalizable {
                     }
                 }
 
+                if (item.getSourceRecipeName() != null) {
+                    name += " (from " + item.getSourceRecipeName() + ")";
+                }
+
                 Label nameLabel = new Label(name);
                 Label amountLabel = new Label(item.getAmount() != null ? item.getAmount().toPrettyString() : "");
 
@@ -220,7 +224,7 @@ public class ShoppingListCtrl implements Internationalizable {
         ShoppingListItem newItem;
         if (item.getIngredientId() != null && newName.equals(currentName)) {
             newItem = new ShoppingListItem(item.getIngredientId(), new Amount(quantity, unit),
-                    item.getSourceRecipeId());
+                    item.getSourceRecipeId(), item.getSourceRecipeName());
         } else {
             newItem = new ShoppingListItem(newName, new Amount(quantity, unit));
         }

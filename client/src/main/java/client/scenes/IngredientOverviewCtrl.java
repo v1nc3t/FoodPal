@@ -25,6 +25,8 @@ public class IngredientOverviewCtrl {
     private TableColumn<ShoppingListItem, String> nameColumn;
     @FXML
     private TableColumn<ShoppingListItem, String> amountColumn;
+    @FXML
+    private TableColumn<ShoppingListItem, String> sourceColumn;
 
     private Stage stage;
 
@@ -44,6 +46,11 @@ public class IngredientOverviewCtrl {
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setOnEditCommit(event -> {
             event.getRowValue().setCustomName(event.getNewValue());
+        });
+
+        sourceColumn.setCellValueFactory(item -> {
+            String source = item.getValue().getSourceRecipeName();
+            return new SimpleStringProperty(source == null ? "" : source);
         });
 
         amountColumn.setCellValueFactory(item -> {
