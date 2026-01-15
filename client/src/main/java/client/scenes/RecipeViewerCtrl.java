@@ -155,27 +155,41 @@ public class RecipeViewerCtrl implements Internationalizable {
      * @param recipe the recipe
      */
     public void setRecipe(Recipe recipe) {
-        this.currentRecipe = recipe;
-
         if (recipe == null) {
             titleProperty.set("");
             ingredientsList.getItems().clear();
             preparationList.getItems().clear();
             return;
         }
+        this.currentRecipe = recipe;
 
         languageSuffixProperty.set(recipe.getLanguage().proper());
-        portionsValueProperty.set(String.valueOf(recipe.getPortions()));
         titleProperty.set(recipe.getTitle());
+
+        boolean scaled = recipeManager.isScaled(recipe.getId());
+
+        if (scaled && calculateScaledPortions() < 1) {
+            recipeManager.removeScaledRecipe(recipe.getId());
+            scaled = false;
+        }
+
+        resetScaleButton.setDisable(!scaled);
+        scaleDownButton.setDisable(calculateScaledPortions() < 2);
+
+        if (scaled) {
+            portionsValueProperty.set("~" + calculateScaledPortions());
+        }
+        else {
+            portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
+        }
+
         setIngredientsList(recipe);
         setPreparationList(recipe);
+
         double kcal = recipe.getCaloriesPerPortion(
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
-
         caloriesProperty.set(String.format("%.1f kcal", kcal));
-
-
     }
 
     /**
@@ -237,4 +251,56 @@ public class RecipeViewerCtrl implements Internationalizable {
         }
     }
 
+    /**
+     * Scales up the recipe by 1 portion
+     */
+    @FXML
+    private void scaleUpRecipe() {
+        if (recipeManager.isScaled(currentRecipe.getId())) {
+            int newScaledPortions = recipeManager.getRecipeScale(currentRecipe.getId()) + 1;
+            recipeManager.setScaledRecipe(currentRecipe.getId(), newScaledPortions);
+        }
+        else {
+            recipeManager.setScaledRecipe(currentRecipe.getId(), 1);
+        }
+
+        setRecipe(currentRecipe);
+    }
+
+    /**
+     * Scales down the recipe by 1 portion, if possible
+     */
+    @FXML
+    private void scaleDownRecipe() {
+        if (calculateScaledPortions() >= 2) {
+            if (recipeManager.isScaled(currentRecipe.getId())) {
+                int newScaledPortions = recipeManager.getRecipeScale(currentRecipe.getId()) - 1;
+                recipeManager.setScaledRecipe(currentRecipe.getId(), newScaledPortions);
+            }
+            else {
+                recipeManager.setScaledRecipe(currentRecipe.getId(), -1);
+            }
+        }
+
+        setRecipe(currentRecipe);
+    }
+
+    /**
+     * Resets the scaled portions of the current recipe
+     */
+    @FXML
+    private void resetScale() {
+        recipeManager.removeScaledRecipe(currentRecipe.getId());
+
+        setRecipe(currentRecipe);
+    }
+
+    /**
+     * Calculates the scaled portions of the current recipe
+     * @return scaled portions
+     */
+    private int calculateScaledPortions() {
+        if (!recipeManager.isScaled(currentRecipe.getId())) return currentRecipe.getPortions();
+        return currentRecipe.getPortions() + recipeManager.getRecipeScale(currentRecipe.getId());
+    }
 }

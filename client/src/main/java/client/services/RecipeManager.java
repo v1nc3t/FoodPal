@@ -13,13 +13,13 @@ import java.util.concurrent.CountDownLatch;
  * - Keeps maps for fast lookup and validation.
  * - Exposes an ObservableList for JavaFX views.
  * - Marshals UI updates onto the JavaFX thread.
- * Use RecipeManager.getInstance() to access the singleton.
  */
 public class RecipeManager {
 
     private final Map<UUID, Recipe> recipesMap = new ConcurrentHashMap<>();
     private final Map<UUID, Ingredient> ingredientsMap = new ConcurrentHashMap<>();
     private final Set<UUID> favouriteRecipes = new HashSet<>();
+    private final Map<UUID, Integer> scaledRecipesMap = new ConcurrentHashMap<>();
 
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipesFx = FXCollections.observableArrayList();
@@ -236,4 +236,47 @@ public class RecipeManager {
         return Set.copyOf(favouriteRecipes);
     }
 
+    /**
+     * Checks whether a recipe with a given id is scaled.
+     * @param id recipe UUID
+     * @return true if scaled, false otherwise
+     */
+    public boolean isScaled(UUID id) {
+        return scaledRecipesMap.containsKey(id);
+    }
+
+    /**
+     * Adds a scaled recipe entry to the map or updates the scale if the recipe already exists.
+     * Treats a scale of 0 as resetting the scale, therefore removing the recipe from the map.
+     * @param id recipe UUID
+     * @param scale integer number to be scaled by (in portion units)
+     */
+    public void setScaledRecipe(UUID id, Integer scale) {
+        if (scale == null) {
+            throw new IllegalArgumentException("Scale must be an integer");
+        }
+        if (scale == 0) {
+            removeScaledRecipe(id);
+        }
+        else {
+            scaledRecipesMap.put(id, scale);
+        }
+    }
+
+    /**
+     * Gets the scale of a scaled recipe.
+     * @param id recipe UUID
+     * @return the scale of the recipe
+     */
+    public Integer getRecipeScale(UUID id) {
+        return scaledRecipesMap.get(id);
+    }
+
+    /**
+     * Removes a scaled recipe entry from the map.
+     * @param id recipe UUID
+     */
+    public void removeScaledRecipe(UUID id) {
+        scaledRecipesMap.remove(id);
+    }
 }
