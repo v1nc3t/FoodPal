@@ -57,6 +57,22 @@ public class AmountTest {
     }
 
     @Test
+    public void testScaleAndNormalizeFormalAmount() {
+        Amount scaled = formalAmount.scaleAndNormalize(2.5);
+
+        assertEquals(1.2, scaled.quantity());
+        assertEquals(Unit.LITER, scaled.unit());
+    }
+
+    @Test
+    public void testScaleAndNormalizeInformalAmount() {
+        Amount scaled = informalAmount.scaleAndNormalize(3.0);
+
+        assertEquals(3.0, scaled.quantity());
+        assertEquals("a pinch", scaled.description());
+    }
+
+    @Test
     public void testScaleInformalAmount() {
         Amount scaled = informalAmount.scale(3.0);
 
@@ -108,13 +124,13 @@ public class AmountTest {
 
     @Test
     void testPrettyStringRepresentationFormal() {
-        String expected = "2.0 CUP";
+        String expected = "2 CUP";
         assertEquals(expected, formalAmount.toPrettyString(), "Expected a different string representation of a formal amount.");
     }
 
     @Test
     void testPrettyStringRepresentationInformal() {
-        String expected = "1.0 a pinch";
+        String expected = "1 a pinch";
         assertEquals(expected, informalAmount.toPrettyString(), "Expected a different string representation of an informal amount.");
     }
 
@@ -126,7 +142,7 @@ public class AmountTest {
 
     @Test
     void testNormalizedStringRepresentationInformal() {
-        String expected = "1.0 a pinch";
+        String expected = "1 a pinch";
         assertEquals(expected, informalAmount.toNormalizedString(), "Informal amounts do not need to be normalized.");
     }
 

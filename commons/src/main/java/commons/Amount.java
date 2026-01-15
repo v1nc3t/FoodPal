@@ -2,6 +2,10 @@ package commons;
 
 import jakarta.persistence.Embeddable;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
 @Embeddable
 public record Amount( double quantity,
                       Unit unit,
@@ -35,10 +39,12 @@ public record Amount( double quantity,
     }
 
     public String toPrettyString() {
+        DecimalFormat df = new DecimalFormat("0.###",
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
         if (unit != null && description == null)
-            return quantity + " " + unit.name();
+            return df.format(quantity) + " " + unit.name();
         else
-            return quantity + " " + description;
+            return df.format(quantity) + " " + description;
     }
 
     /**
@@ -46,10 +52,12 @@ public record Amount( double quantity,
      * @return normalized (kg or L) human-readable string of the amount
      */
     public String toNormalizedString() {
-        if (unit != null && description == null)
-            return toNormalizedAmount() + " " + toNormalizedUnit().name();
+        DecimalFormat df = new DecimalFormat("0.###",
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
+        if (toNormalizedUnit() != null && description == null)
+            return df.format(toNormalizedAmount()) + " " + toNormalizedUnit().name();
         else
-            return quantity + " " + description;
+            return df.format(quantity) + " " + description;
     }
 
     @Override
@@ -72,6 +80,9 @@ public record Amount( double quantity,
     }
     public Amount scale(double factor) {
         return new Amount(quantity * factor, unit, description);
+    }
+    public Amount scaleAndNormalize(double factor) {
+        return new Amount(toNormalizedAmount() * factor, toNormalizedUnit(), description);
     }
     public double toGrams() {
         if (unit == null) {
@@ -115,6 +126,7 @@ public record Amount( double quantity,
      * {@link Unit#LITER} otherwise.
      */
     public Unit toNormalizedUnit() {
+        if (unit == null) return null;
         if (unit == Unit.GRAM || unit == Unit.KILOGRAM) return Unit.KILOGRAM;
         return Unit.LITER;
     }

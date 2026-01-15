@@ -15,6 +15,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -170,7 +172,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         double kcal = recipe.getCaloriesPerPortion(
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
-        caloriesProperty.set(String.format("%.1f kcal", kcal));
+        DecimalFormat df = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
+        caloriesProperty.set(df.format(kcal) + " kcal");
 
         boolean scaled = recipeManager.isScaled(recipe.getId());
 
