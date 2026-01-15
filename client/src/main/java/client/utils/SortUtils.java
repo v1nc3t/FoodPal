@@ -241,7 +241,7 @@ public class SortUtils {
                         ListObject::name,
                         String.CASE_INSENSITIVE_ORDER
                 );
-            case "Most recent" ->
+            case "Reverse alphabetical" ->
                 Comparator.comparing(
                         ListObject::name,
                         String.CASE_INSENSITIVE_ORDER.reversed()

@@ -157,9 +157,9 @@ public class SidebarListCtrl {
                     }
                 }
             }
-            else if (cloneMode && onCloneRequest != null)
+            else if (cloneMode && onCloneRequest != null && currentMode == ESidebarMode.Recipe)
                 onCloneRequest.accept(recipeManager.getRecipe(sel.id()));
-            else if (favouriteMode) {
+            else if (favouriteMode && currentMode == ESidebarMode.Recipe) {
                 recipeManager.toggleFavourite(sel.id());
                 listView.refresh(); // redraw star
                 updateFavourites(recipeManager.getFavouriteRecipesSnapshot());
