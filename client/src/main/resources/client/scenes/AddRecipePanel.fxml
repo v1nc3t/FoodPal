@@ -15,11 +15,9 @@
          </children>
       </HBox>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
-         <children>
-             <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" />
-             <ComboBox fx:id="ingredientsComboBox" promptText="${controller.selectIngredientProperty}" HBox.hgrow="ALWAYS" />
-             <Button fx:id="addIngredientButton" mnemonicParsing="false" onAction="#clickAddIngredient" prefHeight="25.0" prefWidth="25.0" text="+" />
-         </children>
+         <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" />
+         <ComboBox fx:id="ingredientsComboBox" promptText="${controller.selectIngredientProperty}" HBox.hgrow="ALWAYS" />
+         <Button fx:id="addIngredientButton" mnemonicParsing="false" onAction="#clickAddIngredient" prefHeight="25.0" prefWidth="25.0" text="+" />
       </HBox>
        <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
          <content>

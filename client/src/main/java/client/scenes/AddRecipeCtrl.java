@@ -3,16 +3,10 @@ package client.scenes;
 import client.MyFXML;
 import client.services.LocaleManager;
 import client.utils.ServerUtils;
-
 import client.utils.TextFieldUtils;
-import commons.Ingredient;
-import commons.Language;
-import commons.Recipe;
-import commons.RecipeIngredient;
-
+import commons.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
-
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -31,7 +25,6 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
 import java.util.*;
 
 import client.services.RecipeManager;
@@ -117,7 +110,6 @@ public class AddRecipeCtrl implements Internationalizable {
     @FXML
     private void initialize() {
         bindElementsProperties();
-
         /* For UI testing purposes, since we don't have a button
          for language selection just yet, change this line
          if you want to visualize language changes.
@@ -130,32 +122,82 @@ public class AddRecipeCtrl implements Internationalizable {
 
         refreshSelectLanguage();
 
-        /*
-        // when user entered a prep step, clicking enter will add it to the list
-        preparationField.setOnAction(e -> {
-            if(!preparationField.getText().isBlank()) {
-                addPreparationButton.fire();
-            }
-        });
-         */
-
-
         preparationScrollPane.setFitToWidth(true);
-
         preparationList.setSpacing(5);
 
         ingredientsScrollPane.setFitToWidth(true);
-
         ingredientsList.setSpacing(5);
-
         /* Custom tab behavior: when focus is on preparation text-area,
         pressing tab will focus the add-preparation button */
         preparationField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.TAB) {
                 event.consume();          
-                addPreparationButton.requestFocus(); 
+                addPreparationButton.requestFocus();
             }
         });
+
+        initComboBox();
+    }
+
+    void initComboBox() {
+        ingredientsComboBox.setItems(recipeManager.getObservableIngredients().sorted());
+        ingredientsComboBox.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Ingredient ingredient, boolean empty) {
+                super.updateItem(ingredient, empty);
+                if (ingredient == null) {
+                    setText(ingredientsComboBox.getPromptText() + "gagha");
+                } else {
+                    setText(ingredient.getName());
+                }
+            }
+        });
+        // half hacky way to make the button always say the prompt text
+        ingredientsComboBox.setButtonCell(new ListCell<Ingredient>() {
+            @Override
+            protected void updateItem(Ingredient ingredient, boolean empty) {
+                super.updateItem(ingredient, empty);
+                if (empty || ingredient == null) {
+                    setText(ingredientsComboBox.getPromptText());
+                } else {
+                    setText(ingredient.getName());
+                }
+            }
+        });
+        ingredientsComboBox.valueProperty().addListener((_, _, ingredient) -> {
+            if (ingredient == null) return;
+            Platform.runLater(() -> {
+                ingredientsComboBox.getSelectionModel().clearSelection();
+                ingredientsComboBox.setValue(null);
+
+                var bundle = localeManager.getCurrentBundle();
+                Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
+                        bundle,"client", "scenes", "AddIngredient.fxml");
+
+                AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
+                var recipeIngredient = new RecipeIngredient(ingredient.getId(), new Amount(0, Unit.GRAM));
+                addIngredientCtrl.setIngredient(recipeIngredient);
+                Parent addIngredientRoot = addIngredientPair.getValue();
+
+                // waits for new ingredient to be made in popup
+                addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
+                    if (newIngredient == null) return;
+                    Platform.runLater(() -> {
+                        ingredients.add(newIngredient);
+                        refreshIngredientsList();
+                    });
+                });
+                var scene = new Scene(addIngredientRoot);
+                scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
+                Stage addIngredientStage = new Stage();
+                addIngredientStage.setTitle("Add Ingredient");
+                addIngredientStage.initModality(Modality.APPLICATION_MODAL);
+                addIngredientStage.setScene(scene);
+                addIngredientStage.setResizable(false);
+                addIngredientStage.showAndWait();
+            });
+        });
+
     }
 
     /**
@@ -307,7 +349,6 @@ public class AddRecipeCtrl implements Internationalizable {
         ingredients = new ArrayList<>();
 
         ingredientsComboBox.getSelectionModel().clearSelection();
-        ingredientsComboBox.getItems().clear();
 
         preparationList.getChildren().clear();
         editingRecipe = null;

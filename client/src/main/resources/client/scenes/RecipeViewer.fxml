@@ -43,6 +43,22 @@
                <Region HBox.hgrow="ALWAYS" />
                <Label fx:id="portionsLabel" text="${controller.portionsProperty}" />
                <Label fx:id="portionsValueLabel" text="${controller.portionsValueProperty}" />
+               <Button fx:id="scaleUpButton" mnemonicParsing="false" text="+" onAction="#scaleUpRecipe" >
+                   <BorderPane.margin>
+                       <Insets bottom="10.0" left="10.0" right="10.0" />
+                   </BorderPane.margin>
+               </Button>
+               <Button fx:id="scaleDownButton" mnemonicParsing="false" text="-" onAction="#scaleDownRecipe" >
+                   <BorderPane.margin>
+                       <Insets bottom="10.0" left="10.0" right="10.0" />
+                   </BorderPane.margin>
+               </Button>
+               <Button fx:id="resetScaleButton" mnemonicParsing="false" text="${controller.resetProperty}" onAction="#resetScale" >
+                   <BorderPane.margin>
+                       <Insets bottom="10.0" left="10.0" right="10.0" />
+                   </BorderPane.margin>
+               </Button>
+               <Label fx:id="servingSizeLabel" text="${controller.servingSizeProperty}" />
                <Label fx:id="caloriesLabel" />
                <Button fx:id="editButton" mnemonicParsing="false" onAction="#editRecipe" >
                    <BorderPane.margin>
