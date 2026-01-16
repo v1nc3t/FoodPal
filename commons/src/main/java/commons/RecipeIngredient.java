@@ -1,12 +1,14 @@
 package commons;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Embeddable;
 
 import java.util.Objects;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Embeddable
 public class RecipeIngredient {
     public UUID ingredientRef;

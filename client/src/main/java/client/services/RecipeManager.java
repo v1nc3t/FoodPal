@@ -102,6 +102,7 @@ public class RecipeManager {
                 recipesMap.put(recipe.getId(), recipe);
             }
 
+            CountDownLatch latch = new CountDownLatch(1);
             runOnFx(() -> {
                 int idx = indexOfRecipe(recipe.getId());
                 if (idx >= 0) {
@@ -109,6 +110,7 @@ public class RecipeManager {
                 } else {
                     recipesFx.add(recipe);
                 }
+                latch.countDown();
             });
 
             return true;
