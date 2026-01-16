@@ -4,12 +4,15 @@ import client.MyFXML;
 import client.config.Config;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import client.utils.ServerUtils;
 import commons.Ingredient;
 import commons.Language;
 import com.google.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -104,6 +107,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
     @Inject
     private RecipeManager recipeManager;
+    @Inject
+    private ServerUtils serverUtils;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
@@ -247,6 +252,8 @@ public class MainApplicationCtrl implements Internationalizable {
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
+
+        Platform.runLater(this::refresh);
     }
 
     private void prepareSearchField() {
@@ -600,11 +607,32 @@ public class MainApplicationCtrl implements Internationalizable {
      * Refreshes db to get latest data
      */
     public void refresh() {
-        // Temp. Rewriting this once server side is done
-        System.out.println("Refresh pressed (Server logic not implemented yet)");
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                if(!serverUtils.isServerAvailable()) {
+                    throw new Exception("Server is offline");
+                }
 
+                List<Recipe> recipes = serverUtils.getRecipes();
+                List<Ingredient> ingredients = serverUtils.getIngredients();
+
+                recipeManager.sync(recipes, ingredients);
+
+                return null;
+            }
+        };
+
+        task.setOnFailed(e -> {
+            new Alert(
+                    Alert.AlertType.ERROR,
+                    "Sync failed: " + task.getException().getMessage()).show();
+        });
+
+        new Thread(task).start();
         showMainScreen();
     }
+
 
     /**
      * Opens a modal popup asking the user to enter a name for a cloned recipe.
@@ -627,8 +655,14 @@ public class MainApplicationCtrl implements Internationalizable {
 
         Recipe clone = original.cloneWithTitle(newName);
         recipeManager.addRecipeOptimistic(clone);
-        showRecipe(clone);
 
+        try {
+            recipeManager.setRecipe(clone);
+        } catch (Exception e) {
+            System.err.println("Failed to save clone to server: " + e.getMessage());
+        }
+
+        showRecipe(clone);
     }
 
     @FXML

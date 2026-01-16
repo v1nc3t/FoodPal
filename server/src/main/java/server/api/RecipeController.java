@@ -7,6 +7,8 @@ import server.service.IRecipeService;
 
 import java.util.UUID;
 
+import java.util.Collection;
+
 @RestController
 @RequestMapping("/api/recipes")
 public class RecipeController {
@@ -20,12 +22,17 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @GetMapping("/")
+    @GetMapping(path = { "", "/" })
     public RecipeState getRecipeState() {
         return recipeService.getState();
     }
 
-    @PostMapping("/")
+    @GetMapping("/all")
+    public Collection<Recipe> getAllRecipes() {
+        return recipeService.getState().recipes();
+    }
+
+    @PostMapping(path = { "", "/" })
     public void setRecipe(@RequestBody Recipe recipe) throws InvalidRecipeError {
         recipeService.setRecipe(recipe);
     }
@@ -38,5 +45,10 @@ public class RecipeController {
     @DeleteMapping("/{id}")
     public void deleteRecipe(@PathVariable UUID id) {
         recipeService.deleteRecipe(id);
+    }
+
+    @DeleteMapping("/ingredient/{id}")
+    public void deleteIngredient(@PathVariable UUID id) {
+        recipeService.deleteIngredient(id);
     }
 }
