@@ -140,7 +140,7 @@ public class AddRecipeCtrl implements Internationalizable {
     }
 
     void initComboBox() {
-        ingredientsComboBox.setItems(recipeManager.getObservableIngredients());
+        ingredientsComboBox.setItems(recipeManager.getObservableIngredients().sorted());
         ingredientsComboBox.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(Ingredient ingredient, boolean empty) {
@@ -352,7 +352,6 @@ public class AddRecipeCtrl implements Internationalizable {
         ingredients = new ArrayList<>();
 
         ingredientsComboBox.getSelectionModel().clearSelection();
-        ingredientsComboBox.getItems().clear();
 
         preparationList.getChildren().clear();
         editingRecipe = null;
