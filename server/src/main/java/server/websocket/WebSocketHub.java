@@ -24,6 +24,7 @@ public class WebSocketHub {
     private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> ingredientSubscribers =
             new ConcurrentHashMap<>();
 
+
     public int getTitleSubscribersCount() {
         return stateSubscribers.size();
     }
