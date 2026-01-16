@@ -80,4 +80,15 @@ public class Ingredient {
     public int hashCode() {
         return Objects.hash(id, name, nutritionValues);
     }
+
+    public Ingredient clone() {
+        Ingredient clone = new Ingredient();
+        // safe cause UUID is immutable
+        clone.id = this.id;
+        // strings are also immutable
+        clone.name = this.name;
+        // since nutritional values is a record, its also immutable
+        clone.nutritionValues = this.nutritionValues;
+        return clone;
+    }
 }

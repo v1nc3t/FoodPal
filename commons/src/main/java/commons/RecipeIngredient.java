@@ -14,7 +14,6 @@ public class RecipeIngredient {
 
     // an empty constructor for object mappers
     public RecipeIngredient() {
-
     }
 
     @JsonCreator

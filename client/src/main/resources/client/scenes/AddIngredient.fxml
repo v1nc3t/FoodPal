@@ -34,8 +34,7 @@
       <HBox alignment="CENTER" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <children>
              <TextField fx:id="amountField" promptText="${controller.amountIngredientProperty}" />
-         
-                   <ComboBox fx:id="unitComboBox" editable="true" promptText="${controller.selectUnitProperty}" />
+             <ComboBox fx:id="unitComboBox" editable="true" promptText="${controller.selectUnitProperty}" />
          </children>
       </HBox>
        <TextField fx:id="proteinField" prefWidth="142.0" promptText="${controller.gramsProteinProperty}" GridPane.columnIndex="1" GridPane.rowIndex="2" />
