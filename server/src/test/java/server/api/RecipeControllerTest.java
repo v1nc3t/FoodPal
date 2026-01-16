@@ -77,6 +77,17 @@ public class RecipeControllerTest {
 
         assertEquals(expectedService, testRecipeService);
     }
+
+    @Test
+    public void deleteIngredient() throws InvalidIngredientError {
+        recipeController.setIngredient(yogurt);
+        recipeController.deleteIngredient(recipe.getId());
+
+        var expectedService = new TestRecipeService();
+        expectedService.setIngredient(yogurt);
+
+        assertEquals(expectedService, testRecipeService);
+    }
 }
 
 class TestRecipeService implements IRecipeService {
@@ -108,6 +119,11 @@ class TestRecipeService implements IRecipeService {
     @Override
     public void deleteRecipe(UUID recipeId) {
         recipes.remove(recipeId);
+    }
+
+    @Override
+    public void deleteIngredient(UUID ingredientId) {
+        ingredients.remove(ingredientId);
     }
 
     @Override

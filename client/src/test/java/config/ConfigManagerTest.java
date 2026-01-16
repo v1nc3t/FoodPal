@@ -3,7 +3,6 @@ package config;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -149,7 +148,7 @@ class ConfigManagerTest {
         manager.load();
 
         assertTrue(Files.exists(jsonPath), "File should be created if it didn't exist");
-        assertEquals("http://localhost:8080", manager.getConfig().getServerAddress());
+        assertEquals("http://localhost:8080/", manager.getConfig().getServerAddress());
     }
 
     @Test
@@ -176,7 +175,7 @@ class ConfigManagerTest {
         // This should trigger the catch block, which calls createDefaultConfig()
         manager.load();
 
-        assertEquals("http://localhost:8080", manager.getConfig().getServerAddress(), "Should reset to defaults");
+        assertEquals("http://localhost:8080/", manager.getConfig().getServerAddress(), "Should reset to defaults");
     }
 
     @Test
