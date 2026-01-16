@@ -18,6 +18,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -69,32 +70,34 @@ public class ShoppingListCtrl implements Internationalizable {
 
     @FXML
     public void addManualItem() {
-        javafx.scene.control.TextInputDialog nameDialog = new javafx.scene.control.TextInputDialog();
+        javafx.scene.control.TextInputDialog nameDialog =
+                new javafx.scene.control.TextInputDialog();
         nameDialog.setTitle("Add Item");
         nameDialog.setHeaderText("Enter item name:");
         nameDialog.setContentText("Name:");
 
         nameDialog.showAndWait().ifPresent(name -> {
-            javafx.scene.control.TextInputDialog amountDialog = new javafx.scene.control.TextInputDialog("1");
+            javafx.scene.control.TextInputDialog amountDialog =
+                    new javafx.scene.control.TextInputDialog("1");
             amountDialog.setTitle("Add Item");
             amountDialog.setHeaderText("Enter amount (e.g., '1 kg', '2 pieces'):");
             amountDialog.setContentText("Amount:");
 
             amountDialog.showAndWait().ifPresent(amountStr -> {
-                int quantity = 1;
+                double quantity = 1;
                 String unit = amountStr;
 
-                String[] parts = amountStr.split(" ", 2);
+                String[] parts = amountStr.split(" ");
                 if (parts.length == 2) {
                     try {
-                        quantity = Integer.parseInt(parts[0]);
+                        quantity = Double.parseDouble(parts[0]);
                         unit = parts[1];
                     } catch (NumberFormatException e) {
                         // ignore
                     }
                 } else if (parts.length == 1) {
                     try {
-                        quantity = Integer.parseInt(parts[0]);
+                        quantity = Double.parseDouble(parts[0]);
                         unit = "";
                     } catch (NumberFormatException e) {
                         unit = amountStr;
@@ -138,14 +141,16 @@ public class ShoppingListCtrl implements Internationalizable {
                     name = item.getCustomName();
                 } else {
                     Ingredient ing = recipeManager
-                            .getIngredient(new RecipeIngredient(item.getIngredientId(), item.getAmount()));
+                            .getIngredient(new RecipeIngredient(item.getIngredientId(),
+                                    item.getAmount()));
                     if (ing != null) {
                         name = ing.getName();
                     }
                 }
 
                 Label nameLabel = new Label(name);
-                Label amountLabel = new Label(item.getAmount() != null ? item.getAmount().toPrettyString() : "");
+                Label amountLabel = new Label(item.getAmount() != null ?
+                        item.getAmount().toPrettyString() : "");
 
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -180,37 +185,41 @@ public class ShoppingListCtrl implements Internationalizable {
         if (item.getCustomName() != null) {
             return item.getCustomName();
         }
-        Ingredient ing = recipeManager.getIngredient(new RecipeIngredient(item.getIngredientId(), item.getAmount()));
+        Ingredient ing = recipeManager.getIngredient(new RecipeIngredient(item.getIngredientId(),
+                item.getAmount()));
         return ing != null ? ing.getName() : null;
     }
 
     private void showAmountDialog(ShoppingListItem item, String currentName, String newName) {
         String currentAmount = item.getAmount() != null ? item.getAmount().toPrettyString() : "1";
 
-        javafx.scene.control.TextInputDialog amountDialog = new javafx.scene.control.TextInputDialog(currentAmount);
+        javafx.scene.control.TextInputDialog amountDialog =
+                new javafx.scene.control.TextInputDialog(currentAmount);
         amountDialog.setTitle("Edit Item");
         amountDialog.setHeaderText("Edit amount:");
         amountDialog.setContentText("Amount:");
 
         amountDialog.showAndWait()
-                .ifPresent(newAmountStr -> updateItemDetails(item, currentName, newName, newAmountStr));
+                .ifPresent(newAmountStr ->
+                        updateItemDetails(item, currentName, newName, newAmountStr));
     }
 
-    private void updateItemDetails(ShoppingListItem item, String currentName, String newName, String newAmountStr) {
-        int quantity = 1;
+    private void updateItemDetails(ShoppingListItem item, String currentName,
+                                   String newName, String newAmountStr) {
+        double quantity = 1;
         String unit = newAmountStr;
 
-        String[] parts = newAmountStr.split(" ", 2);
+        String[] parts = newAmountStr.split(" ");
         if (parts.length == 2) {
             try {
-                quantity = Integer.parseInt(parts[0]);
+                quantity = Double.parseDouble(parts[0]);
                 unit = parts[1];
             } catch (NumberFormatException e) {
                 // ignore
             }
         } else if (parts.length == 1) {
             try {
-                quantity = Integer.parseInt(parts[0]);
+                quantity = Double.parseDouble(parts[0]);
                 unit = "";
             } catch (NumberFormatException e) {
                 unit = newAmountStr;

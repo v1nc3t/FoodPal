@@ -99,10 +99,22 @@ public class ShoppingListManager {
 
         runOnFx(() -> {
             for (RecipeIngredient ri : ingredients) {
-                ShoppingListItem item = new ShoppingListItem(
-                        ri.getIngredientRef(),
-                        ri.getAmount(),
-                        recipe.getId());
+                ShoppingListItem item = null;
+                if (recipeManager.isScaled(recipe.getId())) {
+                    double scaleFactor = (double) (recipe.getPortions()
+                                    + recipeManager.getRecipeScale(recipe.getId())) /
+                            (double) recipe.getPortions();
+                    item = new ShoppingListItem(
+                            ri.getIngredientRef(),
+                            ri.getAmount().scaleAndNormalize(scaleFactor),
+                            recipe.getId());
+                }
+                else {
+                    item = new ShoppingListItem(
+                            ri.getIngredientRef(),
+                            ri.getAmount(),
+                            recipe.getId());
+                }
 
                 // Snapshot the name for persistence
                 try {

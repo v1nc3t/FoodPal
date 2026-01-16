@@ -15,6 +15,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -41,6 +43,16 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final StringProperty portionsValueProperty = new SimpleStringProperty();
     @FXML
     private Label portionsValueLabel;
+
+    @FXML
+    private Button scaleUpButton;
+
+    @FXML
+    private Button scaleDownButton;
+
+    private final StringProperty resetProperty = new SimpleStringProperty();
+    @FXML
+    private Button resetScaleButton;
 
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML
@@ -70,9 +82,12 @@ public class RecipeViewerCtrl implements Internationalizable {
     private Recipe currentRecipe;
 
     private final StringProperty caloriesProperty = new SimpleStringProperty();
-
     @FXML
     private Label caloriesLabel;
+
+    private final StringProperty servingSizeProperty = new SimpleStringProperty();
+    @FXML
+    private Label servingSizeLabel;
 
     private Consumer<Recipe> onRecipeEdit;
     private final LocaleManager localeManager;
@@ -111,11 +126,13 @@ public class RecipeViewerCtrl implements Internationalizable {
         languageSuffixLabel.textProperty().bind(languageSuffixProperty);
         portionsLabel.textProperty().bind(portionsProperty);
         portionsValueLabel.textProperty().bind(portionsValueProperty);
+        resetScaleButton.textProperty().bind(resetProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         preparationLabel.textProperty().bind(preparationProperty);
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
+        servingSizeLabel.textProperty().bind(servingSizeProperty);
         caloriesLabel.textProperty().bind(caloriesProperty);
     }
 
@@ -126,14 +143,15 @@ public class RecipeViewerCtrl implements Internationalizable {
             languageSuffixProperty.set(currentRecipe.getLanguage().proper());
         }
         titleProperty.set(resourceBundle.getString("txt.recipe_name"));
-        languageProperty.set(resourceBundle.getString("txt.recipe_language") + ": ");
-        portionsProperty.set(resourceBundle.getString("txt.portions") + ": ");
+        languageProperty.set(resourceBundle.getString("txt.recipe_language") + ":");
+        portionsProperty.set(resourceBundle.getString("txt.portions") + ":");
+        resetProperty.set(resourceBundle.getString("txt.reset"));
         ingredientsProperty.set(resourceBundle.getString("txt.ingredients"));
         preparationProperty.set(resourceBundle.getString("txt.preparation"));
         editProperty.set(resourceBundle.getString("txt.edit"));
         printProperty.set(resourceBundle.getString("txt.print"));
         addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
-        caloriesProperty.set(resourceBundle.getString("txt.calories_per_portion"));
+        servingSizeProperty.set(resourceBundle.getString("txt.serving_size") + ":");
 
     }
 
@@ -143,27 +161,44 @@ public class RecipeViewerCtrl implements Internationalizable {
      * @param recipe the recipe
      */
     public void setRecipe(Recipe recipe) {
-        this.currentRecipe = recipe;
-
         if (recipe == null) {
             titleProperty.set("");
             ingredientsList.getItems().clear();
             preparationList.getItems().clear();
             return;
         }
+        this.currentRecipe = recipe;
 
         languageSuffixProperty.set(recipe.getLanguage().proper());
-        portionsValueProperty.set(String.valueOf(recipe.getPortions()));
         titleProperty.set(recipe.getTitle());
-        setIngredientsList(recipe);
         setPreparationList(recipe);
+
         double kcal = recipe.getCaloriesPerPortion(
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
+        DecimalFormat df = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
+        caloriesProperty.set(df.format(kcal) + " kcal");
 
-        caloriesProperty.set(String.format("%.1f kcal", kcal));
+        boolean scaled = recipeManager.isScaled(recipe.getId());
 
+        if (scaled && calculateScaledPortions() < 1) {
+            recipeManager.removeScaledRecipe(recipe.getId());
+            scaled = false;
+        }
 
+        resetScaleButton.setDisable(!scaled);
+        scaleDownButton.setDisable(calculateScaledPortions() < 2);
+
+        double scaleFactor = 0;
+        if (scaled) {
+            portionsValueProperty.set("~" + calculateScaledPortions());
+            scaleFactor = calculateScaledPortions() / (double) recipe.getPortions();
+            setIngredientsList(recipe, scaleFactor);
+        }
+        else {
+            portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
+            setIngredientsList(recipe);
+        }
     }
 
     /**
@@ -179,6 +214,23 @@ public class RecipeViewerCtrl implements Internationalizable {
                 Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
                 ingredientsList.getItems().add(ingredient.getName() + " | " +
                         recipeIngredient.getAmount().toPrettyString());
+            }
+        }
+    }
+
+    /**
+     * This sets the ingredients with a scaling factor.
+     * @param recipe the recipe
+     * @param scaleFactor the scaling factor
+     */
+    private void setIngredientsList(Recipe recipe, double scaleFactor) {
+        ingredientsList.getItems().clear();
+        var ingredients = recipe.getIngredients();
+        if (ingredients != null) {
+            for (var recipeIngredient : ingredients) {
+                Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
+                ingredientsList.getItems().add(ingredient.getName() + " | " +
+                        recipeIngredient.getAmount().scale(scaleFactor).toNormalizedString());
             }
         }
     }
@@ -223,5 +275,58 @@ public class RecipeViewerCtrl implements Internationalizable {
         if (currentRecipe != null) {
             shoppingListManager.addRecipe(currentRecipe);
         }
+    }
+
+    /**
+     * Scales up the recipe by 1 portion
+     */
+    @FXML
+    private void scaleUpRecipe() {
+        if (recipeManager.isScaled(currentRecipe.getId())) {
+            int newScaledPortions = recipeManager.getRecipeScale(currentRecipe.getId()) + 1;
+            recipeManager.setScaledRecipe(currentRecipe.getId(), newScaledPortions);
+        }
+        else {
+            recipeManager.setScaledRecipe(currentRecipe.getId(), 1);
+        }
+
+        setRecipe(currentRecipe);
+    }
+
+    /**
+     * Scales down the recipe by 1 portion, if possible
+     */
+    @FXML
+    private void scaleDownRecipe() {
+        if (calculateScaledPortions() >= 2) {
+            if (recipeManager.isScaled(currentRecipe.getId())) {
+                int newScaledPortions = recipeManager.getRecipeScale(currentRecipe.getId()) - 1;
+                recipeManager.setScaledRecipe(currentRecipe.getId(), newScaledPortions);
+            }
+            else {
+                recipeManager.setScaledRecipe(currentRecipe.getId(), -1);
+            }
+        }
+
+        setRecipe(currentRecipe);
+    }
+
+    /**
+     * Resets the scaled portions of the current recipe
+     */
+    @FXML
+    private void resetScale() {
+        recipeManager.removeScaledRecipe(currentRecipe.getId());
+
+        setRecipe(currentRecipe);
+    }
+
+    /**
+     * Calculates the scaled portions of the current recipe
+     * @return scaled portions
+     */
+    private int calculateScaledPortions() {
+        if (!recipeManager.isScaled(currentRecipe.getId())) return currentRecipe.getPortions();
+        return currentRecipe.getPortions() + recipeManager.getRecipeScale(currentRecipe.getId());
     }
 }
