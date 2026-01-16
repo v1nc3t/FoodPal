@@ -156,7 +156,7 @@ public class RecipeServiceTest {
         }
 
         @Test
-        public void deleteIngredient() {
+        public void deleteIngredient() throws InvalidIngredientError {
                 recipeService.setIngredient(yogurt);
                 recipeService.setIngredient(sugar);
 
