@@ -297,16 +297,13 @@ public class AddRecipeCtrl implements Internationalizable {
         try {
             r = getRecipe();
 
+            recipeManager.setRecipe(r);
+            //server.setRecipe(r);
+
             if (editingRecipe == null) {
                 recipeManager.addRecipeOptimistic(r);
 
                 if (onRecipeAdded != null) onRecipeAdded.accept(r);
-
-                try {
-                    server.addRecipe(r); // current project signature is void;
-                } catch (Exception e) {
-                    // Server not available / failed: keep optimistic copy.
-                }
             } else {
                 if (!recipeManager.setRecipe(r)) {
                     System.out.println("Failed to add recipe " + r);
@@ -412,10 +409,23 @@ public class AddRecipeCtrl implements Internationalizable {
         Parent addIngredientRoot = addIngredientPair.getValue();
 
         // waits for new ingredient to be made in popup
-        addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
+        addIngredientCtrl.setIngredientAddedCb(newRecipeIngredient -> {
             Platform.runLater(() -> {
-                ingredients.add(newIngredient);
-                refreshIngredientsList();
+                try {
+                    Ingredient base = recipeManager.getIngredient(
+                            newRecipeIngredient.ingredientRef
+                    );
+
+                    recipeManager.setIngredient(base);
+
+                    ingredients.add(newRecipeIngredient);
+                    refreshIngredientsList();
+                } catch (Exception e) {
+                    new Alert(
+                            Alert.AlertType.ERROR,
+                            "Failed to save ingredient to server"
+                    ).show();
+                }
             });
         });
         var scene = new Scene(addIngredientRoot);
@@ -489,7 +499,10 @@ public class AddRecipeCtrl implements Internationalizable {
 
         item.getChildren().addAll(textFlow, buttonGroup);
 
-        delete.setOnAction(e -> ingredientsList.getChildren().remove(item));
+        delete.setOnAction(e -> {
+            ingredients.remove(recipeIngredient);
+            refreshIngredientsList();
+        });
         edit.setOnAction(e -> clickEditIngredient(recipeIngredient));
 
         return item;

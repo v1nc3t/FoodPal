@@ -154,4 +154,25 @@ public class RecipeServiceTest {
                 verify(recipeRepository, never()).deleteById(any());
                 verify(webSocketHub, never()).broadcastRecipeDelete(any());
         }
+
+        @Test
+        public void deleteIngredient() throws InvalidIngredientError {
+                recipeService.setIngredient(yogurt);
+                recipeService.setIngredient(sugar);
+
+                recipeService.deleteIngredient(yogurt.getId());
+                recipeService.deleteIngredient(sugar.getId());
+
+                assertTrue(recipeService.getState().ingredients().isEmpty());
+                verify(ingredientRepository).deleteById(yogurt.getId());
+                verify(ingredientRepository).deleteById(sugar.getId());
+        }
+
+        @Test
+        public void deleteNonExistentIngredient() {
+            UUID randomId = UUID.randomUUID();
+            recipeService.deleteIngredient(randomId);
+
+            verify(ingredientRepository, never()).deleteById(any());
+        }
 }

@@ -18,6 +18,7 @@ import javafx.scene.control.ListView;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class RecipeViewerCtrl implements Internationalizable {
 
@@ -73,21 +74,24 @@ public class RecipeViewerCtrl implements Internationalizable {
     @FXML
     private Label caloriesLabel;
 
-    private MainApplicationCtrl mainCtrl;
+    private Consumer<Recipe> onRecipeEdit;
     private final LocaleManager localeManager;
     private final RecipeManager recipeManager;
 
     private final ShoppingListManager shoppingListManager;
 
     @Inject
-    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
+    public RecipeViewerCtrl(LocaleManager localeManager,
                             RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
-        this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
         this.recipeManager = recipeManager;
         this.shoppingListManager = shoppingListManager;
 
         localeManager.register(this);
+    }
+
+    public void setOnRecipeEdit(Consumer<Recipe> cb) {
+        onRecipeEdit = cb;
     }
 
     @FXML
@@ -197,8 +201,8 @@ public class RecipeViewerCtrl implements Internationalizable {
      */
     @FXML
     private void editRecipe() {
-        if (mainCtrl != null && currentRecipe != null) {
-            mainCtrl.editRecipe(currentRecipe);
+        if (currentRecipe != null && onRecipeEdit != null) {
+            onRecipeEdit.accept(currentRecipe);
         }
     }
 
@@ -220,5 +224,4 @@ public class RecipeViewerCtrl implements Internationalizable {
             shoppingListManager.addRecipe(currentRecipe);
         }
     }
-
 }

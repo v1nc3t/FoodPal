@@ -4,12 +4,15 @@ import client.MyFXML;
 import client.config.Config;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import client.utils.ServerUtils;
 import commons.Ingredient;
 import commons.Language;
 import com.google.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -31,7 +34,7 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private ChoiceBox<String> orderBy;
     private final StringProperty alphabeticalProperty = new SimpleStringProperty();
-    private final StringProperty recentProperty = new SimpleStringProperty();
+    private final StringProperty reverseAlphabeticalProperty = new SimpleStringProperty();
 
     @FXML
     private ComboBox<Language> languageOptions;
@@ -104,6 +107,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
     @Inject
     private RecipeManager recipeManager;
+    @Inject
+    private ServerUtils serverUtils;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
@@ -153,13 +158,13 @@ public class MainApplicationCtrl implements Internationalizable {
         ingredientToggleTextProperty.set(resourceBundle.getString("txt.ingredient"));
 
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
-        recentProperty.set(resourceBundle.getString("txt.recent"));
+        reverseAlphabeticalProperty.set(resourceBundle.getString("txt.reverse_alphabetical"));
 
         if (orderBy != null) {
             int selectedIndex = orderBy.getSelectionModel().getSelectedIndex();
             orderBy.getItems().setAll(
                     alphabeticalProperty.get(),
-                    recentProperty.get());
+                    reverseAlphabeticalProperty.get());
             orderBy.getSelectionModel().select(selectedIndex >= 0 ? selectedIndex : 0);
         }
 
@@ -209,6 +214,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
         prepareLanguageOptions();
         prepareSortBy();
+        prepareSearchField();
+
         sidebarListCtrl.initialize();
 
         sidebarListCtrl.setListView(sidebarListView);
@@ -245,6 +252,21 @@ public class MainApplicationCtrl implements Internationalizable {
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
+
+        Platform.runLater(this::refresh);
+    }
+
+    private void prepareSearchField() {
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            sidebarListCtrl.setSearchQuery(newValue);
+        });
+
+        searchField.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                searchField.clear(); // This triggers the listener above with ""
+                contentPane.requestFocus(); // Optional: move focus away from search
+            }
+        });
     }
 
     /**
@@ -365,8 +387,20 @@ public class MainApplicationCtrl implements Internationalizable {
         categoryToggleGroup.selectedToggleProperty().addListener((_, _, newValue) -> {
             if (newValue == recipeToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Recipe);
+                cloneButton.setDisable(false);
+                favouriteButton.setDisable(false);
+                onlyShowFavouritesToggle.setDisable(false);
+                englishFilter.setDisable(false);
+                dutchFilter.setDisable(false);
+                germanFilter.setDisable(false);
             } else if  (newValue == ingredientToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Ingredient);
+                cloneButton.setDisable(true);
+                favouriteButton.setDisable(true);
+                onlyShowFavouritesToggle.setDisable(true);
+                englishFilter.setDisable(true);
+                dutchFilter.setDisable(true);
+                germanFilter.setDisable(true);
             }
         });
     }
@@ -377,7 +411,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private void prepareSortBy() {
         orderBy.getItems().setAll(
                 alphabeticalProperty.get(),
-                recentProperty.get());
+                reverseAlphabeticalProperty.get());
         orderBy.setValue(alphabeticalProperty.get());
     }
 
@@ -396,8 +430,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
             if (newValue.equals(alphabeticalProperty.get())) {
                 sidebarListCtrl.setSortMethod("Alphabetical");
-            } else if (newValue.equals(recentProperty.get())) {
-                sidebarListCtrl.setSortMethod("Most recent");
+            } else if (newValue.equals(reverseAlphabeticalProperty.get())) {
+                sidebarListCtrl.setSortMethod("Reverse alphabetical");
             }
         });
         // if the currently shown recipe disappears, close viewer.
@@ -493,6 +527,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 "client", "scenes", "RecipeViewer.fxml");
 
         RecipeViewerCtrl viewerCtrl = pair.getKey();
+        viewerCtrl.setOnRecipeEdit(this::editRecipe);
         Parent viewerRoot = pair.getValue();
 
         viewerCtrl.setRecipe(recipe);
@@ -513,10 +548,27 @@ public class MainApplicationCtrl implements Internationalizable {
                 "client", "scenes", "IngredientViewer.fxml");
 
         IngredientViewerCtrl viewerCtrl = pair.getKey();
-        Parent viewerRoot = pair.getValue();
-
+        viewerCtrl.setOnIngredientEdit(this::editIngredient);
         viewerCtrl.setIngredient(ingredient);
 
+        Parent viewerRoot = pair.getValue();
+
+        contentPane.getChildren().setAll(viewerRoot);
+        currentlyShownId = ingredient.getId();
+    }
+
+    private void editIngredient(Ingredient ingredient) {
+        var bundle = localeManager.getCurrentBundle();
+        Pair<EditIngredientCtrl, Parent> editIngredientPair = fxml.load(EditIngredientCtrl.class,
+                bundle,"client", "scenes", "EditIngredient.fxml");
+
+        EditIngredientCtrl editIngredientCtrl = editIngredientPair.getKey();
+        Parent editIngredientRoot = editIngredientPair.getValue();
+
+        editIngredientCtrl.setIngredient(ingredient);
+        editIngredientCtrl.setOnShowIngredient(this::showIngredient);
+
+        Parent viewerRoot = editIngredientPair.getValue();
         contentPane.getChildren().setAll(viewerRoot);
         currentlyShownId = ingredient.getId();
     }
@@ -532,10 +584,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * Search field for users to search up items/recipes from ist
      */
     public void search() {
-        String query = searchField.getText();
-
-        // To be implemented once server side is done.
-        System.out.println("Searching for '" + query);
+        sidebarListCtrl.setSearchQuery(searchField.getText());
     }
 
     public void editRecipe(Recipe recipe) {
@@ -558,11 +607,32 @@ public class MainApplicationCtrl implements Internationalizable {
      * Refreshes db to get latest data
      */
     public void refresh() {
-        // Temp. Rewriting this once server side is done
-        System.out.println("Refresh pressed (Server logic not implemented yet)");
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                if(!serverUtils.isServerAvailable()) {
+                    throw new Exception("Server is offline");
+                }
 
+                List<Recipe> recipes = serverUtils.getRecipes();
+                List<Ingredient> ingredients = serverUtils.getIngredients();
+
+                recipeManager.sync(recipes, ingredients);
+
+                return null;
+            }
+        };
+
+        task.setOnFailed(e -> {
+            new Alert(
+                    Alert.AlertType.ERROR,
+                    "Sync failed: " + task.getException().getMessage()).show();
+        });
+
+        new Thread(task).start();
         showMainScreen();
     }
+
 
     /**
      * Opens a modal popup asking the user to enter a name for a cloned recipe.
@@ -585,8 +655,14 @@ public class MainApplicationCtrl implements Internationalizable {
 
         Recipe clone = original.cloneWithTitle(newName);
         recipeManager.addRecipeOptimistic(clone);
-        showRecipe(clone);
 
+        try {
+            recipeManager.setRecipe(clone);
+        } catch (Exception e) {
+            System.err.println("Failed to save clone to server: " + e.getMessage());
+        }
+
+        showRecipe(clone);
     }
 
     @FXML

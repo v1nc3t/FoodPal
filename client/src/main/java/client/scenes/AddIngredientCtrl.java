@@ -70,7 +70,7 @@ public class AddIngredientCtrl implements Internationalizable {
     private final ServerUtils server;
     private final AddRecipeCtrl ctrl;
     private final LocaleManager localeManager;
-    private Consumer<RecipeIngredient> ingredientAdded;
+    private Consumer<RecipeIngredient> onIngredientAdded;
 
     @FXML
     private void initialize() {
@@ -156,7 +156,7 @@ public class AddIngredientCtrl implements Internationalizable {
      * @param callback new ingredient made will be sent
      */
     public void setIngredientAddedCb(Consumer<RecipeIngredient> callback) {
-        this.ingredientAdded = callback;
+        this.onIngredientAdded = callback;
     }
 
     /**
@@ -185,8 +185,8 @@ public class AddIngredientCtrl implements Internationalizable {
             return;
         }
 
-        if(ingredientAdded != null && newIngredient != null) {
-            ingredientAdded.accept(newIngredient);
+        if(onIngredientAdded != null && newIngredient != null) {
+            onIngredientAdded.accept(newIngredient);
         }
 
         closeWindow();

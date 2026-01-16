@@ -4,6 +4,7 @@ import commons.Ingredient;
 import commons.Recipe;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface IServerUtils {
 
@@ -11,7 +12,13 @@ public interface IServerUtils {
 
     List<Recipe> getRecipes();
 
-    Recipe addRecipe(Recipe recipe);
+    Recipe setRecipe(Recipe recipe);
+
+    Ingredient setIngredient(Ingredient ingredient);
+
+    void removeRecipe(UUID reciepId);
+
+    void removeIngredient(UUID ingredientId);
 
     boolean isServerAvailable();
 }
