@@ -78,6 +78,8 @@ public class RecipeService implements IRecipeService {
                 .forEach(recipe -> webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe));
 
         webSocketHub.broadcastStateUpdate(getState());
+        webSocketHub.broadcastIngredientStateUpdate(ingredients.values());
+
     }
 
     @Override
@@ -105,5 +107,7 @@ public class RecipeService implements IRecipeService {
             }
         }
         webSocketHub.broadcastStateUpdate(getState());
+        webSocketHub.broadcastIngredientStateUpdate(ingredients.values());
+
     }
 }
