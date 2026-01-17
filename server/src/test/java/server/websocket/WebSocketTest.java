@@ -353,4 +353,42 @@ public class WebSocketTest {
 
         session.close();
     }
+    @Test
+    public void testIngredientDeleteNotification() throws Exception {
+        CompletableFuture<String> subConfirmation = new CompletableFuture<>();
+        CompletableFuture<String> deleteNotification = new CompletableFuture<>();
+        TextWebSocketHandler handler = new TextWebSocketHandler() {
+            @Override
+            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+                String payload = message.getPayload();
+                if (payload.contains("SUBSCRIBED")) {
+                    subConfirmation.complete(payload);
+                } else if (payload.contains("DELETE")) {
+                    deleteNotification.complete(payload);
+                }
+            }
+        };
+        String url = "ws://localhost:" + port + "/ws";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        WebSocketSession session = client.execute(handler, url).get(5, TimeUnit.SECONDS);
+        UUID ingredientId = UUID.randomUUID();
+        // Subscribe to ingredient
+        Map<String, Object> subRequest = new HashMap<>();
+        subRequest.put("type", "SUBSCRIBE");
+        subRequest.put("topic", "ingredient");
+        subRequest.put("ingredientId", ingredientId.toString());
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
+        // Wait for confirmation
+        subConfirmation.get(5, TimeUnit.SECONDS);
+        // Simulate deletion on server
+        hub.broadcastIngredientDelete(ingredientId);
+        // Check for delete notification
+        String result = deleteNotification.get(5, TimeUnit.SECONDS);
+        assertTrue(result.contains("DELETE"));
+        assertTrue(result.contains("ingredient"));
+        assertTrue(result.contains(ingredientId.toString()));
+
+        session.close();
+    }
+
 }

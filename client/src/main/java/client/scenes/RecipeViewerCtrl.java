@@ -161,7 +161,7 @@ public class RecipeViewerCtrl implements Internationalizable {
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
 
-        caloriesProperty.set(String.format("%.1f kcal", kcal));
+        caloriesProperty.set(String.format("%.2f kcal", kcal));
 
 
     }

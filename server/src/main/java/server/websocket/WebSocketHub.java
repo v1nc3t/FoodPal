@@ -147,4 +147,17 @@ public class WebSocketHub {
         ingredientSubscribers.values().forEach(sessions -> sessions.remove(session));
         ingredientSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);
     }
+    public void broadcastIngredientDelete(UUID ingredientId) {
+        List<WebSocketSession> sessions = ingredientSubscribers.get(ingredientId);
+        if (sessions != null && !sessions.isEmpty()) {
+            WebSocketResponse response = new WebSocketResponse(
+                    WebSocketTypes.DELETE,
+                    "ingredient",
+                    ingredientId
+            );
+            broadcast(sessions, response);
+            ingredientSubscribers.remove(ingredientId);
+        }
+    }
+
 }
