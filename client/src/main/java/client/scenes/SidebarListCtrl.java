@@ -222,7 +222,7 @@ public class SidebarListCtrl {
                 Recipe recipe = recipeManager.getRecipe(item.id());
                 return recipeMatchScore(recipe, query) >= 0;
             } else {
-                return item.name().toLowerCase().contains(query.toLowerCase());
+                return ingredentMatchScore(item.name(), query) >= 0;
             }
         });
 
@@ -232,13 +232,18 @@ public class SidebarListCtrl {
             if (query == null || query.isEmpty()) {
                 return a.name().compareToIgnoreCase(b.name());
             }
-            if (currentMode == ESidebarMode.Recipe && !currentSearchQuery.isEmpty()) {
-                int scoreA = recipeMatchScore(recipeManager.getRecipe(a.id()), query);
-                int scoreB = recipeMatchScore(recipeManager.getRecipe(b.id()), query);
 
-                if (scoreA != scoreB) {
-                    return Integer.compare(scoreB, scoreA);
-                }
+            int scoreA, scoreB;
+            if (currentMode == ESidebarMode.Recipe) {
+                scoreA = recipeMatchScore(recipeManager.getRecipe(a.id()), query);
+                scoreB = recipeMatchScore(recipeManager.getRecipe(b.id()), query);
+            } else {
+                scoreA = ingredentMatchScore(a.name(), query);
+                scoreB = ingredentMatchScore(b.name(), query);
+            }
+
+            if (scoreA != scoreB) {
+                return Integer.compare(scoreB, scoreA);
             }
             return a.name().compareToIgnoreCase(b.name());
         });
@@ -280,6 +285,30 @@ public class SidebarListCtrl {
             } else {
                 if (termScore == 0) return -1;
                 totalScore += termScore;
+            }
+        }
+        return totalScore;
+    }
+
+    private int ingredentMatchScore(String ingredientName, String query) {
+        if (query == null || query.isBlank()) return 0;
+
+        String[] terms = query.toLowerCase().split("\\s+");
+
+        int totalScore = 0;
+        for(String term : terms) {
+            boolean isExcluded = term.startsWith("-");
+
+            String actualTerm = isExcluded ? term.substring(1) : term;
+            if (actualTerm.isEmpty()) continue;
+
+            boolean found = ingredientName.toLowerCase().contains(actualTerm);
+
+            if (isExcluded && found) return -1;
+            if (!isExcluded && !found) return -1;
+
+            if (found) {
+                totalScore += ingredientName.toLowerCase().startsWith(actualTerm) ? 50 : 25;
             }
         }
         return totalScore;
