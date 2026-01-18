@@ -11,12 +11,12 @@
 
 <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientOverviewCtrl">
    <children>
-      <Label text="Review Ingredients">
+      <Label fx:id="titleLabel" text="Review Ingredients">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Label text="Adjust names and amounts directly in the table." />
+      <Label fx:id="instructionLabel" text="Adjust names and amounts directly in the table." />
       <TableView fx:id="ingredientsTable" editable="true" prefHeight="300.0" prefWidth="580.0" VBox.vgrow="ALWAYS">
         <columns>
           <TableColumn fx:id="nameColumn" prefWidth="300.0" text="Ingredient" />
@@ -29,11 +29,11 @@
       </TableView>
       <HBox alignment="CENTER_RIGHT" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#addItem" text="Add Item" />
-            <Button mnemonicParsing="false" onAction="#removeItem" text="Remove Item" />
+            <Button fx:id="addItemButton" mnemonicParsing="false" onAction="#addItem" text="Add Item" />
+            <Button fx:id="removeItemButton" mnemonicParsing="false" onAction="#removeItem" text="Remove Item" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" onAction="#cancel" text="Cancel" />
-            <Button mnemonicParsing="false" onAction="#confirm" text="Add to Shopping List" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
+            <Button fx:id="confirmButton" mnemonicParsing="false" onAction="#confirm" text="Add to Shopping List" />
          </children>
       </HBox>
    </children>

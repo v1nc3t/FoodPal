@@ -1,25 +1,33 @@
 package client.scenes;
 
+import client.services.LocaleManager;
 import client.services.ShoppingListManager;
 import client.shoppingList.ShoppingListItem;
 import com.google.inject.Inject;
 import commons.Amount;
 import commons.Unit;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javafx.scene.control.TextInputDialog;
 
-public class IngredientOverviewCtrl {
+public class IngredientOverviewCtrl implements Internationalizable {
 
     private final ShoppingListManager shoppingListManager;
+    private final LocaleManager localeManager;
 
+    @FXML
+    private Label titleLabel;
+    @FXML
+    private Label instructionLabel;
     @FXML
     private TableView<ShoppingListItem> ingredientsTable;
     @FXML
@@ -28,16 +36,42 @@ public class IngredientOverviewCtrl {
     private TableColumn<ShoppingListItem, String> amountColumn;
     @FXML
     private TableColumn<ShoppingListItem, String> sourceColumn;
+    @FXML
+    private Button addItemButton;
+    @FXML
+    private Button removeItemButton;
+    @FXML
+    private Button cancelButton;
+    @FXML
+    private Button confirmButton;
+
+    private final StringProperty titleProperty = new SimpleStringProperty();
+    private final StringProperty instructionProperty = new SimpleStringProperty();
+    private final StringProperty nameColumnProperty = new SimpleStringProperty();
+    private final StringProperty amountColumnProperty = new SimpleStringProperty();
+    private final StringProperty sourceColumnProperty = new SimpleStringProperty();
+    private final StringProperty addItemProperty = new SimpleStringProperty();
+    private final StringProperty removeItemProperty = new SimpleStringProperty();
+    private final StringProperty cancelProperty = new SimpleStringProperty();
+    private final StringProperty confirmProperty = new SimpleStringProperty();
+
+    private String addItemDialogHeader;
+    private String addAmountDialogHeader;
 
     private Stage stage;
 
     @Inject
-    public IngredientOverviewCtrl(ShoppingListManager shoppingListManager) {
+    public IngredientOverviewCtrl(ShoppingListManager shoppingListManager, LocaleManager localeManager) {
         this.shoppingListManager = shoppingListManager;
+        this.localeManager = localeManager;
+        this.localeManager.register(this);
     }
 
     @FXML
     public void initialize() {
+        bindProperties();
+        setLocale(localeManager.getCurrentLocale());
+
         ingredientsTable.setEditable(true);
 
         nameColumn.setCellValueFactory(item -> {
@@ -64,6 +98,35 @@ public class IngredientOverviewCtrl {
             event.getRowValue().setAmount(newAmount);
             ingredientsTable.refresh();
         });
+    }
+
+    private void bindProperties() {
+        titleLabel.textProperty().bind(titleProperty);
+        instructionLabel.textProperty().bind(instructionProperty);
+        nameColumn.textProperty().bind(nameColumnProperty);
+        amountColumn.textProperty().bind(amountColumnProperty);
+        sourceColumn.textProperty().bind(sourceColumnProperty);
+        addItemButton.textProperty().bind(addItemProperty);
+        removeItemButton.textProperty().bind(removeItemProperty);
+        cancelButton.textProperty().bind(cancelProperty);
+        confirmButton.textProperty().bind(confirmProperty);
+    }
+
+    @Override
+    public void setLocale(Locale newLocale) {
+        ResourceBundle bundle = ResourceBundle.getBundle(localeManager.getBundleName(), newLocale);
+        titleProperty.set(bundle.getString("txt.review_ingredients"));
+        instructionProperty.set(bundle.getString("txt.adjust_instruction"));
+        nameColumnProperty.set(bundle.getString("txt.ingredient"));
+        amountColumnProperty.set(bundle.getString("txt.amount"));
+        sourceColumnProperty.set(bundle.getString("txt.source_recipe"));
+        addItemProperty.set(bundle.getString("txt.add_item"));
+        removeItemProperty.set(bundle.getString("txt.remove_item"));
+        cancelProperty.set(bundle.getString("txt.cancel"));
+        confirmProperty.set(bundle.getString("txt.add_to_shopping_list"));
+
+        addItemDialogHeader = bundle.getString("txt.add_item_dialog_header");
+        addAmountDialogHeader = bundle.getString("txt.add_amount_dialog_header");
     }
 
     public void setStage(Stage stage) {
@@ -106,10 +169,6 @@ public class IngredientOverviewCtrl {
                 return new Amount(quantity, "");
             }
         } catch (NumberFormatException e) {
-            // If the first part isn't a number, treat the whole thing as a description with
-            // 0 quantity?
-            // Or maybe 1? Let's use 0 quantity and the whole string as description for
-            // safety:)
             return new Amount(0, input);
         }
     }
@@ -117,15 +176,15 @@ public class IngredientOverviewCtrl {
     @FXML
     private void addItem() {
         TextInputDialog nameDialog = new TextInputDialog();
-        nameDialog.setTitle("Add Item");
-        nameDialog.setHeaderText("Enter item name:");
-        nameDialog.setContentText("Name:");
+        nameDialog.setTitle(addItemProperty.get());
+        nameDialog.setHeaderText(addItemDialogHeader);
+        nameDialog.setContentText(nameColumnProperty.get() + ":");
 
         nameDialog.showAndWait().ifPresent(name -> {
             TextInputDialog amountDialog = new TextInputDialog("1");
-            amountDialog.setTitle("Add Item");
-            amountDialog.setHeaderText("Enter amount (e.g., '1 kg', '2 pieces'):");
-            amountDialog.setContentText("Amount:");
+            amountDialog.setTitle(addItemProperty.get());
+            amountDialog.setHeaderText(addAmountDialogHeader);
+            amountDialog.setContentText(amountColumnProperty.get() + ":");
 
             amountDialog.showAndWait().ifPresent(amountStr -> {
                 Amount amount = parseAmount(amountStr);

@@ -402,7 +402,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 englishFilter.setDisable(false);
                 dutchFilter.setDisable(false);
                 germanFilter.setDisable(false);
-            } else if  (newValue == ingredientToggleButton) {
+            } else if (newValue == ingredientToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Ingredient);
                 cloneButton.setDisable(true);
                 favouriteButton.setDisable(true);
@@ -569,7 +569,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private void editIngredient(Ingredient ingredient) {
         var bundle = localeManager.getCurrentBundle();
         Pair<EditIngredientCtrl, Parent> editIngredientPair = fxml.load(EditIngredientCtrl.class,
-                bundle,"client", "scenes", "EditIngredient.fxml");
+                bundle, "client", "scenes", "EditIngredient.fxml");
 
         EditIngredientCtrl editIngredientCtrl = editIngredientPair.getKey();
         Parent editIngredientRoot = editIngredientPair.getValue();
@@ -616,7 +616,7 @@ public class MainApplicationCtrl implements Internationalizable {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                if(!serverUtils.isServerAvailable()) {
+                if (!serverUtils.isServerAvailable()) {
                     throw new Exception("Server is offline");
                 }
 
@@ -638,7 +638,6 @@ public class MainApplicationCtrl implements Internationalizable {
         new Thread(task).start();
         showMainScreen();
     }
-
 
     /**
      * Opens a modal popup asking the user to enter a name for a cloned recipe.
@@ -694,7 +693,7 @@ public class MainApplicationCtrl implements Internationalizable {
         Parent root = pair.getValue();
 
         Stage stage = new Stage();
-        stage.setTitle("Review Ingredients");
+        stage.setTitle(bundle.getString("txt.review_ingredients"));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(new Scene(root));
 
