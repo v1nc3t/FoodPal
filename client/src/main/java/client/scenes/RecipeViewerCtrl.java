@@ -94,10 +94,12 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final RecipeManager recipeManager;
 
     private final ShoppingListManager shoppingListManager;
+    private final MainApplicationCtrl mainCtrl;
 
     @Inject
-    public RecipeViewerCtrl(LocaleManager localeManager,
-                            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
+    public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
+            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
+        this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
         this.recipeManager = recipeManager;
         this.shoppingListManager = shoppingListManager;
@@ -174,8 +176,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         setPreparationList(recipe);
 
         double kcal = recipe.getCaloriesPerPortion(
-                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
-        );
+                id -> recipeManager.getIngredient(new RecipeIngredient(id, null)));
         DecimalFormat df = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
         caloriesProperty.set(df.format(kcal) + " kcal");
 
@@ -194,8 +195,7 @@ public class RecipeViewerCtrl implements Internationalizable {
             portionsValueProperty.set("~" + calculateScaledPortions());
             scaleFactor = calculateScaledPortions() / (double) recipe.getPortions();
             setIngredientsList(recipe, scaleFactor);
-        }
-        else {
+        } else {
             portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
             setIngredientsList(recipe);
         }
@@ -220,7 +220,8 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     /**
      * This sets the ingredients with a scaling factor.
-     * @param recipe the recipe
+     * 
+     * @param recipe      the recipe
      * @param scaleFactor the scaling factor
      */
     private void setIngredientsList(Recipe recipe, double scaleFactor) {
@@ -273,7 +274,8 @@ public class RecipeViewerCtrl implements Internationalizable {
     @FXML
     private void addToShoppingList() {
         if (currentRecipe != null) {
-            shoppingListManager.addRecipe(currentRecipe);
+            var items = shoppingListManager.getRecipeItems(currentRecipe);
+            mainCtrl.showIngredientOverview(items);
         }
     }
 
@@ -285,8 +287,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         if (recipeManager.isScaled(currentRecipe.getId())) {
             int newScaledPortions = recipeManager.getRecipeScale(currentRecipe.getId()) + 1;
             recipeManager.setScaledRecipe(currentRecipe.getId(), newScaledPortions);
-        }
-        else {
+        } else {
             recipeManager.setScaledRecipe(currentRecipe.getId(), 1);
         }
 
@@ -302,8 +303,7 @@ public class RecipeViewerCtrl implements Internationalizable {
             if (recipeManager.isScaled(currentRecipe.getId())) {
                 int newScaledPortions = recipeManager.getRecipeScale(currentRecipe.getId()) - 1;
                 recipeManager.setScaledRecipe(currentRecipe.getId(), newScaledPortions);
-            }
-            else {
+            } else {
                 recipeManager.setScaledRecipe(currentRecipe.getId(), -1);
             }
         }
@@ -323,10 +323,12 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     /**
      * Calculates the scaled portions of the current recipe
+     * 
      * @return scaled portions
      */
     private int calculateScaledPortions() {
-        if (!recipeManager.isScaled(currentRecipe.getId())) return currentRecipe.getPortions();
+        if (!recipeManager.isScaled(currentRecipe.getId()))
+            return currentRecipe.getPortions();
         return currentRecipe.getPortions() + recipeManager.getRecipeScale(currentRecipe.getId());
     }
 }
