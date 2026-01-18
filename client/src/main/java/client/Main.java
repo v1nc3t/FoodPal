@@ -78,15 +78,6 @@ public class Main extends Application {
         primaryStage.setMinWidth(640);
         primaryStage.setMinHeight(480);
         primaryStage.show();
-
-        /*
-         * var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes",
-         * "QuoteOverview.fxml");
-         * var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
-         * 
-         * var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-         * mainCtrl.initialize(primaryStage, overview, add);
-         */
     }
 
     @Override
