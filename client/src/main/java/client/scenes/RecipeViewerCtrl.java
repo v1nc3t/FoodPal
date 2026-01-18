@@ -84,6 +84,8 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final StringProperty caloriesProperty = new SimpleStringProperty();
     @FXML
     private Label caloriesLabel;
+    private final StringProperty caloriesLabelProperty = new SimpleStringProperty();
+
 
     private final StringProperty servingSizeProperty = new SimpleStringProperty();
     @FXML
@@ -133,7 +135,10 @@ public class RecipeViewerCtrl implements Internationalizable {
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
         servingSizeLabel.textProperty().bind(servingSizeProperty);
-        caloriesLabel.textProperty().bind(caloriesProperty);
+        caloriesLabel.textProperty().bind(
+                caloriesLabelProperty.concat(" ").concat(caloriesProperty)
+        );
+
     }
 
     @Override
@@ -152,6 +157,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         printProperty.set(resourceBundle.getString("txt.print"));
         addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
         servingSizeProperty.set(resourceBundle.getString("txt.serving_size") + ":");
+        caloriesLabelProperty.set(resourceBundle.getString("txt.recipe_kcal_100g"));
 
     }
 
@@ -172,12 +178,15 @@ public class RecipeViewerCtrl implements Internationalizable {
         languageSuffixProperty.set(recipe.getLanguage().proper());
         titleProperty.set(recipe.getTitle());
         setPreparationList(recipe);
-
-        double kcal = recipe.getCaloriesPerPortion(
+        double kcalPer100g = recipe.getKcalPer100g(
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
-        DecimalFormat df = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
-        caloriesProperty.set(df.format(kcal) + " kcal");
+
+        DecimalFormat df = new DecimalFormat("0.#",
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
+
+        caloriesProperty.set(df.format(kcalPer100g) + " kcal / 100g");
+
 
         boolean scaled = recipeManager.isScaled(recipe.getId());
 
