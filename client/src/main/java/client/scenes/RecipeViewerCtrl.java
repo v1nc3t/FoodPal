@@ -94,6 +94,7 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final RecipeManager recipeManager;
 
     private final ShoppingListManager shoppingListManager;
+    private final MainApplicationCtrl mainCtrl;
 
     @Inject
     public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
