@@ -7,7 +7,6 @@ public enum Unit {
     MILLILITER,
     CUP,
     TABLESPOON,
-    TEASPOON,
-    PIECE
+    TEASPOON
     //Just an example, more units can be added as needed
 }

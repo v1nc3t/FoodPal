@@ -21,6 +21,8 @@ import client.scenes.MainApplicationCtrl;
 import client.scenes.SidebarListCtrl;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import client.utils.IServerUtils;
+import client.utils.ServerUtils;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
@@ -43,5 +45,6 @@ public class MyModule implements Module {
         binder.bind(RecipeManager.class).in(Scopes.SINGLETON);
         binder.bind(client.services.ShoppingListManager.class).in(Scopes.SINGLETON);
         binder.bind(client.config.ConfigManager.class).toInstance(configManager);
+        binder.bind(IServerUtils.class).to(ServerUtils.class).in(Scopes.SINGLETON);
     }
 }

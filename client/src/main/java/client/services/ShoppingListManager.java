@@ -133,7 +133,40 @@ public class ShoppingListManager {
             return;
 
         runOnFx(() -> {
+<<<<<<< HEAD
             items.addAll(newItems);
+=======
+            for (RecipeIngredient ri : ingredients) {
+                ShoppingListItem item = null;
+                if (recipeManager.isScaled(recipe.getId())) {
+                    double scaleFactor = (double) (recipe.getPortions()
+                                    + recipeManager.getRecipeScale(recipe.getId())) /
+                            (double) recipe.getPortions();
+                    item = new ShoppingListItem(
+                            ri.getIngredientRef(),
+                            ri.getAmount().scaleAndNormalize(scaleFactor),
+                            recipe.getId());
+                }
+                else {
+                    item = new ShoppingListItem(
+                            ri.getIngredientRef(),
+                            ri.getAmount(),
+                            recipe.getId());
+                }
+
+                // Snapshot the name for persistence
+                try {
+                    var ingredient = recipeManager.getIngredient(ri);
+                    if (ingredient != null) {
+                        item.setCustomName(ingredient.getName());
+                    }
+                } catch (Exception e) {
+                    // fall back to unknown/null customName
+                }
+
+                items.add(item);
+            }
+>>>>>>> 21703c7099f7d6c7bace809eddf567967378ed2c
             saveToConfig();
         });
     }

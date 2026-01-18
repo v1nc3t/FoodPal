@@ -1,9 +1,12 @@
 package client.services;
 
+import client.utils.ServerUtils;
+import com.google.inject.Inject;
 import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,17 +16,20 @@ import java.util.concurrent.CountDownLatch;
  * - Keeps maps for fast lookup and validation.
  * - Exposes an ObservableList for JavaFX views.
  * - Marshals UI updates onto the JavaFX thread.
- * Use RecipeManager.getInstance() to access the singleton.
  */
 public class RecipeManager {
 
     private final Map<UUID, Recipe> recipesMap = new ConcurrentHashMap<>();
     private final Map<UUID, Ingredient> ingredientsMap = new ConcurrentHashMap<>();
     private final Set<UUID> favouriteRecipes = new HashSet<>();
+    private final Map<UUID, Integer> scaledRecipesMap = new ConcurrentHashMap<>();
 
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipesFx = FXCollections.observableArrayList();
     private final ObservableList<Ingredient> ingredientsFx = FXCollections.observableArrayList();
+
+    @Inject
+    private ServerUtils server;
 
     public RecipeManager() {
         // Seed a test recipe so ListView shows something immediately during manual testing.
@@ -62,6 +68,22 @@ public class RecipeManager {
     }
 
 
+    public void sync(List<Recipe> recipes, List<Ingredient> ingredients) {
+        runOnFx(() -> {
+            recipesMap.clear();
+            ingredientsMap.clear();
+
+            for (Ingredient ingredient : ingredients) {
+                ingredientsMap.put(ingredient.getId(), ingredient);
+            }
+            ingredientsFx.setAll(ingredients);
+
+            for (Recipe recipe : recipes) {
+                recipesMap.put(recipe.getId(), recipe);
+            }
+            recipesFx.setAll(recipes);
+        });
+    }
 
     /**
      Returns true if stored, false if invalid input.
@@ -73,22 +95,29 @@ public class RecipeManager {
                 .allMatch(ri -> ingredientsMap.containsKey(ri.getIngredientRef()));
         if (!allRefsExist) return false;
 
-        // store
-        if (recipe.getId() != null) recipesMap.put(recipe.getId(), recipe);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        runOnFx(() -> {
-            int idx = indexOfRecipe(recipe.getId());
-            if (idx >= 0) recipesFx.set(idx, recipe);
-            else recipesFx.add(recipe);
-            latch.countDown();
-        });
         try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            server.setRecipe(recipe);
+
+            if (recipe.getId() != null) {
+                recipesMap.put(recipe.getId(), recipe);
+            }
+
+            CountDownLatch latch = new CountDownLatch(1);
+            runOnFx(() -> {
+                int idx = indexOfRecipe(recipe.getId());
+                if (idx >= 0) {
+                    recipesFx.set(idx, recipe);
+                } else {
+                    recipesFx.add(recipe);
+                }
+                latch.countDown();
+            });
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to save recipe to server: " + e.getMessage());
+            return false;
         }
-        return true;
     }
 
     /**
@@ -113,42 +142,68 @@ public class RecipeManager {
 
     public boolean removeRecipe(UUID recipeId) {
         if (recipeId == null) return false;
-        favouriteRecipes.remove(recipeId); // keep favourites consistent
+
+        server.removeRecipe(recipeId);
+
+        // keep favourites consistent
+        favouriteRecipes.remove(recipeId);
+        // keep scaled recipes consistent
+        scaledRecipesMap.remove(recipeId);
         Recipe removed = recipesMap.remove(recipeId);
+
         // still remove from observable list
         runOnFx(() -> recipesFx.removeIf(r -> Objects.equals(r.getId(), recipeId)));
-        return removed != null;
-    }
 
-    public boolean removeIngredient(UUID ingredientId) {
-        if (ingredientId == null) return false;
-        var usedRecipe =
-                recipesMap
-                        .values()
-                        .stream()
-                        .filter(
-                        rv -> rv
-                                .getIngredients()
-                                .stream()
-                                .anyMatch(ri -> ri.ingredientRef == ingredientId)
-                ).findAny().orElse(null);
-        if (usedRecipe != null)
-            throw new RuntimeException("Cannot remove ingredient, because it is used in recipe: " + usedRecipe.getTitle());
-        Ingredient removed = ingredientsMap.remove(ingredientId);
-        // still remove from observable list
-        runOnFx(() -> ingredientsFx.removeIf(r -> Objects.equals(r.getId(), ingredientId)));
         return removed != null;
     }
 
     public boolean setIngredient(Ingredient ingredient) {
         if (ingredient == null || ingredient.getId() == null) return false;
-        ingredientsMap.put(ingredient.getId(), ingredient);
-        runOnFx(() -> {
-            int idx = indexOfIngredient(ingredient.getId());
-            if (idx >= 0) ingredientsFx.set(idx, ingredient);
-            else ingredientsFx.add(ingredient);
-        });
-        return true;
+
+        try {
+            server.setIngredient(ingredient);
+
+            ingredientsMap.put(ingredient.getId(), ingredient);
+
+            runOnFx(() -> {
+                int idx = indexOfIngredient(ingredient.getId());
+                if (idx >= 0) ingredientsFx.set(idx, ingredient);
+                else ingredientsFx.add(ingredient);
+            });
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to save ingredient to server: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean removeIngredient(UUID ingredientId) {
+        if (ingredientId == null) return false;
+
+        var usedRecipe = recipesMap
+                        .values()
+                        .stream()
+                        .filter(rv -> rv
+                                .getIngredients()
+                                .stream()
+                                .anyMatch(ri -> ri.ingredientRef == ingredientId)
+                        ).findAny().orElse(null);
+
+        if (usedRecipe != null)
+            throw new RuntimeException(
+                    "Cannot remove ingredient, because it is used in recipe: " +
+                            usedRecipe.getTitle()
+            );
+
+        server.removeIngredient(ingredientId);
+
+        Ingredient removed = ingredientsMap.remove(ingredientId);
+
+        // still remove from observable list
+        runOnFx(() -> ingredientsFx.removeIf(r -> Objects.equals(r.getId(), ingredientId)));
+
+        return removed != null;
     }
 
 
@@ -236,4 +291,47 @@ public class RecipeManager {
         return Set.copyOf(favouriteRecipes);
     }
 
+    /**
+     * Checks whether a recipe with a given id is scaled.
+     * @param id recipe UUID
+     * @return true if scaled, false otherwise
+     */
+    public boolean isScaled(UUID id) {
+        return scaledRecipesMap.containsKey(id);
+    }
+
+    /**
+     * Adds a scaled recipe entry to the map or updates the scale if the recipe already exists.
+     * Treats a scale of 0 as resetting the scale, therefore removing the recipe from the map.
+     * @param id recipe UUID
+     * @param scale integer number to be scaled by (in portion units)
+     */
+    public void setScaledRecipe(UUID id, Integer scale) {
+        if (scale == null) {
+            throw new IllegalArgumentException("Scale must be an integer");
+        }
+        if (scale == 0) {
+            removeScaledRecipe(id);
+        }
+        else {
+            scaledRecipesMap.put(id, scale);
+        }
+    }
+
+    /**
+     * Gets the scale of a scaled recipe.
+     * @param id recipe UUID
+     * @return the scale of the recipe
+     */
+    public Integer getRecipeScale(UUID id) {
+        return scaledRecipesMap.get(id);
+    }
+
+    /**
+     * Removes a scaled recipe entry from the map.
+     * @param id recipe UUID
+     */
+    public void removeScaledRecipe(UUID id) {
+        scaledRecipesMap.remove(id);
+    }
 }

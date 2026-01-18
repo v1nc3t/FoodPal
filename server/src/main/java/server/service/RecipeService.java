@@ -2,15 +2,18 @@ package server.service;
 
 import commons.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 import server.websocket.WebSocketHub;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 /// Service that keeps track of recipes
 @Service
+@Transactional
 public class RecipeService implements IRecipeService {
     private final HashMap<UUID, Recipe> recipes = new HashMap<>();
     private final HashMap<UUID, Ingredient> ingredients = new HashMap<>();
@@ -85,5 +88,23 @@ public class RecipeService implements IRecipeService {
             webSocketHub.broadcastRecipeDelete(recipeId);
             webSocketHub.broadcastStateUpdate(getState());
         }
+    }
+
+    @Override
+    public void deleteIngredient(UUID ingredientId) {
+        if (ingredients.remove(ingredientId) != null) {
+            ingredientRepository.deleteById(ingredientId);
+        }
+
+        for (Recipe recipe : recipes.values()) {
+            boolean wasModified = recipe.getIngredients().removeIf(ir ->
+                    Objects.equals(ir.getIngredientRef(), ingredientId));
+
+            if (wasModified) {
+                recipeRepository.save(recipe);
+                // webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
+            }
+        }
+        // webSocketHub.broadcastTitleUpdate(getState());
     }
 }
