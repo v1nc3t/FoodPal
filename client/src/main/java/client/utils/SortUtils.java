@@ -139,6 +139,7 @@ public class SortUtils {
      * @param id provided UUID to add or remove from favourites
      */
     public void toggleFavourite(UUID id) {
+        System.out.println("Favourite ID: " + id);
         if (favourites.contains(id)) {
             favourites.remove(id);
         } else {

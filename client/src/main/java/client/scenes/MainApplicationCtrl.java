@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.MyFXML;
 import client.config.Config;
+import client.config.FavoriteRecipe;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
 import client.utils.ServerUtils;
@@ -253,12 +254,13 @@ public class MainApplicationCtrl implements Internationalizable {
         removeButton.setOnAction(_ -> sidebarListCtrl.enterRemoveMode());
         favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
 
-        readConfigFavourites();
         sortUponSelection(sidebarListCtrl);
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
 
-        Platform.runLater(this::refresh);
+        Platform.runLater(() ->
+            refresh(this::readConfigFavourites)
+        );
     }
 
     private void prepareSearchField() {
@@ -285,26 +287,32 @@ public class MainApplicationCtrl implements Internationalizable {
      */
     public void readConfigFavourites() {
         Config config = localeManager.getConfigManager().getConfig();
-        List<UUID> configFavourites = config.getFavoriteRecipeIDs();
-        List<UUID> updatedFavourites = new ArrayList<>();
+        var configFavourites = config.getFavoriteRecipes();
+        var updatedFavourites = new ArrayList<>();
 
-        for (UUID uuid : configFavourites) {
-            if (recipeManager.indexOfRecipe(uuid) == -1) {
+        for (var favRecipe: configFavourites) {
+            if (recipeManager.indexOfRecipe(favRecipe.id()) == -1) {
                 // alert the user for each missing recipe
-                String message = "Your favourite recipe with ID " + uuid +
-                        " has been deleted :(";
+                String message = localeManager
+                        .getCurrentBundle()
+                        .getString("txt.recipe_was_deleted")
+                        .replace("$name", favRecipe.name());
 
                 var alert = new Alert(Alert.AlertType.WARNING);
                 alert.initModality(Modality.APPLICATION_MODAL);
                 alert.setContentText(message);
                 alert.showAndWait();
             } else {
-                recipeManager.toggleFavourite(uuid);
-                updatedFavourites.add(uuid);
+                recipeManager.toggleFavourite(favRecipe.id());
+                updatedFavourites.add(favRecipe.id());
             }
         }
 
-        config.setFavoriteRecipeIDs(updatedFavourites);
+        config.setFavoriteRecipes(recipeManager
+                        .getFavouriteRecipesSnapshot()
+                        .stream()
+                        .map(id -> new FavoriteRecipe(id, recipeManager.getRecipe(id).title))
+                        .toList());
         localeManager.getConfigManager().save();
     }
 
@@ -609,10 +617,13 @@ public class MainApplicationCtrl implements Internationalizable {
         contentPane.getChildren().setAll(addRecipeRoot);
     }
 
+    public void refresh() {
+        refresh(null);
+    }
     /**
      * Refreshes db to get latest data
      */
-    public void refresh() {
+    public void refresh(Runnable afterRefresh) {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
@@ -623,13 +634,17 @@ public class MainApplicationCtrl implements Internationalizable {
                 List<Recipe> recipes = serverUtils.getRecipes();
                 List<Ingredient> ingredients = serverUtils.getIngredients();
 
-                recipeManager.sync(recipes, ingredients);
-
+                Platform.runLater(() -> {
+                    recipeManager.sync(recipes, ingredients);
+                    if (afterRefresh != null)
+                        afterRefresh.run();
+                });
                 return null;
             }
         };
 
         task.setOnFailed(e -> {
+            task.getException().printStackTrace();
             new Alert(
                     Alert.AlertType.ERROR,
                     "Sync failed: " + task.getException().getMessage()).show();

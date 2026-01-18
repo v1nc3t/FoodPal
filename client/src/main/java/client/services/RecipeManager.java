@@ -1,12 +1,13 @@
 package client.services;
 
+import client.config.ConfigManager;
+import client.config.FavoriteRecipe;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,8 @@ public class RecipeManager {
 
     @Inject
     private ServerUtils server;
+    @Inject
+    private ConfigManager configManager;
 
     public RecipeManager() {
         // Seed a test recipe so ListView shows something immediately during manual testing.
@@ -82,7 +85,23 @@ public class RecipeManager {
                 recipesMap.put(recipe.getId(), recipe);
             }
             recipesFx.setAll(recipes);
+
+            refreshFavoriteRecipeNames();
         });
+    }
+
+    public void refreshFavoriteRecipeNames() {
+        configManager.getConfig().setFavoriteRecipes(
+            configManager.getConfig()
+                    .getFavoriteRecipes()
+                    .stream()
+                    .map(favRecipe -> {
+                            var recipe = getRecipe(favRecipe.id());
+                            return new FavoriteRecipe(favRecipe.id(),
+                                    recipe == null ? favRecipe.name() : recipe.title);
+                    })
+                    .toList()
+        );
     }
 
     /**
@@ -113,6 +132,7 @@ public class RecipeManager {
                 latch.countDown();
             });
 
+            refreshFavoriteRecipeNames();
             return true;
         } catch (Exception e) {
             System.err.println("Failed to save recipe to server: " + e.getMessage());
