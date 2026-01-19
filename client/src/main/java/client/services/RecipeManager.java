@@ -67,19 +67,34 @@ public class RecipeManager {
     }
 
     public void sync(List<Recipe> recipes, List<Ingredient> ingredients) {
+        // Defensive copy if someone passes the internal list
+        List<Recipe> recipesCopy = new ArrayList<>(recipes);
+        List<Ingredient> ingredientsCopy = new ArrayList<>(ingredients);
+
         runOnFx(() -> {
             recipesMap.clear();
             ingredientsMap.clear();
 
-            for (Ingredient ingredient : ingredients) {
+            for (Ingredient ingredient : ingredientsCopy) {
                 ingredientsMap.put(ingredient.getId(), ingredient);
             }
-            ingredientsFx.setAll(ingredients);
+            ingredientsFx.setAll(ingredientsCopy);
 
-            for (Recipe recipe : recipes) {
+            for (Recipe recipe : recipesCopy) {
                 recipesMap.put(recipe.getId(), recipe);
             }
-            recipesFx.setAll(recipes);
+            recipesFx.setAll(recipesCopy);
+        });
+    }
+
+    public void syncIngredients(List<Ingredient> ingredients) {
+        List<Ingredient> ingredientsCopy = new ArrayList<>(ingredients);
+        runOnFx(() -> {
+            ingredientsMap.clear();
+            for (Ingredient ingredient : ingredientsCopy) {
+                ingredientsMap.put(ingredient.getId(), ingredient);
+            }
+            ingredientsFx.setAll(ingredientsCopy);
         });
     }
 

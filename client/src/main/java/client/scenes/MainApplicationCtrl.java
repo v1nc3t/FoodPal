@@ -292,7 +292,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 List<Ingredient> ingredients = webSocketService.convertData(
                         response.data(), new com.fasterxml.jackson.core.type.TypeReference<List<Ingredient>>() {
                         });
-                recipeManager.sync(recipeManager.getObservableRecipes(), ingredients);
+                recipeManager.syncIngredients(ingredients);
             }
         });
     }
