@@ -267,14 +267,6 @@ public class MainApplicationCtrl implements Internationalizable {
     private void initializeWebSockets() {
         webSocketService.connect();
 
-        // Listen for global recipe state changes (syncs the whole list)
-        webSocketService.subscribe("recipe-state", null, response -> {
-            if (response.type() == WebSocketTypes.UPDATE) {
-                RecipeState state = webSocketService.convertData(response.data(), RecipeState.class);
-                recipeManager.sync(state.recipes().stream().toList(), state.ingredients().stream().toList());
-            }
-        });
-
         // Listen for individual recipe updates/deletes to keep list consistent
         webSocketService.subscribe("recipe", null, response -> {
             if (response.type() == WebSocketTypes.UPDATE) {
@@ -306,16 +298,6 @@ public class MainApplicationCtrl implements Internationalizable {
             } else if (response.type() == WebSocketTypes.DELETE) {
                 UUID id = UUID.fromString((String) response.data());
                 recipeManager.applyIngredientDelete(id);
-            }
-        });
-
-        // Listen for bulk ingredient updates
-        webSocketService.subscribe("ingredient-state", null, response -> {
-            if (response.type() == WebSocketTypes.UPDATE) {
-                List<Ingredient> ingredients = webSocketService.convertData(
-                        response.data(), new com.fasterxml.jackson.core.type.TypeReference<List<Ingredient>>() {
-                        });
-                recipeManager.syncIngredients(ingredients);
             }
         });
     }
