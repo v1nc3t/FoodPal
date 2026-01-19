@@ -24,7 +24,7 @@ public class RecipeManager {
 
     private final Map<UUID, Recipe> recipesMap = new ConcurrentHashMap<>();
     private final Map<UUID, Ingredient> ingredientsMap = new ConcurrentHashMap<>();
-    private final Set<UUID> favouriteRecipes = new HashSet<>();
+    private Set<UUID> favouriteRecipes = new HashSet<>();
     private final Map<UUID, Integer> scaledRecipesMap = new ConcurrentHashMap<>();
 
     // Observable list for UI binding (JavaFX)
@@ -127,6 +127,9 @@ public class RecipeManager {
                                     pair.getKey().id(),
                                     pair.getValue().title))
                     .toList()
+        );
+        favouriteRecipes = new HashSet<>(
+                configManager.getConfig().getFavoriteRecipes().stream().map(FavoriteRecipe::id).toList()
         );
     }
 

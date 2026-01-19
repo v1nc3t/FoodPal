@@ -260,7 +260,7 @@ public class MainApplicationCtrl implements Internationalizable {
 
         recipeManager.setOnFavoriteRecipeDeleted(this::showDeletedRecipePrompt);
         Platform.runLater(() ->
-            refresh(this::readConfigFavourites)
+            refresh(recipeManager::refreshFavoriteRecipes)
         );
     }
 
@@ -275,27 +275,6 @@ public class MainApplicationCtrl implements Internationalizable {
                 contentPane.requestFocus(); // Optional: move focus away from search
             }
         });
-    }
-
-    /**
-     * Initializes the list of favourite recipe UUIDs in the recipeManager
-     * to that given by the config. Also calls the appropriate {@link RecipeManager}
-     * method that checks the validity of the favorites.
-     */
-    public void readConfigFavourites() {
-        Config config = localeManager.getConfigManager().getConfig();
-        var configFavourites = config.getFavoriteRecipes();
-
-        for (var favRecipe: configFavourites) {
-            if (recipeManager.indexOfRecipe(favRecipe.id()) == -1) {
-                showDeletedRecipePrompt(favRecipe);
-            } else {
-                recipeManager.toggleFavourite(favRecipe.id());
-            }
-        }
-
-        recipeManager.refreshFavoriteRecipes();
-        localeManager.getConfigManager().save();
     }
 
     /**
