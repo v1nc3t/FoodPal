@@ -221,11 +221,11 @@ public class RecipeViewerCtrl implements Internationalizable {
         servingSizeProperty.set(
                 localeManager.getCurrentBundle().getString("txt.serving_size")
                         + ": "
-                        + portions
-                        + " ("
                         + df1.format(kcalPerPortion)
-                        + " kcal / portion)"
+                        + " "
+                        + localeManager.getCurrentBundle().getString("txt.kcal_per_portion")
         );
+
 
     }
 
