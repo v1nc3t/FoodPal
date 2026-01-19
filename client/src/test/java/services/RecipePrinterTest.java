@@ -15,9 +15,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -25,6 +24,7 @@ import org.testfx.framework.junit5.Start;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,7 +39,9 @@ public class RecipePrinterTest {
 
     @Test
     void printRecipeWithNullDoesNotThrow() {
-        assertDoesNotThrow(() -> RecipePrinter.printRecipe(null, null));
+        assertDoesNotThrow(() ->
+                RecipePrinter.printRecipe(null, null, id -> "TestIngredient")
+        );
     }
 
     @Test
@@ -99,11 +101,14 @@ public class RecipePrinterTest {
         assertTrue(text.contains("2. Step two"));
     }
 
+
+
     private VBox invokePrintableRecipe(Recipe recipe, Printer printer) throws Exception {
         Method method = RecipePrinter.class.getDeclaredMethod(
                 "printableRecipe",
                 Recipe.class,
-                PageLayout.class
+                PageLayout.class,
+                Function.class
         );
         method.setAccessible(true);
 
@@ -113,7 +118,10 @@ public class RecipePrinterTest {
                 Printer.MarginType.DEFAULT
         );
 
-        Node node = (Node) method.invoke(null, recipe, layout);
+
+        Function<UUID, String> nameResolver = id -> "TestIngredient";
+
+        Node node = (Node) method.invoke(null, recipe, layout, nameResolver);
         assertInstanceOf(VBox.class, node);
         return (VBox) node;
     }

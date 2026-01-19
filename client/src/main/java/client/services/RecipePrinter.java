@@ -1,6 +1,9 @@
 package client.services;
 
+import commons.Amount;
 import commons.Recipe;
+import commons.RecipeIngredient;
+import commons.Unit;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.print.PageLayout;
@@ -16,37 +19,47 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Window;
 
+import java.util.UUID;
+import java.util.function.Function;
+
 public class RecipePrinter {
 
     /**
      * Opens print dialog and prints the current recipe
+     *
      * @param recipe recipe that is printed
      * @param owner owner window for printing dialog
+     * @param ingredientNameResolver resolves ingredient UUID to name
      */
-    public static void printRecipe(Recipe recipe, Window owner) {
-        if (recipe == null){
+    public static void printRecipe(
+            Recipe recipe,
+            Window owner,
+            Function<UUID, String> ingredientNameResolver
+    ) {
+        if (recipe == null) {
             return;
         }
 
         PrinterJob job = PrinterJob.createPrinterJob();
-        if(job == null){
+        if (job == null) {
             System.out.println("Nothing to print");
             return;
         }
 
         boolean proceed = job.showPrintDialog(owner);
-        if(!proceed){
+        if (!proceed) {
             return;
         }
+
         Printer printer = job.getPrinter();
         PageLayout pageLayout = printer.createPageLayout(
-            Paper.A4,
-            PageOrientation.PORTRAIT,
-            Printer.MarginType.DEFAULT
+                Paper.A4,
+                PageOrientation.PORTRAIT,
+                Printer.MarginType.DEFAULT
         );
         job.getJobSettings().setPageLayout(pageLayout);
 
-        Node print = printableRecipe(recipe, pageLayout);
+        Node print = printableRecipe(recipe, pageLayout, ingredientNameResolver);
 
         boolean success = job.printPage(pageLayout, print);
         if (success) {
@@ -54,45 +67,38 @@ public class RecipePrinter {
         }
     }
 
-    /**
-     * This creates a formatted recipe that can be printed
-     * @param recipe the recipe
-     * @param pageLayout the page layout.
-     * @return node that containing formatted recipe
-     */
-    private static Node printableRecipe(Recipe recipe, PageLayout pageLayout){
+
+    private static Node printableRecipe(
+            Recipe recipe,
+            PageLayout pageLayout,
+            Function<UUID, String> ingredientNameResolver
+    ) {
         double contentWidth = pageLayout.getPrintableWidth() - 80;
 
         VBox root = new VBox(8);
-
         root.setPadding(new Insets(20));
         root.setPrefWidth(contentWidth);
         root.setMaxWidth(contentWidth);
 
         Label title = getTitle(recipe, contentWidth);
         Label ingredientsTitle = getIngredientsTitle(contentWidth);
-        VBox ingredientsBox = getIngredientsBox(recipe, contentWidth);
+        VBox ingredientsBox = getIngredientsBox(recipe, contentWidth, ingredientNameResolver);
         Label preparationTitle = getPreparationTitle(contentWidth);
         VBox preparationBox = getPreparationBox(recipe, contentWidth);
 
         root.getChildren().addAll(
-            title,
-            new Text(""),
-            ingredientsTitle,
-            ingredientsBox,
-            new Text(""),
-            preparationTitle,
-            preparationBox);
+                title,
+                new Text(""),
+                ingredientsTitle,
+                ingredientsBox,
+                new Text(""),
+                preparationTitle,
+                preparationBox
+        );
 
         return root;
     }
 
-    /**
-     * This gets us the title of current recipe
-     * @param recipe recipe
-     * @param contentWidth max width for the label.
-     * @return formatted recipe title
-     */
     private static Label getTitle(Recipe recipe, double contentWidth) {
         Label title = new Label(recipe.getTitle());
         title.setFont(Font.font("Monospaced", FontWeight.BOLD, 15));
@@ -102,58 +108,56 @@ public class RecipePrinter {
         return title;
     }
 
-    /**
-     * This gets us the ingredientsTitle
-     * @param contentWidth max width for the label
-     * @return formatted ingredient title.
-     */
     private static Label getIngredientsTitle(double contentWidth) {
-        Label ingredientsTitle = new Label("Ingredients: ");
+        Label ingredientsTitle = new Label("Ingredients:");
         ingredientsTitle.setFont(Font.font("Monospaced", FontWeight.BOLD, 15));
         ingredientsTitle.setPrefWidth(contentWidth);
         return ingredientsTitle;
     }
 
-    /**
-     * This gets us the ingredients for the current recipe in formatted way
-     * @param recipe recipe
-     * @param contentWidth max width for the label.
-     * @return returns ingredients in formatted way
-     */
-    private static VBox getIngredientsBox(Recipe recipe, double contentWidth) {
+
+    private static VBox getIngredientsBox(
+            Recipe recipe,
+            double contentWidth,
+            Function<UUID, String> ingredientNameResolver
+    ) {
         VBox ingredientsBox = new VBox(4);
+
         if (recipe.getIngredients() != null) {
-            for (Object ingredient : recipe.getIngredients()) {
-                Text text = new Text("- " + ingredient);
+            for (RecipeIngredient ingredient : recipe.getIngredients()) {
+                Amount amount = ingredient.getAmount();
+                String name = ingredientNameResolver.apply(ingredient.getIngredientRef());
+
+                String line;
+                if (amount.unit() != null) {
+                    line = "- " + name + " " +
+                            formatQuantity(amount.quantity()) + " " +
+                            formatUnit(amount.unit());
+                } else {
+                    line = "- " + name + " " + amount.description();
+                }
+
+                Text text = new Text(line);
                 text.setWrappingWidth(contentWidth);
                 ingredientsBox.getChildren().add(text);
             }
         }
+
         return ingredientsBox;
     }
 
-    /**
-     * This gets us the Preparation title in formatted way
-     * @param contentWidth max width for the label.
-     * @return formatted preparationtitle
-     */
     private static Label getPreparationTitle(double contentWidth) {
-        Label preparationTitle = new Label("Preparation: ");
+        Label preparationTitle = new Label("Preparation:");
         preparationTitle.setFont(Font.font("Monospaced", FontWeight.BOLD, 15));
         preparationTitle.setPrefWidth(contentWidth);
         return preparationTitle;
     }
 
-    /**
-     * Gets the preparation steps for the current recipe in formatted way
-     * @param recipe recipe
-     * @param contentWidth max width for the label.
-     * @return preparation steps in formatted way
-     */
     private static VBox getPreparationBox(Recipe recipe, double contentWidth) {
         VBox preparationBox = new VBox(4);
-        if(recipe.getSteps() != null){
-            for(int i = 0; i < recipe.getSteps().size(); i++){
+
+        if (recipe.getSteps() != null) {
+            for (int i = 0; i < recipe.getSteps().size(); i++) {
                 String text = (i + 1) + ". " + recipe.getSteps().get(i);
 
                 Label label = new Label(text);
@@ -163,6 +167,26 @@ public class RecipePrinter {
                 preparationBox.getChildren().add(label);
             }
         }
+
         return preparationBox;
+    }
+
+
+
+    private static String formatQuantity(double quantity) {
+        if (quantity == Math.floor(quantity)) {
+            return String.valueOf((int) quantity);
+        }
+        return String.format("%.1f", quantity);
+    }
+
+    private static String formatUnit(Unit unit) {
+        return switch (unit) {
+            case KILOGRAM -> "kg";
+            case GRAM -> "g";
+            case LITER -> "l";
+            case MILLILITER -> "ml";
+            default -> unit.name().toLowerCase();
+        };
     }
 }

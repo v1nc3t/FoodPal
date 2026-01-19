@@ -268,8 +268,9 @@ public class RecipeViewerCtrl implements Internationalizable {
             return;
         }
 
-        RecipePrinter.printRecipe(currentRecipe, titleLabel.getScene().getWindow());
+        RecipePrinter.printRecipe(currentRecipe, titleLabel.getScene().getWindow(), id -> recipeManager.getIngredient(new RecipeIngredient(id, null)).getName());
     }
+
 
     @FXML
     private void addToShoppingList() {
