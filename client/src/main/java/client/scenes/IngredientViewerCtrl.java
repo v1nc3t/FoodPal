@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.services.LocaleManager;
+import client.services.WebSocketService;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import javafx.beans.property.SimpleStringProperty;
@@ -41,8 +42,13 @@ public class IngredientViewerCtrl implements Internationalizable {
     private final StringProperty carbsProperty = new SimpleStringProperty();
     @Inject
     LocaleManager localeManager;
+    @Inject
+    WebSocketService webSocketService;
+    @Inject
+    MainApplicationCtrl mainCtrl;
 
     private Consumer<Ingredient> onIngredientEdit;
+
     public void setOnIngredientEdit(Consumer<Ingredient> cb) {
         onIngredientEdit = cb;
     }
@@ -58,6 +64,28 @@ public class IngredientViewerCtrl implements Internationalizable {
     }
 
     public void setIngredient(Ingredient ingredient) {
+        if (ingredient == null) {
+            titleLabel.setText("");
+            return;
+        }
+
+        if (this.ingredient != null && !this.ingredient.getId().equals(ingredient.getId())) {
+            webSocketService.unsubscribe("ingredient", this.ingredient.getId());
+        }
+
+        if (this.ingredient == null || !this.ingredient.getId().equals(ingredient.getId())) {
+            webSocketService.subscribe("ingredient", ingredient.getId(), response -> {
+                javafx.application.Platform.runLater(() -> {
+                    if (response.type() == commons.WebSocketTypes.UPDATE) {
+                        Ingredient updated = webSocketService.convertData(response.data(), Ingredient.class);
+                        setIngredient(updated);
+                    } else if (response.type() == commons.WebSocketTypes.DELETE) {
+                        mainCtrl.showMainScreen();
+                    }
+                });
+            });
+        }
+
         this.ingredient = ingredient;
         titleLabel.setText(ingredient.getName());
         var nv = ingredient.getNutritionValues();

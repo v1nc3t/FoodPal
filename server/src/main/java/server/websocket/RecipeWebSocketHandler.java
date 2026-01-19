@@ -76,7 +76,8 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             case "recipe" -> {
                 String idStr = json.path("recipeId").asText(null);
                 if (idStr == null || idStr.isEmpty()) {
-                    sendErrorMessage(session, "recipeId is missing for subscription");
+                    hub.subscribeRecipe(session, null);
+                    sendSubscribeConfirm(session, "recipe");
                 } else {
                     try {
                         UUID recipeId = UUID.fromString(idStr);
@@ -90,7 +91,8 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             case "ingredient" -> {
                 String idStr = json.path("ingredientId").asText(null);
                 if (idStr == null || idStr.isEmpty()) {
-                    sendErrorMessage(session, "ingredientId is missing for subscription");
+                    hub.subscribeIngredient(session, null);
+                    sendSubscribeConfirm(session, "ingredient");
                 } else {
                     try {
                         UUID ingredientId = UUID.fromString(idStr);
@@ -123,7 +125,8 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             case "recipe" -> {
                 String idStr = json.path("recipeId").asText(null);
                 if (idStr == null || idStr.isEmpty()) {
-                    sendErrorMessage(session, "recipeId is missing for unsubscription");
+                    hub.unsubscribeRecipe(session, null);
+                    sendUnsubscribeConfirm(session, "recipe");
                 } else {
                     try {
                         UUID recipeId = UUID.fromString(idStr);
@@ -137,7 +140,8 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
             case "ingredient" -> {
                 String idStr = json.path("ingredientId").asText(null);
                 if (idStr == null || idStr.isEmpty()) {
-                    sendErrorMessage(session, "ingredientId is missing for unsubscription");
+                    hub.unsubscribeIngredient(session, null);
+                    sendUnsubscribeConfirm(session, "ingredient");
                 } else {
                     try {
                         UUID ingredientId = UUID.fromString(idStr);

@@ -286,7 +286,18 @@ public class MainApplicationCtrl implements Internationalizable {
             }
         });
 
-        // Listen for ingredient updates
+        // Listen for individual ingredient updates/deletes
+        webSocketService.subscribe("ingredient", null, response -> {
+            if (response.type() == WebSocketTypes.UPDATE) {
+                Ingredient ingredient = webSocketService.convertData(response.data(), Ingredient.class);
+                recipeManager.applyIngredientUpdate(ingredient);
+            } else if (response.type() == WebSocketTypes.DELETE) {
+                UUID id = UUID.fromString((String) response.data());
+                recipeManager.applyIngredientDelete(id);
+            }
+        });
+
+        // Listen for bulk ingredient updates
         webSocketService.subscribe("ingredient-state", null, response -> {
             if (response.type() == WebSocketTypes.UPDATE) {
                 List<Ingredient> ingredients = webSocketService.convertData(
