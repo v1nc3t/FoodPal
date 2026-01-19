@@ -78,6 +78,8 @@ public class RecipeService implements IRecipeService {
                 .forEach(recipe -> webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe));
 
         webSocketHub.broadcastStateUpdate(getState());
+        webSocketHub.broadcastIngredientStateUpdate(ingredients.values());
+
     }
 
     @Override
@@ -94,17 +96,18 @@ public class RecipeService implements IRecipeService {
     public void deleteIngredient(UUID ingredientId) {
         if (ingredients.remove(ingredientId) != null) {
             ingredientRepository.deleteById(ingredientId);
+            webSocketHub.broadcastIngredientDelete(ingredientId);
         }
-
         for (Recipe recipe : recipes.values()) {
             boolean wasModified = recipe.getIngredients().removeIf(ir ->
                     Objects.equals(ir.getIngredientRef(), ingredientId));
-
             if (wasModified) {
                 recipeRepository.save(recipe);
-                // webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
+                webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
             }
         }
-        // webSocketHub.broadcastTitleUpdate(getState());
+        webSocketHub.broadcastStateUpdate(getState());
+        webSocketHub.broadcastIngredientStateUpdate(ingredients.values());
+
     }
 }

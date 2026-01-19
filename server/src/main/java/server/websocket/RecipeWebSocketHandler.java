@@ -99,6 +99,11 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
                     }
                 }
             }
+            case "ingredient-state" -> {
+                hub.subscribeIngredientState(session);
+                sendSubscribeConfirm(session, "ingredient-state");
+            }
+
             default -> sendErrorMessage(session, "Unknown topic: " + topic);
         }
     }
@@ -141,6 +146,11 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
                     }
                 }
             }
+            case "ingredient-state" -> {
+                hub.unsubscribeIngredientState(session);
+                sendUnsubscribeConfirm(session, "ingredient-state");
+            }
+
             default -> sendErrorMessage(session, "Unknown topic: " + topic);
         }
     }
