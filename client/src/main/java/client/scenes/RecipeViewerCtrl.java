@@ -341,4 +341,5 @@ public class RecipeViewerCtrl implements Internationalizable {
             return currentRecipe.getPortions();
         return currentRecipe.getPortions() + recipeManager.getRecipeScale(currentRecipe.getId());
     }
+
 }
