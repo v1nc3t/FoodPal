@@ -282,6 +282,18 @@ public class MainApplicationCtrl implements Internationalizable {
                 recipeManager.applyRecipeUpdate(recipe);
             } else if (response.type() == WebSocketTypes.DELETE) {
                 UUID id = UUID.fromString((String) response.data());
+                if (recipeManager.isFavourite(id)) {
+                    Recipe deleted = recipeManager.getRecipe(id);
+                    String title = (deleted != null) ? deleted.getTitle() : "A favorite recipe";
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Recipe Deleted");
+                        alert.setHeaderText("A favorite recipe was lost");
+                        alert.setContentText(
+                                "The recipe '" + title + "' has been deleted by another user.");
+                        alert.show();
+                    });
+                }
                 recipeManager.applyRecipeDelete(id);
             }
         });
