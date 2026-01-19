@@ -8,10 +8,12 @@ import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 /**
  * - Keeps maps for fast lookup and validation.
@@ -28,6 +30,7 @@ public class RecipeManager {
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipesFx = FXCollections.observableArrayList();
     private final ObservableList<Ingredient> ingredientsFx = FXCollections.observableArrayList();
+    private Consumer<FavoriteRecipe> onFavoriteRecipeDeleted;
 
     @Inject
     private ServerUtils server;
@@ -70,6 +73,15 @@ public class RecipeManager {
         return ingredientsMap.get(id);
     }
 
+    /**
+     * Sets the callback that notifies whenever favorite recipes are synchronized with the server,
+     * **and** one of them happens to not exist on the server anymore.
+     * @param cb the consumer to call whenever a {@link FavoriteRecipe} was removed
+     */
+    public void setOnFavoriteRecipeDeleted(Consumer<FavoriteRecipe> cb) {
+        this.onFavoriteRecipeDeleted = cb;
+    }
+
 
     public void sync(List<Recipe> recipes, List<Ingredient> ingredients) {
         runOnFx(() -> {
@@ -86,23 +98,38 @@ public class RecipeManager {
             }
             recipesFx.setAll(recipes);
 
-            refreshFavoriteRecipeNames();
+            refreshFavoriteRecipes();
         });
     }
 
-    public void refreshFavoriteRecipeNames() {
+    /**
+     * Checks the currently favorite recipes against the recipes in itself.
+     * <br>
+     * - If recipe exists, the name is updated
+     * <br>
+     * - If recipe does not exist, it optionally calls a previously set onFavoriteRecipeDeleted consumer.
+     *   This can be used to show the user a prompt that this happened.
+     */
+    public void refreshFavoriteRecipes() {
         configManager.getConfig().setFavoriteRecipes(
             configManager.getConfig()
                     .getFavoriteRecipes()
                     .stream()
-                    .map(favRecipe -> {
-                            var recipe = getRecipe(favRecipe.id());
-                            return new FavoriteRecipe(favRecipe.id(),
-                                    recipe == null ? favRecipe.name() : recipe.title);
+                    .map((fav -> new Pair<>(fav, getRecipe(fav.id()))))
+                    .filter(pair -> {
+                        if (pair.getValue() != null) return true;
+                        if (onFavoriteRecipeDeleted != null)
+                            onFavoriteRecipeDeleted.accept(pair.getKey());
+                        return false;
                     })
+                    .map(pair ->
+                            new FavoriteRecipe(
+                                    pair.getKey().id(),
+                                    pair.getValue().title))
                     .toList()
         );
     }
+
 
     /**
      Returns true if stored, false if invalid input.
@@ -132,7 +159,7 @@ public class RecipeManager {
                 latch.countDown();
             });
 
-            refreshFavoriteRecipeNames();
+            refreshFavoriteRecipes();
             return true;
         } catch (Exception e) {
             System.err.println("Failed to save recipe to server: " + e.getMessage());

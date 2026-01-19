@@ -258,6 +258,7 @@ public class MainApplicationCtrl implements Internationalizable {
         prepareLanguageFilters(sidebarListCtrl);
         filterUponSelection(sidebarListCtrl);
 
+        recipeManager.setOnFavoriteRecipeDeleted(this::showDeletedRecipePrompt);
         Platform.runLater(() ->
             refresh(this::readConfigFavourites)
         );
@@ -278,42 +279,41 @@ public class MainApplicationCtrl implements Internationalizable {
 
     /**
      * Initializes the list of favourite recipe UUIDs in the recipeManager
-     * to that given by the config. Also performs a check to see whether any
-     * favourites are missing.
-     * If this is the case, an appropriate alert is shown to the user and the config
-     * is updated.
-     * Can also be called during runtime to check whether any favourites
-     * have been deleted not by the user themselves.
+     * to that given by the config. Also calls the appropriate {@link RecipeManager}
+     * method that checks the validity of the favorites.
      */
     public void readConfigFavourites() {
         Config config = localeManager.getConfigManager().getConfig();
         var configFavourites = config.getFavoriteRecipes();
-        var updatedFavourites = new ArrayList<>();
 
         for (var favRecipe: configFavourites) {
             if (recipeManager.indexOfRecipe(favRecipe.id()) == -1) {
-                // alert the user for each missing recipe
-                String message = localeManager
-                        .getCurrentBundle()
-                        .getString("txt.recipe_was_deleted")
-                        .replace("$name", favRecipe.name());
-
-                var alert = new Alert(Alert.AlertType.WARNING);
-                alert.initModality(Modality.APPLICATION_MODAL);
-                alert.setContentText(message);
-                alert.showAndWait();
+                showDeletedRecipePrompt(favRecipe);
             } else {
                 recipeManager.toggleFavourite(favRecipe.id());
-                updatedFavourites.add(favRecipe.id());
             }
         }
 
-        config.setFavoriteRecipes(recipeManager
-                        .getFavouriteRecipesSnapshot()
-                        .stream()
-                        .map(id -> new FavoriteRecipe(id, recipeManager.getRecipe(id).title))
-                        .toList());
+        recipeManager.refreshFavoriteRecipes();
         localeManager.getConfigManager().save();
+    }
+
+    /**
+     * Shows an alert to the user, describing that a recipe that was previously
+     * saved as favorite was deleted, it uses that recipes last saved name in
+     * the prompt
+     * @param recipe the recipe that was deleted
+     */
+    public void showDeletedRecipePrompt(FavoriteRecipe recipe) {
+        String message = localeManager
+                .getCurrentBundle()
+                .getString("txt.recipe_was_deleted")
+                .replace("$name", recipe.name());
+
+        var alert = new Alert(Alert.AlertType.WARNING);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     /**
