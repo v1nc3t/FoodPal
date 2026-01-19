@@ -10,12 +10,11 @@ import commons.WebSocketTypes;
 import jakarta.websocket.*;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @ClientEndpoint
@@ -25,8 +24,10 @@ public class WebSocketService {
     private final ConfigManager configManager;
     private final ObjectMapper mapper;
     private final Map<String, List<Consumer<WebSocketResponse>>> listeners = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private Session session;
+    private boolean manuallyClosed = false;
 
     @Inject
     public WebSocketService(ConfigManager configManager) {
@@ -53,6 +54,7 @@ public class WebSocketService {
      * Connects to the WebSocket server.
      */
     public void connect() {
+        manuallyClosed = false;
         String serverAddress = configManager.getConfig().getServerAddress();
         // Convert http(s) to ws(s)
         String wsAddress = serverAddress.replaceFirst("(?i)^http", "ws");
@@ -66,8 +68,15 @@ public class WebSocketService {
             container.connectToServer(this, new URI(wsAddress));
         } catch (Exception e) {
             System.err.println("Failed to connect to WebSocket: " + e.getMessage());
-            e.printStackTrace();
+            scheduleReconnect();
         }
+    }
+
+    private void scheduleReconnect() {
+        if (manuallyClosed)
+            return;
+        System.out.println("Scheduling WebSocket reconnection in 5 seconds...");
+        scheduler.schedule(this::connect, 5, TimeUnit.SECONDS);
     }
 
     /**
@@ -187,10 +196,29 @@ public class WebSocketService {
     public void onClose(Session session, CloseReason closeReason) {
         this.session = null;
         System.out.println("WebSocket closed: " + closeReason);
+        if (closeReason.getCloseCode() != CloseReason.CloseCodes.NORMAL_CLOSURE) {
+            scheduleReconnect();
+        }
     }
 
     @OnError
     public void onError(Throwable throwable) {
         System.err.println("WebSocket error: " + throwable.getMessage());
+        // Usually onError is followed by onClose, but if not:
+        if (session == null || !session.isOpen()) {
+            scheduleReconnect();
+        }
+    }
+
+    public void stop() {
+        manuallyClosed = true;
+        try {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        scheduler.shutdown();
     }
 }
