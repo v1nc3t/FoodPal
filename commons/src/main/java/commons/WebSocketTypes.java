@@ -1,4 +1,4 @@
-package server.websocket;
+package commons;
 
 public enum WebSocketTypes {
     SUBSCRIBE,
