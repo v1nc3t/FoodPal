@@ -141,6 +141,13 @@ public class WebSocketService {
             WebSocketResponse response = mapper.readValue(message, WebSocketResponse.class);
             String topic = response.topic();
 
+            if (topic == null) {
+                if (response.type() == WebSocketTypes.ERROR) {
+                    System.err.println("WebSocket server error: " + response.data());
+                }
+                return;
+            }
+
             String fullTopic = topic;
             if (response.data() != null && response.data() instanceof Map) {
                 @SuppressWarnings("unchecked")
