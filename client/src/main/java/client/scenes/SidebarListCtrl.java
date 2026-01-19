@@ -201,54 +201,55 @@ public class SidebarListCtrl {
      * (in a sorted manner through SortUtils)
      */
     private void setListViewSorted() {
-        if (recipeSortUtils == null || ingredientsSortUtils == null) {
-            initializeSortUtils();
-        }
+        if (recipeSortUtils == null || ingredientsSortUtils == null) initializeSortUtils();
 
-        ObservableList<ListObject> baseList = (currentMode == ESidebarMode.Recipe)
-                ? recipeSortUtils.applyFilters()
-                : ingredientsSortUtils.applyFilters();
+        SortUtils currentUtils = (currentMode == ESidebarMode.Recipe) ? recipeSortUtils : ingredientsSortUtils;
 
-        listView.setItems(createSortedFileteredList(baseList, currentSearchQuery));
-    }
-
-    private SortedList<ListObject> createSortedFileteredList(
-            ObservableList<ListObject> baseList,
-            String query) {
-        FilteredList<ListObject> filteredList = new FilteredList<>(baseList, item -> {
-            if (query == null || query.isEmpty()) return true;
-
-            if (currentMode == ESidebarMode.Recipe) {
-                Recipe recipe = recipeManager.getRecipe(item.id());
-                return recipeMatchScore(recipe, query) >= 0;
-            } else {
-                return ingredentMatchScore(item.name(), query) >= 0;
-            }
-        });
+        FilteredList<ListObject> filteredList = new FilteredList<>(currentUtils.getList(), item ->
+                matchesUtilityFilters(item, currentUtils) && matchesSearchFilter(item)
+        );
 
         SortedList<ListObject> sortedList = new SortedList<>(filteredList);
-
         sortedList.setComparator((a, b) -> {
-            if (query == null || query.isEmpty()) {
-                return a.name().compareToIgnoreCase(b.name());
-            }
-
-            int scoreA, scoreB;
-            if (currentMode == ESidebarMode.Recipe) {
-                scoreA = recipeMatchScore(recipeManager.getRecipe(a.id()), query);
-                scoreB = recipeMatchScore(recipeManager.getRecipe(b.id()), query);
-            } else {
-                scoreA = ingredentMatchScore(a.name(), query);
-                scoreB = ingredentMatchScore(b.name(), query);
-            }
-
-            if (scoreA != scoreB) {
-                return Integer.compare(scoreB, scoreA);
-            }
-            return a.name().compareToIgnoreCase(b.name());
+            int scoreCompare = compareSearchRelevance(a, b);
+            return (scoreCompare != 0) ? scoreCompare : currentUtils.getComparator().compare(a, b);
         });
 
-        return sortedList;
+        listView.setItems(sortedList);
+    }
+
+    /**
+     * Handles Language and Favourites filters
+     **/
+    private boolean matchesUtilityFilters(ListObject item, SortUtils utils) {
+        boolean langMatch = item.language().isEmpty() || utils.getLanguageFilters().contains(item.language().get());
+        boolean favMatch = !utils.isOnlyFavourites() || utils.getFavourites().contains(item.id());
+        return langMatch && favMatch;
+    }
+
+    /**
+     * Handles Search query logic
+     **/
+    private boolean matchesSearchFilter(ListObject item) {
+        if (currentSearchQuery == null || currentSearchQuery.isEmpty()) return true;
+        return getScore(item) >= 0;
+    }
+
+    /**
+     * Compares two items based on search score
+     **/
+    private int compareSearchRelevance(ListObject a, ListObject b) {
+        if (currentSearchQuery == null || currentSearchQuery.isEmpty()) return 0;
+        return Integer.compare(getScore(b), getScore(a)); // Descending score
+    }
+
+    /**
+     * Centralizes score fetching for both modes
+     **/
+    private int getScore(ListObject item) {
+        return (currentMode == ESidebarMode.Recipe)
+                ? recipeMatchScore(recipeManager.getRecipe(item.id()), currentSearchQuery)
+                : ingredentMatchScore(item.name(), currentSearchQuery);
     }
 
     private int recipeMatchScore(Recipe recipe, String query) {
