@@ -411,6 +411,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 dutchFilter.setDisable(true);
                 germanFilter.setDisable(true);
             }
+            showMainScreen();
         });
     }
 

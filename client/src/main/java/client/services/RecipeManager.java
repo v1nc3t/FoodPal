@@ -32,8 +32,6 @@ public class RecipeManager {
     private ServerUtils server;
 
     public RecipeManager() {
-        // Seed a test recipe so ListView shows something immediately during manual testing.
-        seedSampleRecipe();
     }
 
     /** Observable list for binding to ListView (mutated on FX thread). */
@@ -227,36 +225,6 @@ public class RecipeManager {
     private static void runOnFx(Runnable r) {
         if (Platform.isFxApplicationThread()) r.run();
         else Platform.runLater(r);
-    }
-
-    /** Adds a single in-memory test recipe so the ListView shows an entry at startup. */
-    private void seedSampleRecipe() {
-        try {
-            Ingredient sampleIngredient = new Ingredient("Honey Tester",
-                    new NutritionValues(1,1,1));
-            setIngredient(sampleIngredient);
-
-            // empty ingredient list for quick seed
-            List<String> preparations = List.of("Mix flour, eggs and milk", "Fry on medium heat");
-            int portions = 2;
-            Language language = Language.EN;
-
-            Recipe sampleRecipe = new Recipe("Test Pancakes",
-                    List.of(
-                            new RecipeIngredient(
-                                    sampleIngredient.getId(),
-                                    new Amount(10, "doll hairs")
-                            )
-                    ),
-                    preparations,
-                    portions,
-                    language);
-
-            addRecipeOptimistic(sampleRecipe);
-        } catch (Throwable t) {
-            // do not block startup on a test seed failure
-            t.printStackTrace();
-        }
     }
 
     /** Clears internal state for unit tests only. */
