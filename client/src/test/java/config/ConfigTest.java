@@ -1,5 +1,6 @@
 package config;
 
+import client.config.FavoriteRecipe;
 import commons.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ConfigTest {
     Config config;
     String server;
-    List<UUID> recipeIds;
-    UUID recId = UUID.randomUUID();
-    UUID recId2 = UUID.randomUUID();
+    List<FavoriteRecipe> favRecipes;
+    FavoriteRecipe rec1 = new FavoriteRecipe(UUID.randomUUID(), "Cake");
+    FavoriteRecipe rec2 = new FavoriteRecipe(UUID.randomUUID(), "Pan");
     String lang;
     List<Language> filters;
     List<client.shoppingList.ShoppingListItem> items;
@@ -28,8 +29,8 @@ class ConfigTest {
     @BeforeEach
     void setUp() {
         config = new Config();
-        recipeIds = Arrays.asList(recId, recId2);
-        config.setFavoriteRecipeIDs(recipeIds);
+        favRecipes = Arrays.asList(rec1, rec2);
+        config.setFavoriteRecipes(favRecipes);
         server = "http://localhost:8080";
         config.setServerAddress(server);
         lang = "en";
@@ -60,15 +61,15 @@ class ConfigTest {
 
     @Test
     void getFavoriteRecipeIDsTest() {
-        assertEquals(recipeIds, config.getFavoriteRecipeIDs());
+        assertEquals(favRecipes, config.getFavoriteRecipes());
     }
 
     @Test
     void setFavoriteRecipeIDsTest() {
-        UUID recId3 = UUID.randomUUID();
-        List<UUID> newRecipeIds = Arrays.asList(recId, recId2, recId3);
-        config.setFavoriteRecipeIDs(newRecipeIds);
-        assertEquals(newRecipeIds, config.getFavoriteRecipeIDs());
+        var rec3 = new FavoriteRecipe(UUID.randomUUID(), "Pan's Cake");
+        List<FavoriteRecipe> newRecipes = Arrays.asList(rec1, rec2, rec3);
+        config.setFavoriteRecipes(newRecipes);
+        assertEquals(newRecipes, config.getFavoriteRecipes());
     }
 
     @Test

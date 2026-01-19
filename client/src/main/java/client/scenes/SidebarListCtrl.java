@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.config.ConfigManager;
+import client.config.FavoriteRecipe;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import com.google.inject.Inject;
@@ -17,9 +18,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Controller for the left-hand recipe list.
@@ -164,7 +165,11 @@ public class SidebarListCtrl {
             else if (favouriteMode && currentMode == ESidebarMode.Recipe) {
                 recipeManager.toggleFavourite(sel.id());
                 listView.refresh(); // redraw star
-                updateFavourites(recipeManager.getFavouriteRecipesSnapshot());
+                updateFavourites(new HashSet<>(recipeManager
+                        .getFavouriteRecipesSnapshot()
+                        .stream()
+                        .map(id -> new FavoriteRecipe(id, recipeManager.getRecipe(id).title))
+                        .toList()));
                 exitFavouriteMode();
             }
 
@@ -183,16 +188,16 @@ public class SidebarListCtrl {
      * Also updates the config to the latest list of favourites.
      * @param favouriteRecipes list of favourite recipe UUIDs
      */
-    public void updateFavourites(Set<UUID> favouriteRecipes) {
+    public void updateFavourites(Set<FavoriteRecipe> favouriteRecipes) {
         if (recipeSortUtils == null || ingredientsSortUtils == null) {
             initializeSortUtils();
         }
 
-        recipeSortUtils.setFavourites(favouriteRecipes.stream().toList());
+        recipeSortUtils.setFavourites(favouriteRecipes.stream().map(FavoriteRecipe::id).toList());
 
         setListViewSorted();
 
-        configManager.getConfig().setFavoriteRecipeIDs(favouriteRecipes.stream().toList());
+        configManager.getConfig().setFavoriteRecipes(favouriteRecipes.stream().toList());
         configManager.save();
     }
 

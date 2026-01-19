@@ -3,11 +3,10 @@ package client.config;
 import commons.Language;
 
 import java.util.List;
-import java.util.UUID;
 
 public class Config {
     private String serverAddress;
-    private List<UUID> favoriteRecipeIDs;
+    private List<FavoriteRecipe> favoriteRecipes;
     private String languagePreference;
     private List<Language> languageFilters;
     private List<client.shoppingList.ShoppingListItem> shoppingList;
@@ -23,12 +22,12 @@ public class Config {
         this.serverAddress = serverAddress;
     }
 
-    public List<UUID> getFavoriteRecipeIDs() {
-        return favoriteRecipeIDs;
+    public List<FavoriteRecipe> getFavoriteRecipes() {
+        return favoriteRecipes;
     }
 
-    public void setFavoriteRecipeIDs(List<UUID> favoriteRecipeIDs) {
-        this.favoriteRecipeIDs = favoriteRecipeIDs;
+    public void setFavoriteRecipes(List<FavoriteRecipe> favoriteRecipeIDs) {
+        this.favoriteRecipes = favoriteRecipeIDs;
     }
 
     public String getLanguagePreference() {
