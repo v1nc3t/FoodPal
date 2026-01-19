@@ -1,5 +1,6 @@
 package server.websocket;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import commons.Ingredient;
 import commons.Language;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -353,4 +355,146 @@ public class WebSocketTest {
 
         session.close();
     }
+    @Test
+    public void testIngredientDeleteNotification() throws Exception {
+        CompletableFuture<String> subConfirmation = new CompletableFuture<>();
+        CompletableFuture<String> deleteNotification = new CompletableFuture<>();
+        TextWebSocketHandler handler = new TextWebSocketHandler() {
+            @Override
+            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+                String payload = message.getPayload();
+                if (payload.contains("SUBSCRIBED")) {
+                    subConfirmation.complete(payload);
+                } else if (payload.contains("DELETE")) {
+                    deleteNotification.complete(payload);
+                }
+            }
+        };
+        String url = "ws://localhost:" + port + "/ws";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        WebSocketSession session = client.execute(handler, url).get(5, TimeUnit.SECONDS);
+        UUID ingredientId = UUID.randomUUID();
+        Map<String, Object> subRequest = new HashMap<>();
+        subRequest.put("type", "SUBSCRIBE");
+        subRequest.put("topic", "ingredient");
+        subRequest.put("ingredientId", ingredientId.toString());
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subRequest)));
+        subConfirmation.get(5, TimeUnit.SECONDS);
+        hub.broadcastIngredientDelete(ingredientId);
+        String result = deleteNotification.get(5, TimeUnit.SECONDS);
+        assertTrue(result.contains("DELETE"));
+        assertTrue(result.contains("ingredient"));
+        assertTrue(result.contains(ingredientId.toString()));
+
+        session.close();
+    }
+    @Test
+    public void testIngredientStateUpdate() throws Exception {
+        CompletableFuture<String> confirmation = new CompletableFuture<>();
+        CompletableFuture<String> update = new CompletableFuture<>();
+
+        TextWebSocketHandler handler = new TextWebSocketHandler() {
+            @Override
+            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+                String payload = message.getPayload();
+                if (payload.contains("SUBSCRIBED")) {
+                    confirmation.complete(payload);
+                } else if (payload.contains("ingredient-state")) {
+                    update.complete(payload);
+                }
+            }
+        };
+
+        String url = "ws://localhost:" + port + "/ws";
+        WebSocketSession session = new StandardWebSocketClient()
+                .execute(handler, url).get(5, TimeUnit.SECONDS);
+
+        Map<String, Object> sub = new HashMap<>();
+        sub.put("type", "SUBSCRIBE");
+        sub.put("topic", "ingredient-state");
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(sub)));
+
+        confirmation.get(5, TimeUnit.SECONDS);
+
+        hub.broadcastIngredientStateUpdate(List.of("test"));
+
+        String result = update.get(5, TimeUnit.SECONDS);
+        assertTrue(result.contains("ingredient-state"));
+
+        session.close();
+    }
+    @Test
+    public void testUnsubscribeIngredientState() throws Exception {
+
+        CompletableFuture<String> subscribed = new CompletableFuture<>();
+        CompletableFuture<String> forbiddenUpdate = new CompletableFuture<>();
+
+        AtomicBoolean unsubscribed = new AtomicBoolean(false);
+
+        TextWebSocketHandler handler = new TextWebSocketHandler() {
+            @Override
+            protected void handleTextMessage(@NonNull WebSocketSession session,
+                                             TextMessage message) {
+                try {
+                    JsonNode json = mapper.readTree(message.getPayload());
+                    String type = json.get("type").asText();
+                    String topic = json.path("topic").asText("");
+
+                    // subscription confirmation
+                    if ("SUBSCRIBED".equals(type)
+                            && "ingredient-state".equals(topic)) {
+                        subscribed.complete(message.getPayload());
+                    }
+
+                    else if ("UNSUBSCRIBED".equals(type)
+                            && "ingredient-state".equals(topic)) {
+                        unsubscribed.set(true);
+                    }
+
+                    else if (unsubscribed.get()
+                            && "UPDATE".equals(type)
+                            && "ingredient-state".equals(topic)) {
+                        forbiddenUpdate.complete(message.getPayload());
+                    }
+
+                } catch (Exception ignored) {
+                }
+            }
+        };
+
+        String url = "ws://localhost:" + port + "/ws";
+        StandardWebSocketClient client = new StandardWebSocketClient();
+        WebSocketSession session =
+                client.execute(handler, url).get(5, TimeUnit.SECONDS);
+
+        Map<String, Object> subscribe = new HashMap<>();
+        subscribe.put("type", "SUBSCRIBE");
+        subscribe.put("topic", "ingredient-state");
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(subscribe)));
+
+        subscribed.get(5, TimeUnit.SECONDS);
+
+        Map<String, Object> unsubscribe = new HashMap<>();
+        unsubscribe.put("type", "UNSUBSCRIBE");
+        unsubscribe.put("topic", "ingredient-state");
+        session.sendMessage(new TextMessage(mapper.writeValueAsString(unsubscribe)));
+
+        Thread.sleep(300);
+
+        hub.broadcastIngredientStateUpdate(List.of("test-ingredient"));
+
+        boolean receivedForbiddenUpdate = true;
+        try {
+            forbiddenUpdate.get(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            receivedForbiddenUpdate = false;
+        }
+
+        assertFalse(receivedForbiddenUpdate,
+                "Client should NOT receive ingredient-state UPDATE after unsubscribe");
+
+        session.close();
+    }
+
+
 }

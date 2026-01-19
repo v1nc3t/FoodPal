@@ -185,7 +185,7 @@ public class RecipeManager {
                         .filter(rv -> rv
                                 .getIngredients()
                                 .stream()
-                                .anyMatch(ri -> ri.ingredientRef == ingredientId)
+                                .anyMatch(ri -> ri.ingredientRef.equals(ingredientId))
                         ).findAny().orElse(null);
 
         if (usedRecipe != null)
