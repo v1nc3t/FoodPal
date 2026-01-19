@@ -35,6 +35,21 @@ public class WebSocketService {
     }
 
     /**
+     * Converts the generic data object from a response to a specific type.
+     */
+    public <T> T convertData(Object data, Class<T> clazz) {
+        return mapper.convertValue(data, clazz);
+    }
+
+    /**
+     * Converts the generic data object from a response to a specific type using
+     * TypeReference.
+     */
+    public <T> T convertData(Object data, com.fasterxml.jackson.core.type.TypeReference<T> typeRef) {
+        return mapper.convertValue(data, typeRef);
+    }
+
+    /**
      * Connects to the WebSocket server.
      */
     public void connect() {

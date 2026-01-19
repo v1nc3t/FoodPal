@@ -3,17 +3,17 @@ package client.scenes;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
 import client.services.ShoppingListManager;
+import client.services.WebSocketService;
 import com.google.inject.Inject;
-import commons.Ingredient;
-import client.services.RecipePrinter;
-import commons.Recipe;
-import commons.RecipeIngredient;
+import commons.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import client.services.RecipePrinter;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -95,14 +95,17 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     private final ShoppingListManager shoppingListManager;
     private final MainApplicationCtrl mainCtrl;
+    private final WebSocketService webSocketService;
 
     @Inject
     public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
-            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
+            RecipeManager recipeManager, ShoppingListManager shoppingListManager,
+            WebSocketService webSocketService) {
         this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
         this.recipeManager = recipeManager;
         this.shoppingListManager = shoppingListManager;
+        this.webSocketService = webSocketService;
 
         localeManager.register(this);
     }
@@ -165,10 +168,27 @@ public class RecipeViewerCtrl implements Internationalizable {
     public void setRecipe(Recipe recipe) {
         if (recipe == null) {
             titleProperty.set("");
-            ingredientsList.getItems().clear();
             preparationList.getItems().clear();
             return;
         }
+
+        if (currentRecipe != null && !currentRecipe.getId().equals(recipe.getId())) {
+            webSocketService.unsubscribe("recipe", currentRecipe.getId());
+        }
+
+        if (currentRecipe == null || !currentRecipe.getId().equals(recipe.getId())) {
+            webSocketService.subscribe("recipe", recipe.getId(), response -> {
+                Platform.runLater(() -> {
+                    if (response.type() == WebSocketTypes.UPDATE) {
+                        Recipe updated = webSocketService.convertData(response.data(), Recipe.class);
+                        setRecipe(updated);
+                    } else if (response.type() == WebSocketTypes.DELETE) {
+                        mainCtrl.showMainScreen();
+                    }
+                });
+            });
+        }
+
         this.currentRecipe = recipe;
 
         languageSuffixProperty.set(recipe.getLanguage().proper());

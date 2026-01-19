@@ -4,9 +4,9 @@ import client.MyFXML;
 import client.config.Config;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import client.services.WebSocketService;
 import client.utils.ServerUtils;
-import commons.Ingredient;
-import commons.Language;
+import commons.*;
 import com.google.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -112,6 +112,8 @@ public class MainApplicationCtrl implements Internationalizable {
     private RecipeManager recipeManager;
     @Inject
     private ServerUtils serverUtils;
+    @Inject
+    private WebSocketService webSocketService;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
@@ -259,6 +261,40 @@ public class MainApplicationCtrl implements Internationalizable {
         filterUponSelection(sidebarListCtrl);
 
         Platform.runLater(this::refresh);
+        initializeWebSockets();
+    }
+
+    private void initializeWebSockets() {
+        webSocketService.connect();
+
+        // Listen for global recipe state changes (syncs the whole list)
+        webSocketService.subscribe("recipe-state", null, response -> {
+            if (response.type() == WebSocketTypes.UPDATE) {
+                RecipeState state = webSocketService.convertData(response.data(), RecipeState.class);
+                recipeManager.sync(state.recipes().stream().toList(), state.ingredients().stream().toList());
+            }
+        });
+
+        // Listen for individual recipe updates/deletes to keep list consistent
+        webSocketService.subscribe("recipe", null, response -> {
+            if (response.type() == WebSocketTypes.UPDATE) {
+                Recipe recipe = webSocketService.convertData(response.data(), Recipe.class);
+                recipeManager.applyRecipeUpdate(recipe);
+            } else if (response.type() == WebSocketTypes.DELETE) {
+                UUID id = UUID.fromString((String) response.data());
+                recipeManager.applyRecipeDelete(id);
+            }
+        });
+
+        // Listen for ingredient updates
+        webSocketService.subscribe("ingredient-state", null, response -> {
+            if (response.type() == WebSocketTypes.UPDATE) {
+                List<Ingredient> ingredients = webSocketService.convertData(
+                        response.data(), new com.fasterxml.jackson.core.type.TypeReference<List<Ingredient>>() {
+                        });
+                recipeManager.sync(recipeManager.getObservableRecipes(), ingredients);
+            }
+        });
     }
 
     private void prepareSearchField() {
