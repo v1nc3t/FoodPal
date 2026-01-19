@@ -183,6 +183,10 @@ public class RecipeViewerCtrl implements Internationalizable {
         double kcalPer100g = recipe.getKcalPer100g(
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
+        double kcalPerPortion = recipe.getCaloriesPerPortion(
+                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
+        );
+
 
         DecimalFormat df = new DecimalFormat("0.#",
                 DecimalFormatSymbols.getInstance(Locale.ROOT));
@@ -209,6 +213,20 @@ public class RecipeViewerCtrl implements Internationalizable {
             portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
             setIngredientsList(recipe);
         }
+        int portions = calculateScaledPortions();
+
+        DecimalFormat df1 = new DecimalFormat("0.#",
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
+
+        servingSizeProperty.set(
+                localeManager.getCurrentBundle().getString("txt.serving_size")
+                        + ": "
+                        + portions
+                        + " ("
+                        + df1.format(kcalPerPortion)
+                        + " kcal / portion)"
+        );
+
     }
 
     /**
