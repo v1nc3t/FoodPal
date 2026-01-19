@@ -511,8 +511,6 @@ public class AddRecipeCtrl implements Internationalizable {
     private HBox createIngredientItem(RecipeIngredient recipeIngredient) {
         Ingredient ingredient = recipeManager.getIngredient(recipeIngredient);
 
-        // TODO find newIngredient based on id
-
         HBox item = new HBox(5);
         item.setAlignment(Pos.CENTER_LEFT);
         item.setMaxWidth(Double.MAX_VALUE);

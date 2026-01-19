@@ -201,122 +201,134 @@ public class SidebarListCtrl {
      * (in a sorted manner through SortUtils)
      */
     private void setListViewSorted() {
-        if (recipeSortUtils == null || ingredientsSortUtils == null) {
-            initializeSortUtils();
-        }
+        if (recipeSortUtils == null || ingredientsSortUtils == null) initializeSortUtils();
 
-        ObservableList<ListObject> baseList = (currentMode == ESidebarMode.Recipe)
-                ? recipeSortUtils.applyFilters()
-                : ingredientsSortUtils.applyFilters();
+        SortUtils currentUtils = (currentMode == ESidebarMode.Recipe) ? recipeSortUtils : ingredientsSortUtils;
 
-        listView.setItems(createSortedFileteredList(baseList, currentSearchQuery));
-    }
-
-    private SortedList<ListObject> createSortedFileteredList(
-            ObservableList<ListObject> baseList,
-            String query) {
-        FilteredList<ListObject> filteredList = new FilteredList<>(baseList, item -> {
-            if (query == null || query.isEmpty()) return true;
-
-            if (currentMode == ESidebarMode.Recipe) {
-                Recipe recipe = recipeManager.getRecipe(item.id());
-                return recipeMatchScore(recipe, query) >= 0;
-            } else {
-                return ingredentMatchScore(item.name(), query) >= 0;
-            }
-        });
+        FilteredList<ListObject> filteredList = new FilteredList<>(currentUtils.getList(), item ->
+                matchesUtilityFilters(item, currentUtils) && matchesSearchFilter(item)
+        );
 
         SortedList<ListObject> sortedList = new SortedList<>(filteredList);
-
         sortedList.setComparator((a, b) -> {
-            if (query == null || query.isEmpty()) {
-                return a.name().compareToIgnoreCase(b.name());
-            }
-
-            int scoreA, scoreB;
-            if (currentMode == ESidebarMode.Recipe) {
-                scoreA = recipeMatchScore(recipeManager.getRecipe(a.id()), query);
-                scoreB = recipeMatchScore(recipeManager.getRecipe(b.id()), query);
-            } else {
-                scoreA = ingredentMatchScore(a.name(), query);
-                scoreB = ingredentMatchScore(b.name(), query);
-            }
-
-            if (scoreA != scoreB) {
-                return Integer.compare(scoreB, scoreA);
-            }
-            return a.name().compareToIgnoreCase(b.name());
+            int scoreCompare = compareSearchRelevance(a, b);
+            return (scoreCompare != 0) ? scoreCompare : currentUtils.getComparator().compare(a, b);
         });
 
-        return sortedList;
+        listView.setItems(sortedList);
+    }
+
+    /**
+     * Handles Language and Favourites filters
+     **/
+    private boolean matchesUtilityFilters(ListObject item, SortUtils utils) {
+        boolean langMatch = item.language().isEmpty() || utils.getLanguageFilters().contains(item.language().get());
+        boolean favMatch = !utils.isOnlyFavourites() || utils.getFavourites().contains(item.id());
+        return langMatch && favMatch;
+    }
+
+    /**
+     * Handles Search query logic
+     **/
+    private boolean matchesSearchFilter(ListObject item) {
+        if (currentSearchQuery == null || currentSearchQuery.isEmpty()) return true;
+        return getScore(item) >= 0;
+    }
+
+    /**
+     * Compares two items based on search score
+     **/
+    private int compareSearchRelevance(ListObject a, ListObject b) {
+        if (currentSearchQuery == null || currentSearchQuery.isEmpty()) return 0;
+        return Integer.compare(getScore(b), getScore(a)); // Descending score
+    }
+
+    /**
+     * Centralizes score fetching for both modes
+     **/
+    private int getScore(ListObject item) {
+        return (currentMode == ESidebarMode.Recipe)
+                ? recipeMatchScore(recipeManager.getRecipe(item.id()), currentSearchQuery)
+                : ingredentMatchScore(item.name(), currentSearchQuery);
     }
 
     private int recipeMatchScore(Recipe recipe, String query) {
         if (query == null || query.isBlank()) return 0;
 
-        String[] terms = query.toLowerCase().split("\\s+");
-
         int totalScore = 0;
-        for (String term : terms) {
-            boolean isExcluded = term.startsWith("-");
-            String actualTerm = isExcluded ? term.substring(1) : term;
-            if (actualTerm.isEmpty()) continue;
+        for (String term : query.toLowerCase().split("\\s+")) {
+            int termScore = getSingleTermScore(recipe, term);
+            if (termScore == -1) return -1;
 
-            int termScore = 0;
-
-            if (recipe.getTitle().toLowerCase().contains(actualTerm)) {
-                termScore += 100;
-            }
-            if (recipe.steps.stream()
-                    .anyMatch(step -> step.toLowerCase().contains(actualTerm))) {
-                termScore += 10;
-            }
-            if (recipe.ingredients.stream()
-                    .anyMatch(ri -> {
-                        var ingredient = recipeManager.getIngredient(ri.ingredientRef);
-                        return ingredient != null
-                                && ingredient.getName().toLowerCase().contains(actualTerm);
-                    })) {
-                termScore += 50;
-            }
-
-            if (isExcluded) {
-                if (termScore > 0) return -1;
-            } else {
-                if (termScore == 0) return -1;
-                totalScore += termScore;
-            }
+            totalScore += termScore;
         }
         return totalScore;
+    }
+
+    private int getSingleTermScore(Recipe recipe, String term) {
+        boolean isExcluded = term.startsWith("-");
+
+        String actualTerm = getAcutalTerm(term);
+        if (actualTerm.isEmpty()) return 0;
+
+        int score = calculateBaseRecipeScore(recipe, actualTerm);
+
+        if (isExcluded) {
+            return (score > 0) ? -1 : 0;
+        }
+        return (score == 0) ? -1 : score;
+    }
+
+    private int calculateBaseRecipeScore(Recipe recipe, String actualTerm) {
+        int score = 0;
+
+        if (recipe.getTitle().toLowerCase().contains(actualTerm)) score += 100;
+        if (recipe.steps.stream().anyMatch(s -> s.toLowerCase().contains(actualTerm))) score += 10;
+        if (hasIngredientMatch(recipe, actualTerm)) score += 50;
+
+        return score;
+    }
+
+    private boolean hasIngredientMatch(Recipe recipe, String term) {
+        return recipe.ingredients.stream().anyMatch(ri -> {
+            var ing = recipeManager.getIngredient(ri.ingredientRef);
+            return ing != null && ing.getName().toLowerCase().contains(term);
+        });
     }
 
     private int ingredentMatchScore(String ingredientName, String query) {
         if (query == null || query.isBlank()) return 0;
 
-        String[] terms = query.toLowerCase().split("\\s+");
-
         int totalScore = 0;
-        for(String term : terms) {
-            boolean isExcluded = term.startsWith("-");
+        for (String term : query.toLowerCase().split("\\s+")) {
+            int termScore = calculateIngredientTermScore(ingredientName.toLowerCase(), term);
 
-            String actualTerm = isExcluded ? term.substring(1) : term;
-            if (actualTerm.isEmpty()) continue;
-
-            boolean found = ingredientName.toLowerCase().contains(actualTerm);
-
-            if (isExcluded && found) return -1;
-            if (!isExcluded && !found) return -1;
-
-            if (found) {
-                totalScore += ingredientName.toLowerCase().startsWith(actualTerm) ? 50 : 25;
-            }
+            if (termScore == -1) return -1;
+            totalScore += termScore;
         }
         return totalScore;
+    }
+
+    private int calculateIngredientTermScore(String name, String term) {
+        boolean isExcluded = term.startsWith("-");
+
+        String actualTerm = getAcutalTerm(term);
+        if (actualTerm.isEmpty()) return 0;
+
+        boolean found = name.contains(actualTerm);
+        if (isExcluded) return found ? -1 : 0;
+        if (!found) return -1;
+
+        return name.startsWith(actualTerm) ? 50 : 25;
     }
 
     public void setSearchQuery(String query) {
         this.currentSearchQuery = query.toLowerCase().trim();
         setListViewSorted();
+    }
+
+    private String getAcutalTerm(String term) {
+        return term.startsWith("-") ? term.substring(1) : term;
     }
 
     /**

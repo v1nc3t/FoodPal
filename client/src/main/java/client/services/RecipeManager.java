@@ -6,7 +6,6 @@ import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -250,14 +249,11 @@ public class RecipeManager {
         if (ingredientId == null)
             return false;
 
-        var usedRecipe = recipesMap
-                .values()
-                .stream()
-                .filter(rv -> rv
-                        .getIngredients()
-                        .stream()
-                        .anyMatch(ri -> ri.ingredientRef == ingredientId))
-                .findAny().orElse(null);
+        Recipe usedRecipe = recipesMap.values().stream()
+                .filter(recipe -> recipe.getIngredients().stream()
+                        .anyMatch(ri -> ri.getIngredientRef().equals(ingredientId)))
+                .findAny()
+                .orElse(null);
 
         if (usedRecipe != null)
             throw new RuntimeException(
