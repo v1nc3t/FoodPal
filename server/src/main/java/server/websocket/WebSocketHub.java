@@ -17,12 +17,11 @@ public class WebSocketHub {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final CopyOnWriteArrayList<WebSocketSession> stateSubscribers =
-            new CopyOnWriteArrayList<>();
-    private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> recipeSubscribers =
-            new ConcurrentHashMap<>();
-    private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> ingredientSubscribers =
-            new ConcurrentHashMap<>();
+    private final CopyOnWriteArrayList<WebSocketSession> stateSubscribers = new CopyOnWriteArrayList<>();
+    private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> recipeSubscribers = new ConcurrentHashMap<>();
+    private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> ingredientSubscribers = new ConcurrentHashMap<>();
+    private final CopyOnWriteArrayList<WebSocketSession> ingredientStateSubscribers = new CopyOnWriteArrayList<>();
+
 
     public int getTitleSubscribersCount() {
         return stateSubscribers.size();
@@ -147,4 +146,35 @@ public class WebSocketHub {
         ingredientSubscribers.values().forEach(sessions -> sessions.remove(session));
         ingredientSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);
     }
+    public void broadcastIngredientDelete(UUID ingredientId) {
+        List<WebSocketSession> sessions = ingredientSubscribers.get(ingredientId);
+        if (sessions != null && !sessions.isEmpty()) {
+            WebSocketResponse response = new WebSocketResponse(
+                    WebSocketTypes.DELETE,
+                    "ingredient",
+                    ingredientId
+            );
+            broadcast(sessions, response);
+            ingredientSubscribers.remove(ingredientId);
+        }
+    }
+    public void subscribeIngredientState(WebSocketSession session) {
+        if (!ingredientStateSubscribers.contains(session)) {
+            ingredientStateSubscribers.add(session);
+        }
+    }
+
+    public void unsubscribeIngredientState(WebSocketSession session) {
+        ingredientStateSubscribers.remove(session);
+    }
+    public void broadcastIngredientStateUpdate(Object allIngredients) {
+        WebSocketResponse response = new WebSocketResponse(
+                WebSocketTypes.UPDATE,
+                "ingredient-state",
+                allIngredients
+        );
+        broadcast(ingredientStateSubscribers, response);
+    }
+
+
 }

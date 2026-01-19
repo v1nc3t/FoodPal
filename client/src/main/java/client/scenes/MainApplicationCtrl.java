@@ -20,13 +20,16 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.util.Pair;
 import commons.Recipe;
+import client.shoppingList.ShoppingListItem;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.util.*;
 
 public class MainApplicationCtrl implements Internationalizable {
 
     /**
-     *   This is the right pane(This pane will load different screens)
+     * This is the right pane(This pane will load different screens)
      */
     @FXML
     private Pane contentPane;
@@ -101,8 +104,8 @@ public class MainApplicationCtrl implements Internationalizable {
     private final MyFXML fxml;
     private final LocaleManager localeManager;
 
-    /// The id of the currently shown object, can be either
-    /// an id of {@link Recipe}, or an id of {@link Ingredient}
+    /// The id of the currently shown object, can be either an id of {@link Recipe},
+    /// or an id of {@link Ingredient}
     private UUID currentlyShownId = null;
 
     @Inject
@@ -223,10 +226,12 @@ public class MainApplicationCtrl implements Internationalizable {
         sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
         // open viewer on double-click, and ignore clicks when in remove mode
         sidebarListView.setOnMouseClicked(evt -> {
-            if (evt.getClickCount() != 2) return; // require double-click to open
+            if (evt.getClickCount() != 2)
+                return; // require double-click to open
 
             var sel = sidebarListView.getSelectionModel().getSelectedItem();
-            if (sel == null) return;
+            if (sel == null)
+                return;
 
             // If the list is in remove mode, the click was for deleting — ignore it
             if (sidebarListCtrl != null && sidebarListCtrl.isInRemoveMode()) {
@@ -238,9 +243,9 @@ public class MainApplicationCtrl implements Internationalizable {
             // Open the viewer
             switch (sidebarListCtrl.getSidebarMode()) {
                 case ESidebarMode.Recipe ->
-                        showRecipe(recipeManager.getRecipe(sel.id()));
+                    showRecipe(recipeManager.getRecipe(sel.id()));
                 case ESidebarMode.Ingredient ->
-                        showIngredient(recipeManager.getIngredient(sel.id()));
+                    showIngredient(recipeManager.getIngredient(sel.id()));
             }
         });
 
@@ -271,8 +276,10 @@ public class MainApplicationCtrl implements Internationalizable {
 
     /**
      * Initializes the list of favourite recipe UUIDs in the recipeManager
-     * to that given by the config. Also performs a check to see whether any favourites are missing.
-     * If this is the case, an appropriate alert is shown to the user and the config is updated.
+     * to that given by the config. Also performs a check to see whether any
+     * favourites are missing.
+     * If this is the case, an appropriate alert is shown to the user and the config
+     * is updated.
      * Can also be called during runtime to check whether any favourites
      * have been deleted not by the user themselves.
      */
@@ -304,8 +311,9 @@ public class MainApplicationCtrl implements Internationalizable {
     /**
      * Initializes the language filter checkboxes according to the config.
      * If reading from the config fails, resorts to defaulting to all languages.
+     * 
      * @param sidebarListCtrl the recipe list controller which is responsible for
-     *                       the recipe list
+     *                        the recipe list
      */
     private void prepareLanguageFilters(SidebarListCtrl sidebarListCtrl) {
         try {
@@ -325,8 +333,7 @@ public class MainApplicationCtrl implements Internationalizable {
             if (!languages.contains(Language.NL)) {
                 sidebarListCtrl.toggleLanguageFilter(Language.NL);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             englishFilter.setSelected(true);
             germanFilter.setSelected(true);
             dutchFilter.setSelected(true);
@@ -337,6 +344,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * Adds a listener for changes to language filter and favourites checkboxes,
      * so the recipe list viewer can get filtered after a selection of a filter.
      * Also propagates the checkbox changes to the config file.
+     * 
      * @param sidebarListCtrl the recipe list controller which is responsible for
      *                        the recipe list
      */
@@ -364,6 +372,7 @@ public class MainApplicationCtrl implements Internationalizable {
 
     /**
      * Updates the config file by adding or removing the given language filter.
+     * 
      * @param language language to be added or removed
      */
     private void updateConfigFilter(Language language) {
@@ -393,7 +402,7 @@ public class MainApplicationCtrl implements Internationalizable {
                 englishFilter.setDisable(false);
                 dutchFilter.setDisable(false);
                 germanFilter.setDisable(false);
-            } else if  (newValue == ingredientToggleButton) {
+            } else if (newValue == ingredientToggleButton) {
                 sidebarListCtrl.setSidebarMode(ESidebarMode.Ingredient);
                 cloneButton.setDisable(true);
                 favouriteButton.setDisable(true);
@@ -443,8 +452,7 @@ public class MainApplicationCtrl implements Internationalizable {
                             boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
-                                    .anyMatch(r -> java.util.Objects.equals
-                                            (r.getId(), currentlyShownId));
+                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownId));
                             if (!stillPresent) {
                                 javafx.application.Platform.runLater(() -> {
                                     showMainScreen();
@@ -490,7 +498,8 @@ public class MainApplicationCtrl implements Internationalizable {
     @FXML
     private void changeLanguage() {
         Language selected = languageOptions.getValue();
-        if (selected == null) return;
+        if (selected == null)
+            return;
 
         // Convert Enum to Locale
         Locale newLocale = new Locale(selected.name().toLowerCase());
@@ -560,7 +569,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private void editIngredient(Ingredient ingredient) {
         var bundle = localeManager.getCurrentBundle();
         Pair<EditIngredientCtrl, Parent> editIngredientPair = fxml.load(EditIngredientCtrl.class,
-                bundle,"client", "scenes", "EditIngredient.fxml");
+                bundle, "client", "scenes", "EditIngredient.fxml");
 
         EditIngredientCtrl editIngredientCtrl = editIngredientPair.getKey();
         Parent editIngredientRoot = editIngredientPair.getValue();
@@ -573,12 +582,9 @@ public class MainApplicationCtrl implements Internationalizable {
         currentlyShownId = ingredient.getId();
     }
 
-
     public void showRecipeViewer(Recipe recipe) {
         showRecipe(recipe);
     }
-
-
 
     /**
      * Search field for users to search up items/recipes from ist
@@ -610,7 +616,7 @@ public class MainApplicationCtrl implements Internationalizable {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                if(!serverUtils.isServerAvailable()) {
+                if (!serverUtils.isServerAvailable()) {
                     throw new Exception("Server is offline");
                 }
 
@@ -632,7 +638,6 @@ public class MainApplicationCtrl implements Internationalizable {
         new Thread(task).start();
         showMainScreen();
     }
-
 
     /**
      * Opens a modal popup asking the user to enter a name for a cloned recipe.
@@ -679,4 +684,22 @@ public class MainApplicationCtrl implements Internationalizable {
         currentlyShownId = null;
     }
 
+    public void showIngredientOverview(List<ShoppingListItem> items) {
+        var bundle = localeManager.getCurrentBundle();
+        Pair<IngredientOverviewCtrl, Parent> pair = fxml.load(IngredientOverviewCtrl.class, bundle,
+                "client", "scenes", "IngredientOverview.fxml");
+
+        IngredientOverviewCtrl ctrl = pair.getKey();
+        Parent root = pair.getValue();
+
+        Stage stage = new Stage();
+        stage.setTitle(bundle.getString("txt.review_ingredients"));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+
+        ctrl.setStage(stage);
+        ctrl.setItems(items);
+
+        stage.showAndWait();
+    }
 }

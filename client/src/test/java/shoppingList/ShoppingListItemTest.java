@@ -3,6 +3,7 @@ package shoppingList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +90,7 @@ public class ShoppingListItemTest {
         assertEquals("ShoppingListItem{ingredientId=" + recIngredient.getIngredientRef() +
                 ", customName='null'" +
                 ", amount=Amount{quantity=2.0, unit=CUP, description='null'}, sourceRecipeId=" +
-                recipe.getId() + "}", shopListItem.toString());
+                recipe.getId() + ", sourceRecipeName='null'}", shopListItem.toString());
     }
 
     @Test
@@ -175,5 +176,35 @@ public class ShoppingListItemTest {
         ShoppingListItem item = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount);
 
         assertNotNull(item.hashCode());
+    }
+
+    @Test
+    public void testSourceRecipeName() {
+        String recipeName = "Delicious Cake";
+        ShoppingListItem item = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount, recipe.getId(),
+                recipeName);
+
+        assertEquals(recipeName, item.getSourceRecipeName());
+    }
+
+    @Test
+    public void testSetSourceRecipeName() {
+        ShoppingListItem item = new ShoppingListItem();
+        String recipeName = "Pancakes";
+        item.setSourceRecipeName(recipeName);
+        assertEquals(recipeName, item.getSourceRecipeName());
+    }
+
+    @Test
+    public void equalsWithSourceRecipeName() {
+        ShoppingListItem item1 = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount, recipe.getId(),
+                "Cake");
+        ShoppingListItem item2 = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount, recipe.getId(),
+                "Cake");
+        ShoppingListItem item3 = new ShoppingListItem(recIngredient.getIngredientRef(), formalAmount, recipe.getId(),
+                "Pie");
+
+        assertEquals(item1, item2);
+        assertNotEquals(item1, item3);
     }
 }
