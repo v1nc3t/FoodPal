@@ -1,5 +1,8 @@
 package server.websocket;
 
+import commons.WebSocketResponse;
+import commons.WebSocketTypes;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.lang.NonNull;
@@ -8,7 +11,6 @@ import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.UUID;
-
 
 @Component
 public class RecipeWebSocketHandler extends TextWebSocketHandler {
@@ -45,7 +47,7 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
         String topic = json.path("topic").asText("");
 
         WebSocketTypes type;
-        try{
+        try {
             type = WebSocketTypes.valueOf(typeString.toUpperCase());
         } catch (IllegalArgumentException e) {
             sendErrorMessage(session, "unknown type:" + typeString);
@@ -173,7 +175,7 @@ public class RecipeWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session,
-                                      @NonNull CloseStatus status) {
+            @NonNull CloseStatus status) {
         hub.removeSessionEverywhere(session);
         System.out.println("debug: Connection closed for " + session.getId());
     }

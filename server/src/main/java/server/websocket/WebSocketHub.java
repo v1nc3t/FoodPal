@@ -1,5 +1,8 @@
 package server.websocket;
 
+import commons.WebSocketResponse;
+import commons.WebSocketTypes;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -21,7 +24,6 @@ public class WebSocketHub {
     private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> recipeSubscribers = new ConcurrentHashMap<>();
     private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> ingredientSubscribers = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<WebSocketSession> ingredientStateSubscribers = new CopyOnWriteArrayList<>();
-
 
     public int getTitleSubscribersCount() {
         return stateSubscribers.size();
@@ -146,18 +148,19 @@ public class WebSocketHub {
         ingredientSubscribers.values().forEach(sessions -> sessions.remove(session));
         ingredientSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);
     }
+
     public void broadcastIngredientDelete(UUID ingredientId) {
         List<WebSocketSession> sessions = ingredientSubscribers.get(ingredientId);
         if (sessions != null && !sessions.isEmpty()) {
             WebSocketResponse response = new WebSocketResponse(
                     WebSocketTypes.DELETE,
                     "ingredient",
-                    ingredientId
-            );
+                    ingredientId);
             broadcast(sessions, response);
             ingredientSubscribers.remove(ingredientId);
         }
     }
+
     public void subscribeIngredientState(WebSocketSession session) {
         if (!ingredientStateSubscribers.contains(session)) {
             ingredientStateSubscribers.add(session);
@@ -167,14 +170,13 @@ public class WebSocketHub {
     public void unsubscribeIngredientState(WebSocketSession session) {
         ingredientStateSubscribers.remove(session);
     }
+
     public void broadcastIngredientStateUpdate(Object allIngredients) {
         WebSocketResponse response = new WebSocketResponse(
                 WebSocketTypes.UPDATE,
                 "ingredient-state",
-                allIngredients
-        );
+                allIngredients);
         broadcast(ingredientStateSubscribers, response);
     }
-
 
 }
