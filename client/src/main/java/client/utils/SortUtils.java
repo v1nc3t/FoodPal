@@ -35,6 +35,10 @@ public class SortUtils {
         this.list = list;
     }
 
+    public ObservableList<ListObject> getList() {
+        return this.list;
+    }
+
     private static void runOnFx(Runnable r) {
         if (Platform.isFxApplicationThread()) r.run();
         else Platform.runLater(r);

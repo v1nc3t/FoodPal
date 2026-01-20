@@ -14,8 +14,6 @@
                      <Font size="14.0" />
                  </font>
              </Label>
-            <Button fx:id="addToShoppingListButton" text="${controller.addToShoppingListProperty}" mnemonicParsing="false" onAction="#addToShoppingList" />
-            <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" />
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -29,6 +27,7 @@
          </padding>
          <children>
              <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" wrapText="true" />
+            <Button fx:id="addToShoppingListButton" mnemonicParsing="false" onAction="#addToShoppingList" text="${controller.addToShoppingListProperty}" />
               <ListView fx:id="ingredientsList" VBox.vgrow="ALWAYS" />
              <Label fx:id="preparationLabel" prefHeight="17.0" prefWidth="200.0" text="${controller.preparationProperty}" />
               <ListView fx:id="preparationList" VBox.vgrow="ALWAYS" />
@@ -43,24 +42,25 @@
                <Region HBox.hgrow="ALWAYS" />
                <Label fx:id="portionsLabel" text="${controller.portionsProperty}" />
                <Label fx:id="portionsValueLabel" text="${controller.portionsValueProperty}" />
-               <Button fx:id="scaleUpButton" mnemonicParsing="false" text="+" onAction="#scaleUpRecipe" >
+               <Button fx:id="scaleUpButton" mnemonicParsing="false" onAction="#scaleUpRecipe" text="+">
                    <BorderPane.margin>
                        <Insets bottom="10.0" left="10.0" right="10.0" />
                    </BorderPane.margin>
                </Button>
-               <Button fx:id="scaleDownButton" mnemonicParsing="false" text="-" onAction="#scaleDownRecipe" >
+               <Button fx:id="scaleDownButton" mnemonicParsing="false" onAction="#scaleDownRecipe" text="-">
                    <BorderPane.margin>
                        <Insets bottom="10.0" left="10.0" right="10.0" />
                    </BorderPane.margin>
                </Button>
-               <Button fx:id="resetScaleButton" mnemonicParsing="false" text="${controller.resetProperty}" onAction="#resetScale" >
+               <Button fx:id="resetScaleButton" mnemonicParsing="false" onAction="#resetScale" text="${controller.resetProperty}">
                    <BorderPane.margin>
                        <Insets bottom="10.0" left="10.0" right="10.0" />
                    </BorderPane.margin>
                </Button>
                <Label fx:id="servingSizeLabel" text="${controller.servingSizeProperty}" />
                <Label fx:id="caloriesLabel" />
-               <Button fx:id="editButton" mnemonicParsing="false" onAction="#editRecipe" >
+            <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" />
+               <Button fx:id="editButton" mnemonicParsing="false" onAction="#editRecipe">
                    <BorderPane.margin>
                        <Insets bottom="10.0" left="10.0" right="10.0" />
                    </BorderPane.margin>

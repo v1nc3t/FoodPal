@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 public class AddIngredientCtrl implements Internationalizable {
     @Inject
-    RecipeManager recipeManager;
+    private RecipeManager recipeManager;
 
     private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML private Label nameLabel;
@@ -169,14 +169,13 @@ public class AddIngredientCtrl implements Internationalizable {
 
     /**
      * Tries to create a new RecipeIngredient from user input
-     * new ingredient is sent to server ///TODO
+     * new ingredient is sent to server
      * @throws WebApplicationException then show alert and stop
      */
     public void clickDone() {
         RecipeIngredient newIngredient = null;
         try {
             newIngredient = setRecipeIngredient();
-            //TODO server.addIngredient(getIngredient());
         } catch (WebApplicationException e) {
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -253,8 +252,6 @@ public class AddIngredientCtrl implements Internationalizable {
 
         Ingredient newIngredient = new Ingredient(ingredientId, name, newValues);
         recipeManager.setIngredient(newIngredient);
-        // TODO: put the new ingredient in the database
-
 
         return new RecipeIngredient(newIngredient.getId(), newAmount);
     }
