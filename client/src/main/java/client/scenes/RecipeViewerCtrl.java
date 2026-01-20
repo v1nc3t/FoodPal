@@ -1,11 +1,8 @@
 package client.scenes;
 
-import client.services.LocaleManager;
-import client.services.RecipeManager;
-import client.services.ShoppingListManager;
+import client.services.*;
 import com.google.inject.Inject;
 import commons.Ingredient;
-import client.services.RecipePrinter;
 import commons.Recipe;
 import commons.RecipeIngredient;
 import javafx.beans.property.SimpleStringProperty;
@@ -268,8 +265,20 @@ public class RecipeViewerCtrl implements Internationalizable {
             return;
         }
 
-        RecipePrinter.printRecipe(currentRecipe, titleLabel.getScene().getWindow());
+        String text = RecipeTextFormatter.toText(
+                currentRecipe,
+                id -> recipeManager
+                        .getIngredient(new RecipeIngredient(id, null))
+                        .getName()
+        );
+
+        TextFileExporter.save(
+                text,
+                titleLabel.getScene().getWindow()
+        );
     }
+
+
 
     @FXML
     private void addToShoppingList() {
