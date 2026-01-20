@@ -1,5 +1,6 @@
 package config;
 
+import client.config.FavoriteRecipe;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -249,7 +250,7 @@ class ConfigManagerTest {
         manager.load();
 
         assertDoesNotThrow(() -> {
-            manager.getConfig().getFavoriteRecipeIDs().add(UUID.randomUUID());
+            manager.getConfig().getFavoriteRecipes().add(new FavoriteRecipe(UUID.randomUUID(), "some food"));
         }, "Default lists should be modifiable (ArrayList), not immutable");
     }
 }

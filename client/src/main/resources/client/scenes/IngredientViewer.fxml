@@ -35,6 +35,12 @@
                 <Label fx:id="carbsLabel" />
                 <Text fx:id="carbsValue" />
             </HBox>
+            <Label fx:id="kcalEstimateLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;">
+                <font>
+                    <Font size="15.0" />
+                </font>
+            </Label>
+            <Text fx:id="kcalEstimateValue" />
         </VBox>
     </top>
     <bottom>

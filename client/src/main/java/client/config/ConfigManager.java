@@ -86,7 +86,7 @@ public class ConfigManager {
     private Config createDefaultConfigObject() {
         Config defaultConfig = new Config();
         defaultConfig.setServerAddress("http://localhost:8080/");
-        defaultConfig.setFavoriteRecipeIDs(java.util.Collections.emptyList());
+        defaultConfig.setFavoriteRecipes(java.util.Collections.emptyList());
         defaultConfig.setLanguagePreference("en");
         defaultConfig.setLanguageFilters(List.of(Language.EN, Language.DE, Language.NL));
         defaultConfig.setShoppingList(java.util.Collections.emptyList());
