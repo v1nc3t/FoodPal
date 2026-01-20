@@ -93,6 +93,7 @@ public class ShoppingListPrinter {
             root.getChildren().add(text);
         }
 
+
         return root;
     }
 }
