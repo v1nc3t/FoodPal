@@ -3,7 +3,6 @@ package commons;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +31,7 @@ class RecipeCaloriesTest {
                 Language.EN
         );
 
-        double kcal = recipe.getCaloriesPerPortion(uuid -> ingredient);
+        double kcal = recipe.calcCaloriesPerPortion(uuid -> ingredient);
         assertEquals(0.85, kcal, 0.001);
 
 

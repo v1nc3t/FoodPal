@@ -179,10 +179,10 @@ public class RecipeViewerCtrl implements Internationalizable {
         languageSuffixProperty.set(recipe.getLanguage().proper());
         titleProperty.set(recipe.getTitle());
         setPreparationList(recipe);
-        double kcalPer100g = recipe.getKcalPer100g(
+        double kcalPer100g = recipe.calcKcalPer100g(
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
-        double kcalPerPortion = recipe.getCaloriesPerPortion(
+        double kcalPerPortion = recipe.calcCaloriesPerPortion(
                 id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
         );
 
