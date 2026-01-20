@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -209,6 +210,20 @@ public class Recipe {
     public double getCaloriesPerPortion(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
         if (portions <= 0) return 0.0;
         return getTotalCalories(ingredientResolver) / portions;
+    }
+    public double getTotalWeightInGrams() {
+        if (ingredients == null) return 0.0;
+
+        return ingredients.stream()
+                .mapToDouble(ri -> ri.getAmount().toGrams())
+                .sum();
+    }
+    public double getKcalPer100g(Function<UUID, Ingredient> ingredientResolver) {
+        double totalGrams = getTotalWeightInGrams();
+        if (totalGrams <= 0) return 0.0;
+
+        double totalKcal = getTotalCalories(ingredientResolver);
+        return (totalKcal / totalGrams) * 100.0;
     }
 
 

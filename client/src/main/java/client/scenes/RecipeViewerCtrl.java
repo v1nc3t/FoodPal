@@ -81,11 +81,16 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final StringProperty caloriesProperty = new SimpleStringProperty();
     @FXML
     private Label caloriesLabel;
+    private final StringProperty caloriesLabelProperty = new SimpleStringProperty();
+
 
     private final StringProperty servingSizeProperty = new SimpleStringProperty();
     @FXML
     private Label servingSizeLabel;
 
+
+    private final StringProperty servingSizeLabelProperty = new SimpleStringProperty();
+    private final StringProperty servingSizeValueProperty = new SimpleStringProperty();
     private Consumer<Recipe> onRecipeEdit;
     private final LocaleManager localeManager;
     private final RecipeManager recipeManager;
@@ -131,8 +136,9 @@ public class RecipeViewerCtrl implements Internationalizable {
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
-        servingSizeLabel.textProperty().bind(servingSizeProperty);
-        caloriesLabel.textProperty().bind(caloriesProperty);
+        servingSizeLabel.textProperty().bind(servingSizeLabelProperty.concat(" ").concat(servingSizeValueProperty));
+        caloriesLabel.textProperty().bind(caloriesLabelProperty.concat(" ").concat(caloriesProperty));
+
     }
 
     @Override
@@ -151,6 +157,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         printProperty.set(resourceBundle.getString("txt.print"));
         addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
         servingSizeProperty.set(resourceBundle.getString("txt.serving_size") + ":");
+        servingSizeLabelProperty.set(resourceBundle.getString("txt.serving_size") + ":");
+        caloriesLabelProperty.set(resourceBundle.getString("txt.recipe_kcal_100g"));
 
     }
 
@@ -171,11 +179,19 @@ public class RecipeViewerCtrl implements Internationalizable {
         languageSuffixProperty.set(recipe.getLanguage().proper());
         titleProperty.set(recipe.getTitle());
         setPreparationList(recipe);
+        double kcalPer100g = recipe.getKcalPer100g(
+                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
+        );
+        double kcalPerPortion = recipe.getCaloriesPerPortion(
+                id -> recipeManager.getIngredient(new RecipeIngredient(id, null))
+        );
 
-        double kcal = recipe.getCaloriesPerPortion(
-                id -> recipeManager.getIngredient(new RecipeIngredient(id, null)));
-        DecimalFormat df = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
-        caloriesProperty.set(df.format(kcal) + " kcal");
+
+        DecimalFormat df = new DecimalFormat("0.#",
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
+
+        caloriesProperty.set(df.format(kcalPer100g) + " kcal / 100g");
+
 
         boolean scaled = recipeManager.isScaled(recipe.getId());
 
@@ -196,6 +212,17 @@ public class RecipeViewerCtrl implements Internationalizable {
             portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
             setIngredientsList(recipe);
         }
+
+        DecimalFormat df1 = new DecimalFormat("0.#",
+                DecimalFormatSymbols.getInstance(Locale.ROOT));
+
+        servingSizeValueProperty.set(
+                df1.format(kcalPerPortion) + " kcal"
+        );
+
+
+
+
     }
 
     /**
@@ -217,7 +244,7 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     /**
      * This sets the ingredients with a scaling factor.
-     * 
+     *
      * @param recipe      the recipe
      * @param scaleFactor the scaling factor
      */
@@ -332,7 +359,7 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     /**
      * Calculates the scaled portions of the current recipe
-     * 
+     *
      * @return scaled portions
      */
     private int calculateScaledPortions() {
@@ -340,4 +367,5 @@ public class RecipeViewerCtrl implements Internationalizable {
             return currentRecipe.getPortions();
         return currentRecipe.getPortions() + recipeManager.getRecipeScale(currentRecipe.getId());
     }
+
 }
