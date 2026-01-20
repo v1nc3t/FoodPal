@@ -90,9 +90,10 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final StringProperty servingSizeProperty = new SimpleStringProperty();
     @FXML
     private Label servingSizeLabel;
+
+
     private final StringProperty servingSizeLabelProperty = new SimpleStringProperty();
     private final StringProperty servingSizeValueProperty = new SimpleStringProperty();
-
     private Consumer<Recipe> onRecipeEdit;
     private final LocaleManager localeManager;
     private final RecipeManager recipeManager;
@@ -138,13 +139,8 @@ public class RecipeViewerCtrl implements Internationalizable {
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
-        servingSizeLabel.textProperty().bind(
-                servingSizeLabelProperty.concat(" ").concat(servingSizeValueProperty)
-        );
-
-        caloriesLabel.textProperty().bind(
-                caloriesLabelProperty.concat(" ").concat(caloriesProperty)
-        );
+        servingSizeLabel.textProperty().bind(servingSizeLabelProperty.concat(" ").concat(servingSizeValueProperty));
+        caloriesLabel.textProperty().bind(caloriesLabelProperty.concat(" ").concat(caloriesProperty));
 
     }
 
@@ -224,10 +220,9 @@ public class RecipeViewerCtrl implements Internationalizable {
                 DecimalFormatSymbols.getInstance(Locale.ROOT));
 
         servingSizeValueProperty.set(
-                df1.format(kcalPerPortion)
-                        + " "
-                        + localeManager.getCurrentBundle().getString("txt.kcal_per_portion")
+                df1.format(kcalPerPortion) + " kcal"
         );
+
 
 
 
