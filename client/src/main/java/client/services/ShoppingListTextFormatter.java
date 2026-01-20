@@ -8,10 +8,7 @@ import java.util.List;
 
 public class ShoppingListTextFormatter {
 
-    public static String toText(
-            List<ShoppingListItem> items,
-            RecipeManager recipeManager
-    ) {
+    public static String toText(List<ShoppingListItem> items, RecipeManager recipeManager) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Shopping List\n\n");

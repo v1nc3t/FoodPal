@@ -10,10 +10,7 @@ import java.util.function.Function;
 
 public class RecipeTextFormatter {
 
-    public static String toText(
-            Recipe recipe,
-            Function<UUID, String> ingredientNameResolver
-    ) {
+    public static String toText(Recipe recipe, Function<UUID, String> ingredientNameResolver) {
         StringBuilder sb = new StringBuilder();
 
         sb.append(recipe.getTitle()).append("\n\n");
