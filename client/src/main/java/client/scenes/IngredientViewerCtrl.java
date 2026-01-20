@@ -97,7 +97,7 @@ public class IngredientViewerCtrl implements Internationalizable {
 
     void updateEstimatedKcal() {
         if (ingredient == null) return;
-        var calories = ingredient.getNutritionValues().getKcalPer100g();
+        var calories = ingredient.getNutritionValues().calcKcalPer100g();
         DecimalFormat formatter = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
         kcalEstimateValue.setText(formatter.format(calories) + " kcal");
     }
