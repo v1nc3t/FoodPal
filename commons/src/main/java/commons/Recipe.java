@@ -198,7 +198,7 @@ public class Recipe {
             Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
             if (ingredient == null) continue;
 
-            double grams = ri.getGrams();
+            double grams = ri.getAmount().toGrams();
             double kcalPer100g = ingredient.getNutritionValues().calcKcalPer100g();
 
             total += (grams / 100.0) * kcalPer100g;
