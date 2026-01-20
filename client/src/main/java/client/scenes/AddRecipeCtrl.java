@@ -75,6 +75,9 @@ public class AddRecipeCtrl implements Internationalizable {
     private final StringProperty editProperty = new SimpleStringProperty();
     private final StringProperty saveProperty = new SimpleStringProperty();
 
+    private final StringProperty emptyFieldProperty = new SimpleStringProperty();
+    private final StringProperty positiveFieldProperty = new SimpleStringProperty();
+
     private Recipe editingRecipe;
 
     private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
@@ -110,14 +113,6 @@ public class AddRecipeCtrl implements Internationalizable {
     @FXML
     private void initialize() {
         bindElementsProperties();
-        /* For UI testing purposes, since we don't have a button
-         for language selection just yet, change this line
-         if you want to visualize language changes.
-         Parameter choices:
-         EN: DEFAULT_LOCALE
-         DE: Locale.GERMAN
-         NL: Locale.forLanguageTag("nl-NL")
-        */
         setLocale(localeManager.getCurrentLocale());
 
         refreshSelectLanguage();
@@ -237,8 +232,6 @@ public class AddRecipeCtrl implements Internationalizable {
         servingsField.promptTextProperty().bind(portionsProperty);
         doneButton.textProperty().bind(doneProperty);
         cancelButton.textProperty().bind(cancelProperty);
-        //addIngredientButton.textProperty().bind(addProperty);
-        //addPreparationButton.textProperty().bind(addProperty);
     }
 
     /**
@@ -261,6 +254,9 @@ public class AddRecipeCtrl implements Internationalizable {
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
         editProperty.set(resourceBundle.getString("txt.edit"));
         saveProperty.set(resourceBundle.getString("txt.save"));
+        emptyFieldProperty.set(resourceBundle.getString("txt.empty_field_error"));
+        positiveFieldProperty.set(resourceBundle.getString("txt.positive_field_error"));
+
 
         refreshSelectLanguage();
     }
@@ -359,10 +355,12 @@ public class AddRecipeCtrl implements Internationalizable {
      * @return a new Recipe with user input
      */
     private Recipe getRecipe() {
-        String name = TextFieldUtils.getStringFromField(nameField,nameLabel);
+        String name = TextFieldUtils.getStringFromField(nameField,nameLabel, emptyFieldProperty);
         Language language = getLanguage();
         List<String> preparations = getPreparations();
-        int servings = TextFieldUtils.getPositiveIntFromField(servingsField, servingsLabel);
+        int servings = TextFieldUtils.getPositiveIntFromField(
+                servingsField, servingsLabel, positiveFieldProperty
+        );
         if(editingRecipe == null){
             // new recipe
             return new Recipe(name, ingredients, preparations, servings, language);

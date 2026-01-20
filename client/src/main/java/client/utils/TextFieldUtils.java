@@ -1,5 +1,7 @@
 package client.utils;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -10,6 +12,14 @@ import java.util.regex.Pattern;
 
 public class TextFieldUtils {
 
+    private final StringProperty emptyFieldProperty = new SimpleStringProperty();
+    private final StringProperty positiveFieldProperty = new SimpleStringProperty();
+    private final StringProperty positiveDoubleFieldProperty = new SimpleStringProperty();
+
+    //emptyFieldProperty.set(bundle.getString("txt.empty_field_error"));
+    //positiveFieldProperty.set(bundle.getString("txt.positive_field_error"));
+    //positiveDoubleFieldProperty.set(bundle.getString("txt.positive_double_field_error"));
+
     /**
      * Extracts a non-empty string from a field
      * @param textField user input
@@ -17,9 +27,16 @@ public class TextFieldUtils {
      * @return a string of user input
      * @throws IllegalArgumentException when input is null
      */
-    public static String getStringFromField(TextField textField, Label label) {
+    public static String getStringFromField(TextField textField, Label label, StringProperty errorProperty) {
         String text = textField.getText();
         if (text.isEmpty()) {
+            String message = label.getText() + " " + errorProperty.get();
+
+            var alert = new Alert(Alert.AlertType.ERROR);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            alert.setContentText(message);
+            alert.showAndWait();
+
             throw new IllegalArgumentException(label.getText() + " cannot be empty");
         }
         return text;
@@ -32,7 +49,7 @@ public class TextFieldUtils {
      * @return a positive integer of user input
      * @throws NumberFormatException when input is null, non-positive, or not an integer
      */
-    public static int getPositiveIntFromField(TextField textField, Label label) {
+    public static int getPositiveIntFromField(TextField textField, Label label, StringProperty errorProperty) {
         String text = textField.getText();
 
         try {
@@ -44,7 +61,7 @@ public class TextFieldUtils {
                 throw new NumberFormatException("Input not in a valid format.");
             }
         } catch (NumberFormatException e) {
-            String message = label.getText() + " must be a positive whole number";
+            String message = label.getText() + " " + errorProperty.get();
 
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);
@@ -62,7 +79,7 @@ public class TextFieldUtils {
      * @return a positive double of user input
      * @throws NumberFormatException when input is null, non-positive, or not double
      */
-    public static double getPositiveDoubleFromField(TextField textField, Label label) {
+    public static double getPositiveDoubleFromField(TextField textField, Label label, StringProperty errorProperty) {
         String text = textField.getText();
         text = text.replace(',', '.');
         boolean validated = validatePattern(text);
@@ -76,9 +93,7 @@ public class TextFieldUtils {
                 throw new NumberFormatException("Input not in a valid format.");
             }
         } catch (NumberFormatException e) {
-            String message = label.getText()
-                    + " must be a positive number, with or without decimal point."
-                    + " Please use at most 5 digits after the decimal point.";
+            String message = label.getText() + " " + errorProperty.get();
 
             var alert = new Alert(Alert.AlertType.ERROR);
             alert.initModality(Modality.APPLICATION_MODAL);

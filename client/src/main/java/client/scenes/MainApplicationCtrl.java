@@ -628,7 +628,7 @@ public class MainApplicationCtrl implements Internationalizable {
             new Alert(
                     Alert.AlertType.ERROR,
                     "Sync failed: " + task.getException().getMessage()).show();
-        });
+        }); // TODO
 
         new Thread(task).start();
         showMainScreen();
