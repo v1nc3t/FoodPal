@@ -90,6 +90,8 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final StringProperty servingSizeProperty = new SimpleStringProperty();
     @FXML
     private Label servingSizeLabel;
+    private final StringProperty servingSizeLabelProperty = new SimpleStringProperty();
+    private final StringProperty servingSizeValueProperty = new SimpleStringProperty();
 
     private Consumer<Recipe> onRecipeEdit;
     private final LocaleManager localeManager;
@@ -136,7 +138,10 @@ public class RecipeViewerCtrl implements Internationalizable {
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
-        servingSizeLabel.textProperty().bind(servingSizeProperty);
+        servingSizeLabel.textProperty().bind(
+                servingSizeLabelProperty.concat(" ").concat(servingSizeValueProperty)
+        );
+
         caloriesLabel.textProperty().bind(
                 caloriesLabelProperty.concat(" ").concat(caloriesProperty)
         );
@@ -159,6 +164,7 @@ public class RecipeViewerCtrl implements Internationalizable {
         printProperty.set(resourceBundle.getString("txt.print"));
         addToShoppingListProperty.set(resourceBundle.getString("txt.add_to_shopping_list"));
         servingSizeProperty.set(resourceBundle.getString("txt.serving_size") + ":");
+        servingSizeLabelProperty.set(resourceBundle.getString("txt.serving_size") + ":");
         caloriesLabelProperty.set(resourceBundle.getString("txt.recipe_kcal_100g"));
 
     }
@@ -213,18 +219,16 @@ public class RecipeViewerCtrl implements Internationalizable {
             portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
             setIngredientsList(recipe);
         }
-        int portions = calculateScaledPortions();
 
         DecimalFormat df1 = new DecimalFormat("0.#",
                 DecimalFormatSymbols.getInstance(Locale.ROOT));
 
-        servingSizeProperty.set(
-                localeManager.getCurrentBundle().getString("txt.serving_size")
-                        + ": "
-                        + df1.format(kcalPerPortion)
+        servingSizeValueProperty.set(
+                df1.format(kcalPerPortion)
                         + " "
                         + localeManager.getCurrentBundle().getString("txt.kcal_per_portion")
         );
+
 
 
     }
