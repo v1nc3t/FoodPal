@@ -2,6 +2,8 @@ package client.scenes;
 
 import client.services.LocaleManager;
 import client.services.WebSocketService;
+import client.services.RecipeManager;
+
 import com.google.inject.Inject;
 import commons.Ingredient;
 import javafx.beans.property.SimpleStringProperty;
@@ -47,12 +49,19 @@ public class IngredientViewerCtrl implements Internationalizable {
     private final StringProperty kcalEstimateProperty = new SimpleStringProperty();
     @FXML
     public Text kcalEstimateValue;
+    @FXML
+    public Label usedInRecipesLabel;
+    private final StringProperty usedInRecipesProperty = new SimpleStringProperty();
+    @FXML
+    public Text usedInRecipesValue;
     @Inject
     LocaleManager localeManager;
     @Inject
     WebSocketService webSocketService;
     @Inject
     MainApplicationCtrl mainCtrl;
+    @Inject
+    RecipeManager recipeManager;
 
     private Consumer<Ingredient> onIngredientEdit;
 
@@ -101,6 +110,7 @@ public class IngredientViewerCtrl implements Internationalizable {
         fatValue.setText(Double.toString(nv.fat()));
         carbsValue.setText(Double.toString(nv.carbs()));
         updateEstimatedKcal();
+        setLocale(localeManager.getCurrentLocale());
     }
 
     private void bindElementsProperties() {
@@ -110,6 +120,7 @@ public class IngredientViewerCtrl implements Internationalizable {
         nutritionalValueLabel.textProperty().bind(nutritionalValueProperty);
         editButton.textProperty().bind(editButtonProperty);
         kcalEstimateLabel.textProperty().bind(kcalEstimateProperty);
+        usedInRecipesLabel.textProperty().bind(usedInRecipesProperty);
     }
 
     @Override
@@ -121,15 +132,19 @@ public class IngredientViewerCtrl implements Internationalizable {
         nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values") + " (100g)");
         editButtonProperty.set(resourceBundle.getString("txt.edit"));
         kcalEstimateProperty.set(resourceBundle.getString("txt.calories_per_100g_estimate") + ":");
+        usedInRecipesProperty.set(resourceBundle.getString("txt.ingredient_used_in") + ":");
+        if (ingredient != null)
+            usedInRecipesValue.setText(
+                    recipeManager.ingredientUsedIn(ingredient.id) + " " + resourceBundle.getString("txt.recipes"));
     }
 
     void updateEstimatedKcal() {
-        if (ingredient == null) return;
+        if (ingredient == null)
+            return;
         var calories = ingredient.getNutritionValues().calcKcalPer100g();
         DecimalFormat formatter = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
         kcalEstimateValue.setText(formatter.format(calories) + " kcal");
     }
-
 
     public void clickEdit(ActionEvent _action) {
         if (ingredient != null && onIngredientEdit != null) {

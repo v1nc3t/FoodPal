@@ -297,6 +297,23 @@ public class RecipeManager {
         }
     }
 
+    /**
+     * Finds how many recipes the ingredient is used in
+     * 
+     * @param ingredientId the ingredient id to search by
+     * @return the count of recipes
+     */
+    public int ingredientUsedIn(UUID ingredientId) {
+        return (int) recipesMap
+                .values()
+                .stream()
+                .filter(rv -> rv
+                        .getIngredients()
+                        .stream()
+                        .anyMatch(ri -> ri.ingredientRef.equals(ingredientId)))
+                .count();
+    }
+
     public boolean removeIngredient(UUID ingredientId) {
         if (ingredientId == null)
             return false;
@@ -315,11 +332,21 @@ public class RecipeManager {
         server.removeIngredient(ingredientId);
 
         Ingredient removed = ingredientsMap.remove(ingredientId);
+        if (removed == null)
+            return false;
+
+        recipesMap.values().forEach(recipe -> {
+            var newIngredients = recipe.ingredients.stream()
+                    .filter(ri -> !ri.ingredientRef.equals(ingredientId))
+                    .toList();
+            recipe.ingredients.clear();
+            recipe.ingredients.addAll(newIngredients);
+        });
 
         // still remove from observable list
         runOnFx(() -> ingredientsFx.removeIf(r -> Objects.equals(r.getId(), ingredientId)));
 
-        return removed != null;
+        return true;
     }
 
     public int indexOfRecipe(UUID id) {
