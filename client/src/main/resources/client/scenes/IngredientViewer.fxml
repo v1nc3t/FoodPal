@@ -41,6 +41,12 @@
                 </font>
             </Label>
             <Text fx:id="kcalEstimateValue" />
+            <Label fx:id="usedInRecipesLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;">
+                <font>
+                    <Font size="15.0" />
+                </font>
+            </Label>
+            <Text fx:id="usedInRecipesValue" />
         </VBox>
     </top>
     <bottom>
