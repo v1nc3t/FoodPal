@@ -77,5 +77,25 @@ public class RecipeTest {
     @Test
     public void testEqualsSameObject() {
         assertEquals(recipe, recipe);
-    }   
+    }
+
+    @Test
+    public void testScaleToPortions() {
+        Recipe actual = recipe.scaleToPortions(2);
+
+        List<RecipeIngredient> scaledIngredients = ingredients.stream()
+                .map(ri -> ri.scale(0.5))
+                .toList();
+
+        Recipe expected = new Recipe(id, "Cake", scaledIngredients, steps, 2, language);
+        assertEquals(expected, actual, "Expected scaled recipe to have scaled ingredients and portions.");
+    }
+
+    @Test
+    public void testCalcTotalWeightInGrams() {
+        double actual = recipe.calcTotalWeightInGrams();
+        double expected = 480.0;
+        assertEquals(expected, actual,
+                0.00001, "Expected a different total weight in grams, while not counting informal amounts.");
+    }
 }
