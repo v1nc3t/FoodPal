@@ -30,6 +30,9 @@
                 <Label fx:id="ingredientsLabel" minWidth="-Infinity" text="${controller.ingredientsProperty}" wrapText="true" />
                 <Region HBox.hgrow="ALWAYS" />
                 <Label fx:id="nutritionalValueLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="servingSizeLabel" minWidth="-Infinity" text="${controller.servingSizeProperty}" />
+                <Label fx:id="caloriesLabel" minWidth="-Infinity" />
              </HBox>
             <Button fx:id="addToShoppingListButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#addToShoppingList" text="${controller.addToShoppingListProperty}" />
               <ListView fx:id="ingredientsList" VBox.vgrow="ALWAYS" />
@@ -61,8 +64,6 @@
                        <Insets bottom="10.0" left="10.0" right="10.0" />
                    </BorderPane.margin>
                </Button>
-               <Label fx:id="servingSizeLabel" minWidth="-Infinity" text="${controller.servingSizeProperty}" />
-               <Label fx:id="caloriesLabel" minWidth="-Infinity" />
                <Button fx:id="printButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#printRecipe" />
                <Button fx:id="editButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#editRecipe">
                    <BorderPane.margin>
