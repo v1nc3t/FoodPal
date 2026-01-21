@@ -275,7 +275,7 @@ public class MainApplicationCtrl implements Internationalizable {
     private void prepareToggleTheme() {
         Platform.runLater(() -> {
             themeToggle.setText("\u263C");
-            setTheme(themeToggle.getScene(), false);
+            setTheme(themeToggle.getScene());
         });
     }
 
@@ -738,23 +738,25 @@ public class MainApplicationCtrl implements Internationalizable {
 
     @FXML
     private void toggleTheme() {
-        boolean darkMode = themeToggle.isSelected();
         Scene scene = themeToggle.getScene();
 
-        setTheme(scene, darkMode);
+        setTheme(scene);
 
+        boolean darkMode = themeToggle.isSelected();
         themeToggle.setText(darkMode ? "\u263E" : "\u263C");
     }
 
-    public void setTheme(Scene scene, boolean darkMode) {
+    public void setTheme(Scene scene) {
         scene.getStylesheets().clear();
 
-        String theme = darkMode
+        scene.getStylesheets().add(
+                getClass().getResource(getStyleSheetPath()).toExternalForm()
+        );
+    }
+
+    public String getStyleSheetPath() {
+        return themeToggle.isSelected()
                 ? "/client/styles/dark.css"
                 : "/client/styles/light.css";
-
-        scene.getStylesheets().add(
-                getClass().getResource(theme).toExternalForm()
-        );
     }
 }

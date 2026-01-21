@@ -25,22 +25,21 @@
             </Label>
             <HBox>
                 <Label fx:id="proteinLabel" />
-                <Text fx:id="proteinValue" />
+                <Text fx:id="proteinValue" styleClass="value-text"/>
             </HBox>
             <HBox>
                 <Label fx:id="fatLabel" />
-                <Text fx:id="fatValue" />
+                <Text fx:id="fatValue" styleClass="value-text"/>
             </HBox>
             <HBox>
                 <Label fx:id="carbsLabel" />
-                <Text fx:id="carbsValue" />
+                <Text fx:id="carbsValue" styleClass="value-text" />
             </HBox>
-            <Label fx:id="kcalEstimateLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;">
-                <font>
-                    <Font size="15.0" />
-                </font>
-            </Label>
-            <Text fx:id="kcalEstimateValue" />
+            <HBox>
+                <Label fx:id="kcalEstimateLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;" />
+                <Text fx:id="kcalEstimateValue" styleClass="value-text"/>
+            </HBox>
+
         </VBox>
     </top>
     <bottom>

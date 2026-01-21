@@ -1,9 +1,17 @@
 .root {
-    -fx-base: #2b2b2b;
-    -fx-background-color: #2b2b2b;
+    -fx-base: #222222;
+    -fx-background-color: #222222;
     -fx-text-fill: #ffffff;
 }
 
-.label, .text {
+.label {
     -fx-text-fill: #ffffff;
+}
+
+.text {
+    -fx-fill: #ffffff;
+}
+
+.value-text {
+    -fx-fill: #ffffff;
 }

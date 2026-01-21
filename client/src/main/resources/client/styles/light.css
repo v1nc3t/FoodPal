@@ -4,6 +4,10 @@
     -fx-text-fill: #000000;
 }
 
-.label, .text {
+.label {
     -fx-text-fill: #000000;
+}
+
+.text {
+    -fx-fill: #000000;
 }
