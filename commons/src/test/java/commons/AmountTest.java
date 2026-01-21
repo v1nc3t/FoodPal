@@ -145,6 +145,11 @@ public class AmountTest {
         String expected = "1 a pinch";
         assertEquals(expected, informalAmount.toNormalizedString(), "Informal amounts do not need to be normalized.");
     }
-
+    @Test
+    void informalAmountToGramsIsZero() {
+        Amount informal = new Amount(5.0, "a pinch");
+        assertEquals(0.0, informal.toGrams(),
+                "Informal amounts should be ignored in kcal calculations");
+    }
 
 }

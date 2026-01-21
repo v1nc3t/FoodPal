@@ -86,7 +86,7 @@ public record Amount( double quantity,
     }
     public double toGrams() {
         if (unit == null) {
-            return quantity;
+            return 0.0;
         }
 
         return switch (unit) {

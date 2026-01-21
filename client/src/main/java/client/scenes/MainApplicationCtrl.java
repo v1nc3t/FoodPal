@@ -581,7 +581,7 @@ public class MainApplicationCtrl implements Internationalizable {
     }
 
     public void showRecipeViewer(Recipe recipe) {
-        showRecipe(recipe); // reuse your existing private method
+        showRecipe(recipe);
     }
 
     /**
