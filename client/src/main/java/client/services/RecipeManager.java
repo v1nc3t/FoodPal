@@ -8,7 +8,6 @@ import commons.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +25,7 @@ public class RecipeManager {
     private final Map<UUID, Ingredient> ingredientsMap = new ConcurrentHashMap<>();
     private Set<UUID> favouriteRecipes = new HashSet<>();
     private final Map<UUID, Integer> scaledRecipesMap = new ConcurrentHashMap<>();
+    private final Set<UUID> reportedDeletedFavorites = new HashSet<>();
 
     // Observable list for UI binding (JavaFX)
     private final ObservableList<Recipe> recipesFx = FXCollections.observableArrayList();
@@ -168,25 +168,37 @@ public class RecipeManager {
      * This can be used to show the user a prompt that this happened.
      */
     public void refreshFavoriteRecipes() {
+        // Pre-compute which favorites are missing and need to be reported
+        // This happens synchronously to avoid race conditions
+        List<FavoriteRecipe> currentFavorites = configManager.getConfig().getFavoriteRecipes();
+        List<FavoriteRecipe> toReport = new ArrayList<>();
+        List<FavoriteRecipe> toKeep = new ArrayList<>();
+
+        for (FavoriteRecipe fav : currentFavorites) {
+            Recipe recipe = getRecipe(fav.id());
+            if (recipe != null) {
+                // Recipe exists, update the name
+                toKeep.add(new FavoriteRecipe(fav.id(), recipe.title));
+            } else {
+                // Recipe is missing - check if we should report it
+                if (onFavoriteRecipeDeleted != null && !reportedDeletedFavorites.contains(fav.id())) {
+                    toReport.add(fav);
+                    reportedDeletedFavorites.add(fav.id());
+                }
+            }
+        }
+
+        // Now update the UI on the FX thread
         runOnFx(() -> {
-            configManager.getConfig().setFavoriteRecipes(
-                    configManager.getConfig()
-                            .getFavoriteRecipes()
-                            .stream()
-                            .map((fav -> new Pair<>(fav, getRecipe(fav.id()))))
-                            .filter(pair -> {
-                                if (pair.getValue() != null)
-                                    return true;
-                                if (onFavoriteRecipeDeleted != null)
-                                    onFavoriteRecipeDeleted.accept(pair.getKey());
-                                return false;
-                            })
-                            .map(pair -> new FavoriteRecipe(
-                                    pair.getKey().id(),
-                                    pair.getValue().title))
-                            .toList());
+            // Show warnings for deleted favorites
+            for (FavoriteRecipe fav : toReport) {
+                onFavoriteRecipeDeleted.accept(fav);
+            }
+
+            // Update the config with remaining favorites
+            configManager.getConfig().setFavoriteRecipes(toKeep);
             favouriteRecipes = new HashSet<>(
-                    configManager.getConfig().getFavoriteRecipes().stream().map(FavoriteRecipe::id).toList());
+                    toKeep.stream().map(FavoriteRecipe::id).toList());
         });
     }
 
@@ -317,17 +329,6 @@ public class RecipeManager {
     public boolean removeIngredient(UUID ingredientId) {
         if (ingredientId == null)
             return false;
-
-        Recipe usedRecipe = recipesMap.values().stream()
-                .filter(recipe -> recipe.getIngredients().stream()
-                        .anyMatch(ri -> ri.getIngredientRef().equals(ingredientId)))
-                .findAny()
-                .orElse(null);
-
-        if (usedRecipe != null)
-            throw new RuntimeException(
-                    "Cannot remove ingredient, because it is used in recipe: " +
-                            usedRecipe.getTitle());
 
         server.removeIngredient(ingredientId);
 
