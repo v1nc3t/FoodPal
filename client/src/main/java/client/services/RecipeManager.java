@@ -101,8 +101,6 @@ public class RecipeManager {
                 recipesMap.put(recipe.getId(), recipe);
             }
             recipesFx.setAll(recipesCopy);
-
-            refreshFavoriteRecipes();
         });
     }
 
@@ -128,6 +126,7 @@ public class RecipeManager {
             else
                 recipesFx.add(recipe);
         });
+        refreshFavoriteRecipes();
     }
 
     public void applyIngredientUpdate(Ingredient ingredient) {
@@ -147,9 +146,9 @@ public class RecipeManager {
         if (id == null)
             return;
         recipesMap.remove(id);
-        favouriteRecipes.remove(id);
         scaledRecipesMap.remove(id);
         runOnFx(() -> recipesFx.removeIf(r -> Objects.equals(r.getId(), id)));
+        refreshFavoriteRecipes();
     }
 
     public void applyIngredientDelete(UUID id) {
@@ -169,24 +168,26 @@ public class RecipeManager {
      * This can be used to show the user a prompt that this happened.
      */
     public void refreshFavoriteRecipes() {
-        configManager.getConfig().setFavoriteRecipes(
-                configManager.getConfig()
-                        .getFavoriteRecipes()
-                        .stream()
-                        .map((fav -> new Pair<>(fav, getRecipe(fav.id()))))
-                        .filter(pair -> {
-                            if (pair.getValue() != null)
-                                return true;
-                            if (onFavoriteRecipeDeleted != null)
-                                onFavoriteRecipeDeleted.accept(pair.getKey());
-                            return false;
-                        })
-                        .map(pair -> new FavoriteRecipe(
-                                pair.getKey().id(),
-                                pair.getValue().title))
-                        .toList());
-        favouriteRecipes = new HashSet<>(
-                configManager.getConfig().getFavoriteRecipes().stream().map(FavoriteRecipe::id).toList());
+        runOnFx(() -> {
+            configManager.getConfig().setFavoriteRecipes(
+                    configManager.getConfig()
+                            .getFavoriteRecipes()
+                            .stream()
+                            .map((fav -> new Pair<>(fav, getRecipe(fav.id()))))
+                            .filter(pair -> {
+                                if (pair.getValue() != null)
+                                    return true;
+                                if (onFavoriteRecipeDeleted != null)
+                                    onFavoriteRecipeDeleted.accept(pair.getKey());
+                                return false;
+                            })
+                            .map(pair -> new FavoriteRecipe(
+                                    pair.getKey().id(),
+                                    pair.getValue().title))
+                            .toList());
+            favouriteRecipes = new HashSet<>(
+                    configManager.getConfig().getFavoriteRecipes().stream().map(FavoriteRecipe::id).toList());
+        });
     }
 
     /**
