@@ -19,6 +19,7 @@
                <TextField fx:id="searchField" maxWidth="Infinity" onAction="#search" promptText="Search" />
                <ComboBox fx:id="languageOptions" minWidth="-Infinity" onAction="#changeLanguage" prefHeight="25.0" prefWidth="60.0" promptText="🏳" />
                <ChoiceBox fx:id="orderBy" minWidth="-Infinity" />
+               <ToggleButton fx:id="themeToggle" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleTheme" prefWidth="35.0" />
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
              <Label fx:id="showRecipesLabel" minWidth="-Infinity" prefHeight="25" text="${controller.showRecipesProperty}" />

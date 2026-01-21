@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.Main;
 import client.MyFXML;
 import client.config.Config;
 import client.config.FavoriteRecipe;
@@ -101,6 +102,9 @@ public class MainApplicationCtrl implements Internationalizable {
     private ToggleButton ingredientToggleButton;
     private final StringProperty ingredientToggleTextProperty = new SimpleStringProperty();
     private final ToggleGroup categoryToggleGroup = new ToggleGroup();
+
+    @FXML
+    private ToggleButton themeToggle;
 
     @Inject
     private SidebarListCtrl sidebarListCtrl;
@@ -222,6 +226,7 @@ public class MainApplicationCtrl implements Internationalizable {
         prepareLanguageOptions();
         prepareSortBy();
         prepareSearchField();
+        prepareToggleTheme();
 
         sidebarListCtrl.initialize();
 
@@ -265,6 +270,13 @@ public class MainApplicationCtrl implements Internationalizable {
         Platform.runLater(() ->
             refresh(recipeManager::refreshFavoriteRecipes)
         );
+    }
+
+    private void prepareToggleTheme() {
+        Platform.runLater(() -> {
+            themeToggle.setText("\u263C");
+            setTheme(themeToggle.getScene(), false);
+        });
     }
 
     private void prepareSearchField() {
@@ -722,5 +734,27 @@ public class MainApplicationCtrl implements Internationalizable {
         ctrl.setItems(items);
 
         stage.showAndWait();
+    }
+
+    @FXML
+    private void toggleTheme() {
+        boolean darkMode = themeToggle.isSelected();
+        Scene scene = themeToggle.getScene();
+
+        setTheme(scene, darkMode);
+
+        themeToggle.setText(darkMode ? "\u263E" : "\u263C");
+    }
+
+    public void setTheme(Scene scene, boolean darkMode) {
+        scene.getStylesheets().clear();
+
+        String theme = darkMode
+                ? "/client/styles/dark.css"
+                : "/client/styles/light.css";
+
+        scene.getStylesheets().add(
+                getClass().getResource(theme).toExternalForm()
+        );
     }
 }

@@ -71,9 +71,14 @@ public class Main extends Application {
                 "client", "scenes", "MainApplication.fxml");
 
         Parent root = pair.getValue();
+        Scene scene = new Scene(root);
+
+        scene.getStylesheets().add(
+                getClass().getResource("/client/styles/light.css").toExternalForm()
+        );
 
         primaryStage.setTitle("FoodPal");
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(scene);
         // primaryStage.setResizable(false);
         primaryStage.setMinWidth(1300);
         primaryStage.setMinHeight(480);
