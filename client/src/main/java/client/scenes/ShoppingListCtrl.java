@@ -90,7 +90,7 @@ public class ShoppingListCtrl implements Internationalizable {
 
         Optional<ButtonType> result = alert.showAndWait();
 
-        if (result.isPresent() && result.get() == ButtonType.OK) {
+        if (result.isPresent() && result.get() == deleteButton) {
             shoppingListManager.clear();
         }
     }
@@ -235,7 +235,9 @@ public class ShoppingListCtrl implements Internationalizable {
         javafx.scene.control.TextInputDialog nameDialog = new javafx.scene.control.TextInputDialog(
                 currentName != null ? currentName : "");
         nameDialog.setTitle(editProperty.get() + " " + itemProperty.get());
-        nameDialog.setHeaderText(editProperty.get() + " " + itemProperty.get() + nameProperty.get() + ":");
+        nameDialog.setHeaderText(
+                editProperty.get() + " " + itemProperty.get() + " " + nameProperty.get() + ":"
+        );
         nameDialog.setContentText(nameProperty.get() + ":");
 
         nameDialog.showAndWait().ifPresent(newName -> showAmountDialog(item, currentName, newName));
