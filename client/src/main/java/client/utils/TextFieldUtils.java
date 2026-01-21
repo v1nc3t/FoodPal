@@ -1,6 +1,5 @@
 package client.utils;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -11,14 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextFieldUtils {
-
-    private final StringProperty emptyFieldProperty = new SimpleStringProperty();
-    private final StringProperty positiveFieldProperty = new SimpleStringProperty();
-    private final StringProperty positiveDoubleFieldProperty = new SimpleStringProperty();
-
-    //emptyFieldProperty.set(bundle.getString("txt.empty_field_error"));
-    //positiveFieldProperty.set(bundle.getString("txt.positive_field_error"));
-    //positiveDoubleFieldProperty.set(bundle.getString("txt.positive_double_field_error"));
 
     /**
      * Extracts a non-empty string from a field

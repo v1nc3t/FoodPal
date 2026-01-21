@@ -77,6 +77,9 @@ public class AddRecipeCtrl implements Internationalizable {
 
     private final StringProperty emptyFieldProperty = new SimpleStringProperty();
     private final StringProperty positiveFieldProperty = new SimpleStringProperty();
+    private final StringProperty failSaveIngredientProperty = new SimpleStringProperty();
+    private final StringProperty addIngredientProperty = new SimpleStringProperty();
+    private final StringProperty editIngredientProperty = new SimpleStringProperty();
 
     private Recipe editingRecipe;
 
@@ -185,7 +188,7 @@ public class AddRecipeCtrl implements Internationalizable {
                 var scene = new Scene(addIngredientRoot);
                 scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
                 Stage addIngredientStage = new Stage();
-                addIngredientStage.setTitle("Add Ingredient");
+                addIngredientStage.setTitle(addIngredientProperty.get());
                 addIngredientStage.initModality(Modality.APPLICATION_MODAL);
                 addIngredientStage.setScene(scene);
                 addIngredientStage.setResizable(false);
@@ -256,7 +259,9 @@ public class AddRecipeCtrl implements Internationalizable {
         saveProperty.set(resourceBundle.getString("txt.save"));
         emptyFieldProperty.set(resourceBundle.getString("txt.empty_field_error"));
         positiveFieldProperty.set(resourceBundle.getString("txt.positive_field_error"));
-
+        failSaveIngredientProperty.set(resourceBundle.getString("txt.save_ingredient_error"));
+        addIngredientProperty.set(resourceBundle.getString("txt.title"));
+        editIngredientProperty.set(resourceBundle.getString("txt.edit_ingredient"));
 
         refreshSelectLanguage();
     }
@@ -276,25 +281,10 @@ public class AddRecipeCtrl implements Internationalizable {
      * And after clear all fields and main app stops showing add recipe panel
      */
     public void clickDone() {
-        boolean isEditing = preparationList.getChildren().stream()
-                .map(node -> (HBox) node)
-                .anyMatch(hbox -> hbox.getChildren().getFirst() instanceof TextArea);
-
-        if (isEditing) {
-            var alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Unsaved Changes");
-            alert.setHeaderText(null);
-            alert.setContentText("Please save or cancel your preparation step before finishing.");
-            alert.showAndWait();
-            return;
-        }
-
         Recipe r;
         try {
             r = getRecipe();
-
             recipeManager.setRecipe(r);
-            //server.setRecipe(r);
 
             if (editingRecipe == null) {
                 recipeManager.addRecipeOptimistic(r);
@@ -421,7 +411,7 @@ public class AddRecipeCtrl implements Internationalizable {
                 } catch (Exception e) {
                     new Alert(
                             Alert.AlertType.ERROR,
-                            "Failed to save ingredient to server"
+                            failSaveIngredientProperty.get()
                     ).show();
                 }
             });
@@ -430,7 +420,7 @@ public class AddRecipeCtrl implements Internationalizable {
         scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
 
         Stage addIngredientStage = new Stage();
-        addIngredientStage.setTitle("Add Ingredient");
+        addIngredientStage.setTitle(addIngredientProperty.get());
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
         addIngredientStage.setScene(scene);
         addIngredientStage.setResizable(false);
@@ -461,7 +451,7 @@ public class AddRecipeCtrl implements Internationalizable {
         scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
 
         Stage addIngredientStage = new Stage();
-        addIngredientStage.setTitle("Edit Ingredient");
+        addIngredientStage.setTitle(editIngredientProperty.get());
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
         addIngredientStage.setScene(scene);
         addIngredientStage.setResizable(false);
@@ -487,7 +477,8 @@ public class AddRecipeCtrl implements Internationalizable {
         HBox.setHgrow(textFlow, Priority.ALWAYS);
 
         Button delete = new Button("-");
-        Button edit =  new Button("Edit");
+        Button edit =  new Button();
+        edit.textProperty().bind(editProperty);
 
         HBox buttonGroup = new HBox(5, delete, edit);
         buttonGroup.setAlignment(Pos.CENTER_RIGHT);
