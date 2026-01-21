@@ -4,22 +4,22 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="10.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
    <children>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-             <Label fx:id="nameLabel" text="${controller.nameProperty}" />
-             <TextField fx:id="nameField" promptText="${controller.recipeNameFieldProperty}" HBox.hgrow="ALWAYS" />
-             <Label fx:id="languageLabel" text="${controller.languageProperty}" HBox.hgrow="ALWAYS" />
-             <ChoiceBox fx:id="languageChoiceBox" HBox.hgrow="ALWAYS" />
+             <Label fx:id="nameLabel" minWidth="-Infinity" text="${controller.nameProperty}" />
+             <TextField fx:id="nameField" minWidth="-Infinity" promptText="${controller.recipeNameFieldProperty}" HBox.hgrow="ALWAYS" />
+             <Label fx:id="languageLabel" minWidth="-Infinity" text="${controller.languageProperty}" HBox.hgrow="ALWAYS" />
+             <ChoiceBox fx:id="languageChoiceBox" prefHeight="25.0" prefWidth="100.0" HBox.hgrow="ALWAYS" />
          </children>
       </HBox>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
-         <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" />
-         <ComboBox fx:id="ingredientsComboBox" promptText="${controller.selectIngredientProperty}" HBox.hgrow="ALWAYS" />
+         <Label fx:id="ingredientsLabel" minWidth="-Infinity" text="${controller.ingredientsProperty}" />
+         <ComboBox fx:id="ingredientsComboBox" prefHeight="25.0" prefWidth="160.0" promptText="${controller.selectIngredientProperty}" HBox.hgrow="ALWAYS" />
          <Button fx:id="addIngredientButton" mnemonicParsing="false" onAction="#clickAddIngredient" prefHeight="25.0" prefWidth="25.0" text="+" />
       </HBox>
-       <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+       <ScrollPane fx:id="ingredientsScrollPane" hbarPolicy="NEVER" prefHeight="80.0" prefWidth="525.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
          <content>
             <VBox fx:id="ingredientsList" spacing="2.0">
                <padding>
@@ -30,12 +30,12 @@
       </ScrollPane>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-             <Label fx:id="preparationLabel" text="${controller.preparationProperty}" />
-            <TextArea fx:id="preparationField" maxWidth="1.7976931348623157E308" prefRowCount="2" promptText="${controller.addPreparationStepProperty}" HBox.hgrow="ALWAYS" />
+             <Label fx:id="preparationLabel" minWidth="-Infinity" text="${controller.preparationProperty}" />
+            <TextArea fx:id="preparationField" maxWidth="1.7976931348623157E308" prefHeight="55.0" prefRowCount="2" prefWidth="160.0" promptText="${controller.addPreparationStepProperty}" HBox.hgrow="ALWAYS" />
              <Button fx:id="addPreparationButton" mnemonicParsing="false" onAction="#clickAddPreparation" prefHeight="25.0" prefWidth="25.0" text="+" />
          </children>
       </HBox>
-      <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" prefHeight="90.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+      <ScrollPane fx:id="preparationScrollPane" hbarPolicy="NEVER" prefHeight="80.0" prefWidth="275.0" style="-fx-border-color: black; -fx-border-width: 0.5;" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
          <content>
              <VBox fx:id="preparationList" spacing="2.0">
                <padding>
@@ -46,10 +46,10 @@
       </ScrollPane>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-             <Label fx:id="servingsLabel" text="${controller.portionsProperty}" />
-             <TextField fx:id="servingsField" promptText="${controller.portionsProperty}" />
-             <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
-             <Button fx:id="doneButton" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
+             <Label fx:id="servingsLabel" minWidth="-Infinity" text="${controller.portionsProperty}" />
+             <TextField fx:id="servingsField" prefHeight="25.0" prefWidth="80.0" promptText="${controller.portionsProperty}" />
+             <Button fx:id="cancelButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#clickCancel" text="${controller.cancelProperty}" />
+             <Button fx:id="doneButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#clickDone" text="${controller.doneProperty}" />
          </children>
       </HBox>
    </children>

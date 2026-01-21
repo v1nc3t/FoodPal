@@ -6,8 +6,8 @@
 
 <GridPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.MainApplicationCtrl">
    <columnConstraints>
-      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="30.0" />
-      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="70.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="NEVER" minWidth="-Infinity" />
+      <ColumnConstraints hgrow="ALWAYS" minWidth="550.0" prefWidth="700.0" />
    </columnConstraints>
    <rowConstraints>
       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -17,32 +17,33 @@
          <children>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <TextField fx:id="searchField" maxWidth="Infinity" onAction="#search" promptText="Search" />
-               <ComboBox fx:id="languageOptions" onAction="#changeLanguage" prefHeight="25.0" prefWidth="60.0" promptText="🏳" />
-               <ChoiceBox fx:id="orderBy" />
+               <ComboBox fx:id="languageOptions" minWidth="-Infinity" onAction="#changeLanguage" prefHeight="25.0" prefWidth="60.0" promptText="🏳" />
+               <ChoiceBox fx:id="orderBy" minWidth="150.0" />
+               <ToggleButton fx:id="themeToggle" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleTheme" prefWidth="35.0" />
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
-             <Label fx:id="showRecipesLabel" prefHeight="25" text="${controller.showRecipesProperty}" />
+             <Label fx:id="showRecipesLabel" minWidth="-Infinity" prefHeight="25" text="${controller.showRecipesProperty}" />
                         <CheckBox fx:id="englishFilter" mnemonicParsing="false" prefHeight="25" text="${controller.englishProperty}" />
                     <CheckBox fx:id="germanFilter" mnemonicParsing="false" prefHeight="25" text="${controller.germanProperty}" />
              <CheckBox fx:id="dutchFilter" mnemonicParsing="false" prefHeight="25" text="${controller.dutchProperty}" />
             </HBox>
              <HBox alignment="CENTER_LEFT" spacing="10.0">
-                 <Label fx:id="onlyShowFavouritesLabel" prefHeight="25" text="${controller.onlyShowFavouritesProperty}" />
+                 <Label fx:id="onlyShowFavouritesLabel" minWidth="-Infinity" prefHeight="25" text="${controller.onlyShowFavouritesProperty}" />
                  <CheckBox fx:id="onlyShowFavouritesToggle" mnemonicParsing="false" prefHeight="25" />
              </HBox>
              <HBox>
-                 <ToggleButton fx:id="recipeToggleButton" text="Recipes" />
-                 <ToggleButton fx:id="ingredientToggleButton" text="Ingredients" />
+                 <ToggleButton fx:id="recipeToggleButton" minWidth="-Infinity" text="Recipes" />
+                 <ToggleButton fx:id="ingredientToggleButton" minWidth="-Infinity" text="Ingredients" />
              </HBox>
               <ListView fx:id="sidebarListView" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             <HBox alignment="CENTER_LEFT" spacing="8.0">
                <children>
-                    <Button fx:id="addButton" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" />
-                    <Button fx:id="removeButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
-                    <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refresh" text="${controller.refreshProperty}" />
-                    <Button fx:id="cloneButton" mnemonicParsing="false" />
-                    <Button fx:id="favouriteButton" mnemonicParsing="false" />
-                    <Button fx:id="shoppingListButton" mnemonicParsing="false" onAction="#showShoppingList" text="🛒" />
+                    <Button fx:id="addButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" wrapText="true" />
+                    <Button fx:id="removeButton" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
+                    <Button fx:id="refreshButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#refresh" text="${controller.refreshProperty}" />
+                    <Button fx:id="cloneButton" minWidth="-Infinity" mnemonicParsing="false" />
+                    <Button fx:id="favouriteButton" minWidth="-Infinity" mnemonicParsing="false" />
+                    <Button fx:id="shoppingListButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#showShoppingList" text="🛒" />
                </children>
             </HBox>
          </children>

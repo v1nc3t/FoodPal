@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.Main;
 import client.MyFXML;
 import client.config.Config;
 import client.config.FavoriteRecipe;
@@ -17,6 +18,8 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.util.Pair;
@@ -25,6 +28,7 @@ import client.shoppingList.ShoppingListItem;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
 import java.util.*;
 
 public class MainApplicationCtrl implements Internationalizable {
@@ -104,6 +108,9 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty cloningProperty = new SimpleStringProperty();
     private final StringProperty enterCloneNameProperty = new SimpleStringProperty();
     private final StringProperty copyProperty = new SimpleStringProperty();
+
+    @FXML
+    private ToggleButton themeToggle;
 
     @Inject
     private SidebarListCtrl sidebarListCtrl;
@@ -229,6 +236,7 @@ public class MainApplicationCtrl implements Internationalizable {
         prepareLanguageOptions();
         prepareSortBy();
         prepareSearchField();
+        prepareToggleTheme();
 
         sidebarListCtrl.initialize();
 
@@ -272,6 +280,13 @@ public class MainApplicationCtrl implements Internationalizable {
         Platform.runLater(() ->
             refresh(recipeManager::refreshFavoriteRecipes)
         );
+    }
+
+    private void prepareToggleTheme() {
+        Platform.runLater(() -> {
+            themeToggle.setText("\u263C");
+            setTheme(themeToggle.getScene());
+        });
     }
 
     private void prepareSearchField() {
@@ -469,7 +484,12 @@ public class MainApplicationCtrl implements Internationalizable {
             @Override
             protected void updateItem(Language item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty ? null : "\uD83C\uDFF4");
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(createFlagView(item));
+                    setText(null); // Explicitly hide text here
+                }
             }
         });
 
@@ -478,8 +498,10 @@ public class MainApplicationCtrl implements Internationalizable {
             protected void updateItem(Language item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
+                    setGraphic(null);
                     setText(null);
                 } else {
+                    setGraphic(createFlagView(item));
                     setText(item.proper());
                 }
             }
@@ -491,6 +513,22 @@ public class MainApplicationCtrl implements Internationalizable {
         } catch (Exception e) {
             languageOptions.setValue(Language.EN);
         }
+    }
+
+    private ImageView createFlagView(Language item) {
+        String path = "/client/flags/" + item.name().toLowerCase() + ".png";
+
+        InputStream stream = getClass().getResourceAsStream(path);
+        if (stream == null) {
+            System.err.println("Could not find resource :" + path);
+            return new ImageView();
+        }
+
+        Image img = new Image(stream);
+        ImageView imageView = new ImageView(img);
+        imageView.setFitWidth(18);
+        imageView.setPreserveRatio(true);
+        return imageView;
     }
 
     @FXML
@@ -708,5 +746,29 @@ public class MainApplicationCtrl implements Internationalizable {
         ctrl.setItems(items);
 
         stage.showAndWait();
+    }
+
+    @FXML
+    private void toggleTheme() {
+        Scene scene = themeToggle.getScene();
+
+        setTheme(scene);
+
+        boolean darkMode = themeToggle.isSelected();
+        themeToggle.setText(darkMode ? "\u263E" : "\u263C");
+    }
+
+    public void setTheme(Scene scene) {
+        scene.getStylesheets().clear();
+
+        scene.getStylesheets().add(
+                getClass().getResource(getStyleSheetPath()).toExternalForm()
+        );
+    }
+
+    public String getStyleSheetPath() {
+        return themeToggle.isSelected()
+                ? "/client/styles/dark.css"
+                : "/client/styles/light.css";
     }
 }
