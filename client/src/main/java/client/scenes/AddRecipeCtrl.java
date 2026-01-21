@@ -80,6 +80,8 @@ public class AddRecipeCtrl implements Internationalizable {
     private final StringProperty failSaveIngredientProperty = new SimpleStringProperty();
     private final StringProperty addIngredientProperty = new SimpleStringProperty();
     private final StringProperty editIngredientProperty = new SimpleStringProperty();
+    private final StringProperty unsavedChangesProperty = new SimpleStringProperty();
+    private final StringProperty pleaseProperty = new SimpleStringProperty();
 
     private Recipe editingRecipe;
 
@@ -262,6 +264,8 @@ public class AddRecipeCtrl implements Internationalizable {
         failSaveIngredientProperty.set(resourceBundle.getString("txt.save_ingredient_error"));
         addIngredientProperty.set(resourceBundle.getString("txt.title"));
         editIngredientProperty.set(resourceBundle.getString("txt.edit_ingredient"));
+        unsavedChangesProperty.set(resourceBundle.getString("txt.unsaved_changes"));
+        pleaseProperty.set(resourceBundle.getString("txt.please"));
 
         refreshSelectLanguage();
     }
@@ -281,6 +285,21 @@ public class AddRecipeCtrl implements Internationalizable {
      * And after clear all fields and main app stops showing add recipe panel
      */
     public void clickDone() {
+        boolean isEditing = preparationList.getChildren().stream()
+                .map(node -> (HBox) node)
+                .anyMatch(hbox -> hbox.getChildren().getFirst() instanceof TextArea);
+
+        if (isEditing) {
+            var alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle(unsavedChangesProperty.get());
+            alert.setHeaderText(null);
+            var label = new Label(pleaseProperty.get());
+            label.setWrapText(true);
+            alert.getDialogPane().setContent(label);
+            alert.showAndWait();
+            return;
+        }
+
         Recipe r;
         try {
             r = getRecipe();
