@@ -296,7 +296,10 @@ public class RecipeViewerCtrl implements Internationalizable {
                 currentRecipe,
                 id -> recipeManager
                         .getIngredient(new RecipeIngredient(id, null))
-                        .getName()
+                        .getName(),
+                ResourceBundle.getBundle(
+                        localeManager.getBundleName(), localeManager.getCurrentLocale()
+                )
         );
 
         TextFileExporter.save(
