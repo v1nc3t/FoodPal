@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 
 import client.services.LocaleManager;
 import com.google.inject.Injector;
-import client.config.ConfigManager;
 import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -34,10 +33,10 @@ public class Main extends Application {
     private static Injector INJECTOR;
     private static MyFXML FXML;
 
-    private ConfigManager configManager;
+    private client.config.ConfigManager configManager;
 
-    public static ConfigManager getConfigManager() {
-        return INJECTOR.getInstance(ConfigManager.class);
+    public static client.config.ConfigManager getConfigManager() {
+        return INJECTOR.getInstance(client.config.ConfigManager.class);
     }
 
     public static void main(String[] args) throws URISyntaxException, IOException {
@@ -48,7 +47,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         // load config
         String cfgPath = getParameters().getNamed().get("cfg");
-        configManager = new ConfigManager(cfgPath);
+        configManager = new client.config.ConfigManager(cfgPath);
         configManager.load();
 
         INJECTOR = createInjector(new MyModule(configManager));
@@ -82,6 +81,8 @@ public class Main extends Application {
 
     @Override
     public void stop() {
-        configManager.save(); // save config on exit
+        if (configManager != null) {
+            configManager.save(); // save config on exit
+        }
     }
 }
