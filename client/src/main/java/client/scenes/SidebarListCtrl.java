@@ -14,6 +14,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
@@ -157,12 +158,13 @@ public class SidebarListCtrl {
                         else {
                             var alert = new Alert(Alert.AlertType.CONFIRMATION);
                             alert.initModality(Modality.APPLICATION_MODAL);
-                            alert.setContentText(
-                                    localeManager
+                            var text = localeManager
                                             .getCurrentBundle()
                                             .getString("txt.ingredient_deletion_confirmation")
-                                            .replace("$num", Integer.toString(usageCount))
-                            );
+                                            .replace("$num", Integer.toString(usageCount));
+                            var label = new Label(text);
+                            label.setWrapText(true);
+                            alert.getDialogPane().setContent(label);
                             alert.showAndWait();
                             var result = alert.getResult().getButtonData().isDefaultButton();
                             if (result)
