@@ -26,7 +26,11 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
          <children>
-             <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" wrapText="true" />
+             <HBox spacing="10.0">
+                <Label fx:id="ingredientsLabel" text="${controller.ingredientsProperty}" wrapText="true" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="nutritionalValueLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;" />
+             </HBox>
             <Button fx:id="addToShoppingListButton" mnemonicParsing="false" onAction="#addToShoppingList" text="${controller.addToShoppingListProperty}" />
               <ListView fx:id="ingredientsList" VBox.vgrow="ALWAYS" />
              <Label fx:id="preparationLabel" prefHeight="17.0" prefWidth="200.0" text="${controller.preparationProperty}" />
