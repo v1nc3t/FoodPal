@@ -6,10 +6,8 @@ import client.services.LocaleManager;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import com.google.inject.Inject;
-import commons.Ingredient;
 import commons.Language;
 import commons.Recipe;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -21,8 +19,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Controller for the left-hand recipe list.
@@ -150,7 +148,7 @@ public class SidebarListCtrl {
             if (removeMode) {
                 switch (currentMode) {
                     case ESidebarMode.Recipe ->
-                            recipeManager.removeRecipe(sel.id());
+                        recipeManager.removeRecipe(sel.id());
                     case ESidebarMode.Ingredient -> {
                         int usageCount = recipeManager.ingredientUsedIn(sel.id());
                         if (usageCount == 0)
@@ -196,10 +194,10 @@ public class SidebarListCtrl {
     }
 
     /**
-     * Updates the given list of favourite recipe UUIDs to sortUtils
+     * Updates the given list of favourite recipes to sortUtils
      * and applies filters to the list view, in case any relevant changes were made.
      * Also updates the config to the latest list of favourites.
-     * @param favouriteRecipes list of favourite recipe UUIDs
+     * @param favouriteRecipes set of favourite recipes {@link FavoriteRecipe}
      */
     public void updateFavourites(Set<FavoriteRecipe> favouriteRecipes) {
         if (recipeSortUtils == null || ingredientsSortUtils == null) {
@@ -215,13 +213,31 @@ public class SidebarListCtrl {
     }
 
     /**
+     * Propagates the given list of favourite recipe UUIDs to sortUtils
+     * and applies filters to the list view, in case any relevant changes were made,
+     * without updating the config.
+     * Intended only for initialization of favourite filters.
+     * @param favouriteRecipes set of favourite recipe UUIDs
+     */
+    public void propagateFavouritesNoConfig(Set<UUID> favouriteRecipes) {
+        if (recipeSortUtils == null || ingredientsSortUtils == null) {
+            initializeSortUtils();
+        }
+
+        recipeSortUtils.setFavourites(favouriteRecipes.stream().toList());
+
+        setListViewSorted();
+    }
+
+    /**
      * Binds the current list view items to the RecipeManager's ObservableList
      * (in a sorted manner through SortUtils)
      */
     private void setListViewSorted() {
         if (recipeSortUtils == null || ingredientsSortUtils == null) initializeSortUtils();
 
-        SortUtils currentUtils = (currentMode == ESidebarMode.Recipe) ? recipeSortUtils : ingredientsSortUtils;
+        SortUtils currentUtils = (currentMode == ESidebarMode.Recipe) ?
+                recipeSortUtils : ingredientsSortUtils;
 
         FilteredList<ListObject> filteredList = new FilteredList<>(currentUtils.getList(), item ->
                 matchesUtilityFilters(item, currentUtils) && matchesSearchFilter(item)
@@ -240,7 +256,8 @@ public class SidebarListCtrl {
      * Handles Language and Favourites filters
      **/
     private boolean matchesUtilityFilters(ListObject item, SortUtils utils) {
-        boolean langMatch = item.language().isEmpty() || utils.getLanguageFilters().contains(item.language().get());
+        boolean langMatch = item.language().isEmpty()
+                || utils.getLanguageFilters().contains(item.language().get());
         boolean favMatch = !utils.isOnlyFavourites() || utils.getFavourites().contains(item.id());
         return langMatch && favMatch;
     }

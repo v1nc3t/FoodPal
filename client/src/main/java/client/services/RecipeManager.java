@@ -199,6 +199,7 @@ public class RecipeManager {
             configManager.getConfig().setFavoriteRecipes(toKeep);
             favouriteRecipes = new HashSet<>(
                     toKeep.stream().map(FavoriteRecipe::id).toList());
+            configManager.save();
         });
     }
 

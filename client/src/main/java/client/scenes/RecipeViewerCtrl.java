@@ -21,6 +21,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -59,6 +60,17 @@ public class RecipeViewerCtrl implements Internationalizable {
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
     @FXML
     private Label ingredientsLabel;
+
+    private final StringProperty nutritionalValueProperty = new SimpleStringProperty();
+    private final StringProperty nutritionalValueKcalProperty = new SimpleStringProperty();
+    private final StringProperty proteinProperty = new SimpleStringProperty();
+    private final StringProperty proteinValueProperty = new SimpleStringProperty();
+    private final StringProperty fatProperty = new SimpleStringProperty();
+    private final StringProperty fatValueProperty = new SimpleStringProperty();
+    private final StringProperty carbsProperty = new SimpleStringProperty();
+    private final StringProperty carbsValueProperty = new SimpleStringProperty();
+    @FXML
+    private Label nutritionalValueLabel;
 
     @FXML
     private ListView<String> ingredientsList;
@@ -138,12 +150,29 @@ public class RecipeViewerCtrl implements Internationalizable {
         portionsValueLabel.textProperty().bind(portionsValueProperty);
         resetScaleButton.textProperty().bind(resetProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
+        nutritionalValueLabel.textProperty().bind(nutritionalValueProperty.concat(" ")
+                .concat(nutritionalValueKcalProperty)
+                .concat(" kcal, ")
+                .concat(proteinProperty)
+                .concat(" ")
+                .concat(proteinValueProperty)
+                .concat(" g, ")
+                .concat(carbsProperty)
+                .concat(" ")
+                .concat(carbsValueProperty)
+                .concat(" g, ")
+                .concat(fatProperty)
+                .concat(" ")
+                .concat(fatValueProperty)
+                .concat(" g"));
         preparationLabel.textProperty().bind(preparationProperty);
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
         addToShoppingListButton.textProperty().bind(addToShoppingListProperty);
-        servingSizeLabel.textProperty().bind(servingSizeLabelProperty.concat(" ").concat(servingSizeValueProperty));
-        caloriesLabel.textProperty().bind(caloriesLabelProperty.concat(" ").concat(caloriesProperty));
+        servingSizeLabel.textProperty().bind(servingSizeLabelProperty.concat(" ")
+                .concat(servingSizeValueProperty));
+        caloriesLabel.textProperty().bind(caloriesLabelProperty.concat(" ")
+                .concat(caloriesProperty));
 
     }
 
@@ -152,8 +181,11 @@ public class RecipeViewerCtrl implements Internationalizable {
         var resourceBundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
         if (currentRecipe != null) {
             languageSuffixProperty.set(currentRecipe.getLanguage().proper());
+            titleProperty.set(currentRecipe.getTitle());
+        } else {
+            languageSuffixProperty.set("");
+            titleProperty.set(resourceBundle.getString("txt.recipe_name"));
         }
-        titleProperty.set(resourceBundle.getString("txt.recipe_name"));
         languageProperty.set(resourceBundle.getString("txt.recipe_language") + ":");
         portionsProperty.set(resourceBundle.getString("txt.portions") + ":");
         resetProperty.set(resourceBundle.getString("txt.reset"));
@@ -165,7 +197,10 @@ public class RecipeViewerCtrl implements Internationalizable {
         servingSizeProperty.set(resourceBundle.getString("txt.serving_size") + ":");
         servingSizeLabelProperty.set(resourceBundle.getString("txt.serving_size") + ":");
         caloriesLabelProperty.set(resourceBundle.getString("txt.recipe_kcal_100g"));
-
+        nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values") + ":");
+        proteinProperty.set(resourceBundle.getString("txt.protein").toLowerCase() + ":");
+        fatProperty.set(resourceBundle.getString("txt.fat").toLowerCase() + ":");
+        carbsProperty.set(resourceBundle.getString("txt.carbs").toLowerCase() + ":");
     }
 
     /**
@@ -198,22 +233,23 @@ public class RecipeViewerCtrl implements Internationalizable {
         }
 
         this.currentRecipe = recipe;
+        Function<UUID, Ingredient> ingredientFactory = recipeManager::getIngredient;
+        DecimalFormat df = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
         languageSuffixProperty.set(recipe.getLanguage().proper());
         titleProperty.set(recipe.getTitle());
         setPreparationList(recipe);
-        double kcalPer100g = recipe.calcKcalPer100g(
-                id -> recipeManager.getIngredient(new RecipeIngredient(id, null)));
-        double kcalPerPortion = recipe.calcCaloriesPerPortion(
-                id -> recipeManager.getIngredient(new RecipeIngredient(id, null)));
 
-        DecimalFormat df = new DecimalFormat("0.#",
-                DecimalFormatSymbols.getInstance(Locale.ROOT));
+        double kcalPer100g = recipe.calcKcalPer100g(ingredientFactory);
+        double kcalPerPortion = recipe.calcCaloriesPerPortion(ingredientFactory);
+        double protein = recipe.calcTotalProtein(ingredientFactory);
+        double carbs = recipe.calcTotalCarbs(ingredientFactory);
+        double fat = recipe.calcTotalFat(ingredientFactory);
 
         caloriesProperty.set(df.format(kcalPer100g) + " kcal / 100g");
+        servingSizeValueProperty.set(df.format(kcalPerPortion) + " kcal");
 
         boolean scaled = recipeManager.isScaled(recipe.getId());
-
         if (scaled && calculateScaledPortions() < 1) {
             recipeManager.removeScaledRecipe(recipe.getId());
             scaled = false;
@@ -222,22 +258,21 @@ public class RecipeViewerCtrl implements Internationalizable {
         resetScaleButton.setDisable(!scaled);
         scaleDownButton.setDisable(calculateScaledPortions() < 2);
 
-        double scaleFactor = 0;
+        nutritionalValueKcalProperty.set(df.format(kcalPerPortion * calculateScaledPortions()));
         if (scaled) {
             portionsValueProperty.set("~" + calculateScaledPortions());
-            scaleFactor = calculateScaledPortions() / (double) recipe.getPortions();
+            double scaleFactor = calculateScaledPortions() / (double) recipe.getPortions();
             setIngredientsList(recipe, scaleFactor);
+            proteinValueProperty.set(df.format(protein * scaleFactor));
+            carbsValueProperty.set(df.format(carbs * scaleFactor));
+            fatValueProperty.set(df.format(fat * scaleFactor));
         } else {
             portionsValueProperty.set(String.valueOf(calculateScaledPortions()));
             setIngredientsList(recipe);
+            proteinValueProperty.set(df.format(protein));
+            carbsValueProperty.set(df.format(carbs));
+            fatValueProperty.set(df.format(fat));
         }
-
-        DecimalFormat df1 = new DecimalFormat("0.#",
-                DecimalFormatSymbols.getInstance(Locale.ROOT));
-
-        servingSizeValueProperty.set(
-                df1.format(kcalPerPortion) + " kcal");
-
     }
 
     /**

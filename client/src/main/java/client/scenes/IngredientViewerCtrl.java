@@ -131,8 +131,8 @@ public class IngredientViewerCtrl implements Internationalizable {
         carbsProperty.set(resourceBundle.getString("txt.carbs") + ": ");
         nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values") + " (100g)");
         editButtonProperty.set(resourceBundle.getString("txt.edit"));
-        kcalEstimateProperty.set(resourceBundle.getString("txt.calories_per_100g_estimate") + ":");
-        usedInRecipesProperty.set(resourceBundle.getString("txt.ingredient_used_in") + ":");
+        kcalEstimateProperty.set(resourceBundle.getString("txt.calories_per_100g_estimate") + ": ");
+        usedInRecipesProperty.set(resourceBundle.getString("txt.ingredient_used_in") + ": ");
         if (ingredient != null)
             usedInRecipesValue.setText(
                     recipeManager.ingredientUsedIn(ingredient.id) + " " + resourceBundle.getString("txt.recipes"));
