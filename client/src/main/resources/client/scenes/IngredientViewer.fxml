@@ -39,6 +39,10 @@
                 <Label fx:id="kcalEstimateLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;" />
                 <Text fx:id="kcalEstimateValue" styleClass="value-text"/>
             </HBox>
+            <HBox>
+                <Label fx:id="usedInRecipesLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-wrap-text: true;" />
+                <Text fx:id="usedInRecipesValue" styleClass="value-text" />
+            </HBox>
 
         </VBox>
     </top>

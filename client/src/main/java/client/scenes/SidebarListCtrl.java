@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.config.ConfigManager;
 import client.config.FavoriteRecipe;
+import client.services.LocaleManager;
 import client.services.RecipeManager;
 import client.utils.SortUtils;
 import com.google.inject.Inject;
@@ -13,6 +14,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
@@ -32,6 +34,8 @@ public class SidebarListCtrl {
     private RecipeManager recipeManager;
     @Inject
     private ConfigManager configManager;
+    @Inject
+    private LocaleManager localeManager;
     private SortUtils recipeSortUtils;
     private SortUtils ingredientsSortUtils;
     private ListView<ListObject> listView;
@@ -148,14 +152,23 @@ public class SidebarListCtrl {
                     case ESidebarMode.Recipe ->
                             recipeManager.removeRecipe(sel.id());
                     case ESidebarMode.Ingredient -> {
-                        try {
+                        int usageCount = recipeManager.ingredientUsedIn(sel.id());
+                        if (usageCount == 0)
                             recipeManager.removeIngredient(sel.id());
-                        }
-                        catch (Exception ex){
-                            var alert = new Alert(Alert.AlertType.ERROR);
+                        else {
+                            var alert = new Alert(Alert.AlertType.CONFIRMATION);
                             alert.initModality(Modality.APPLICATION_MODAL);
-                            alert.setContentText(ex.getMessage());
+                            var text = localeManager
+                                            .getCurrentBundle()
+                                            .getString("txt.ingredient_deletion_confirmation")
+                                            .replace("$num", Integer.toString(usageCount));
+                            var label = new Label(text);
+                            label.setWrapText(true);
+                            alert.getDialogPane().setContent(label);
                             alert.showAndWait();
+                            var result = alert.getResult().getButtonData().isDefaultButton();
+                            if (result)
+                                recipeManager.removeIngredient(sel.id());
                         }
                     }
                 }
@@ -367,27 +380,6 @@ public class SidebarListCtrl {
     }
 
     /**
-     * Adds a recipe to the list using the RecipeManager.
-     * Uses an optimistic add, meaning the recipe appears immediately in the UI.
-     *
-     * @param r the recipe to add
-     */
-    public void addRecipe(Recipe r) {
-        if (r == null) return;
-        recipeManager.addRecipeOptimistic(r);
-    }
-
-    /**
-     * Removes a recipe from the list using the RecipeManager.
-     *
-     * @param r the recipe to remove
-     */
-    public void removeRecipe(Recipe r) {
-        if (r == null) return;
-        recipeManager.removeRecipe(r.getId());
-    }
-
-    /**
      * Enables remove mode.
      * The next click on a list item will remove it instead of selecting it.
      */
@@ -411,15 +403,6 @@ public class SidebarListCtrl {
         removeMode = false;
     }
 
-    /**
-     * Returns a plain Java snapshot of all recipes currently displayed.
-     * Useful for testing, logging, or non-JavaFX logic.
-     *
-     * @return an immutable snapshot of recipes
-     */
-    public List<Recipe> getRecipesSnapshot() {
-        return recipeManager.getRecipesSnapshot();
-    }
     public void enterCloneMode() {
         removeMode = false;
         cloneMode = true;
