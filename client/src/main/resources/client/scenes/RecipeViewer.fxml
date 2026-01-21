@@ -59,7 +59,7 @@
                </Button>
                <Label fx:id="servingSizeLabel" text="${controller.servingSizeProperty}" />
                <Label fx:id="caloriesLabel" />
-            <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" />
+               <Button fx:id="printButton" mnemonicParsing="false" onAction="#printRecipe" />
                <Button fx:id="editButton" mnemonicParsing="false" onAction="#editRecipe">
                    <BorderPane.margin>
                        <Insets bottom="10.0" left="10.0" right="10.0" />

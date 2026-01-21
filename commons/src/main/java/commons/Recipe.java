@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -188,7 +189,7 @@ public class Recipe {
                 this.language
         );
     }
-    public double getTotalCalories(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+    public double calcTotalCalories(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
         double total = 0.0;
 
         if (ingredients == null) return 0.0;
@@ -197,8 +198,8 @@ public class Recipe {
             Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
             if (ingredient == null) continue;
 
-            double grams = ri.getGrams();
-            double kcalPer100g = ingredient.getNutritionValues().getKcalPer100g();
+            double grams = ri.getAmount().toGrams();
+            double kcalPer100g = ingredient.getNutritionValues().calcKcalPer100g();
 
             total += (grams / 100.0) * kcalPer100g;
         }
@@ -206,9 +207,23 @@ public class Recipe {
         return total;
     }
 
-    public double getCaloriesPerPortion(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+    public double calcCaloriesPerPortion(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
         if (portions <= 0) return 0.0;
-        return getTotalCalories(ingredientResolver) / portions;
+        return calcTotalCalories(ingredientResolver) / portions;
+    }
+    public double calcTotalWeightInGrams() {
+        if (ingredients == null) return 0.0;
+
+        return ingredients.stream()
+                .mapToDouble(ri -> ri.getAmount().toGrams())
+                .sum();
+    }
+    public double calcKcalPer100g(Function<UUID, Ingredient> ingredientResolver) {
+        double totalGrams = calcTotalWeightInGrams();
+        if (totalGrams <= 0) return 0.0;
+
+        double totalKcal = calcTotalCalories(ingredientResolver);
+        return (totalKcal / totalGrams) * 100.0;
     }
 
 

@@ -1,9 +1,6 @@
 package client.scenes;
 
-import client.services.ShoppingListManager;
-import client.services.ShoppingListPrinter;
-import client.services.RecipeManager;
-import client.services.LocaleManager;
+import client.services.*;
 import client.shoppingList.ShoppingListItem;
 import com.google.inject.Inject;
 import commons.Amount;
@@ -64,9 +61,17 @@ public class ShoppingListCtrl implements Internationalizable {
 
     @FXML
     public void printList() {
-        ShoppingListPrinter.printShoppingList(shoppingListManager.getItems(), recipeManager,
-                shoppingListView.getScene().getWindow());
+        String text = ShoppingListTextFormatter.toText(
+                shoppingListManager.getItems(),
+                recipeManager
+        );
+
+        TextFileExporter.save(
+                text,
+                shoppingListView.getScene().getWindow()
+        );
     }
+
 
     @FXML
     public void addManualItem() {

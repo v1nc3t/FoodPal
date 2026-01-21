@@ -12,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -40,6 +42,11 @@ public class IngredientViewerCtrl implements Internationalizable {
     @FXML
     private Label carbsLabel;
     private final StringProperty carbsProperty = new SimpleStringProperty();
+    @FXML
+    public Label kcalEstimateLabel;
+    private final StringProperty kcalEstimateProperty = new SimpleStringProperty();
+    @FXML
+    public Text kcalEstimateValue;
     @Inject
     LocaleManager localeManager;
     @Inject
@@ -61,6 +68,7 @@ public class IngredientViewerCtrl implements Internationalizable {
 
         setLocale(localeManager.getCurrentLocale());
         localeManager.register(this);
+        updateEstimatedKcal();
     }
 
     public void setIngredient(Ingredient ingredient) {
@@ -92,6 +100,7 @@ public class IngredientViewerCtrl implements Internationalizable {
         proteinValue.setText(Double.toString(nv.protein()));
         fatValue.setText(Double.toString(nv.fat()));
         carbsValue.setText(Double.toString(nv.carbs()));
+        updateEstimatedKcal();
     }
 
     private void bindElementsProperties() {
@@ -100,6 +109,7 @@ public class IngredientViewerCtrl implements Internationalizable {
         carbsLabel.textProperty().bind(carbsProperty);
         nutritionalValueLabel.textProperty().bind(nutritionalValueProperty);
         editButton.textProperty().bind(editButtonProperty);
+        kcalEstimateLabel.textProperty().bind(kcalEstimateProperty);
     }
 
     @Override
@@ -110,12 +120,20 @@ public class IngredientViewerCtrl implements Internationalizable {
         carbsProperty.set(resourceBundle.getString("txt.carbs") + ": ");
         nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values") + " (100g)");
         editButtonProperty.set(resourceBundle.getString("txt.edit"));
+        kcalEstimateProperty.set(resourceBundle.getString("txt.calories_per_100g_estimate") + ":");
     }
+
+    void updateEstimatedKcal() {
+        if (ingredient == null) return;
+        var calories = ingredient.getNutritionValues().calcKcalPer100g();
+        DecimalFormat formatter = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
+        kcalEstimateValue.setText(formatter.format(calories) + " kcal");
+    }
+
 
     public void clickEdit(ActionEvent _action) {
         if (ingredient != null && onIngredientEdit != null) {
             onIngredientEdit.accept(ingredient);
-
         }
     }
 
