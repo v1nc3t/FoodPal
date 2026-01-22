@@ -71,6 +71,7 @@ public class EditIngredientCtrl implements Internationalizable {
     private final StringProperty positiveDoubleFieldProperty = new SimpleStringProperty();
 
     private Ingredient ingredient = new Ingredient("", new NutritionValues(0, 0, 0));
+    private boolean isEditing = false;
 
     private Consumer<Ingredient> onShowIngredient;
 
@@ -141,47 +142,70 @@ public class EditIngredientCtrl implements Internationalizable {
 
     public void setIngredient(Ingredient ingredient) {
         this.ingredient = ingredient;
+        this.isEditing = (ingredient.getId() != null);
+
         nameField.setText(ingredient.getName());
         proteinField.setText(Double.toString(ingredient.nutritionValues.protein()));
         fatField.setText(Double.toString(ingredient.nutritionValues.fat()));
         carbsField.setText(Double.toString(ingredient.nutritionValues.carbs()));
 
-        webSocketService.subscribe("ingredient", ingredient.getId(), response -> {
-            if (response.type() == WebSocketTypes.DELETE) {
-                Platform.runLater(() -> {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Ingredient Deleted");
-                    alert.setHeaderText(null);
-                    alert.setContentText("The ingredient you are editing was deleted by another user.");
-                    alert.showAndWait();
-                    mainCtrl.showMainScreen();
-                });
-            }
-        });
+        if (isEditing) {
+            webSocketService.subscribe("ingredient", ingredient.getId(), response -> {
+                if (response.type() == WebSocketTypes.DELETE) {
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Ingredient Deleted");
+                        alert.setHeaderText(null);
+                        alert.setContentText("The ingredient you are editing was deleted by another user.");
+                        alert.showAndWait();
+                        mainCtrl.showMainScreen();
+                    });
+                }
+            });
+        }
+    }
+
+    private void resetIngredientToDefault() {
+        this.ingredient = new Ingredient("", new NutritionValues(0, 0, 0));
+        this.isEditing = false;
+        nameField.clear();
+        proteinField.clear();
+        fatField.clear();
+        carbsField.clear();
     }
 
     public void clickCancel() {
-        if (ingredient != null) {
+        if (isEditing && ingredient != null) {
             webSocketService.unsubscribe("ingredient", ingredient.getId());
         }
         if (onShowIngredient != null) {
-            onShowIngredient.accept(ingredient);
+            onShowIngredient.accept(isEditing ? ingredient : null);
         }
+        resetIngredientToDefault();
     }
 
     public void clickDone() {
-        if (ingredient != null) {
+        if (isEditing && ingredient != null) {
             webSocketService.unsubscribe("ingredient", ingredient.getId());
         }
-        ingredient.name = TextFieldUtils.getStringFromField(nameField, nameLabel, emptyFieldProperty);
-        double protein = TextFieldUtils.getPositiveDoubleFromField(proteinField, proteinLabel,
-                positiveDoubleFieldProperty);
-        double fat = TextFieldUtils.getPositiveDoubleFromField(fatField, fatLabel, positiveDoubleFieldProperty);
-        double carbs = TextFieldUtils.getPositiveDoubleFromField(carbsField, carbsLabel, positiveDoubleFieldProperty);
+        ingredient.name = TextFieldUtils.getStringFromField(
+                nameField, nameLabel, emptyFieldProperty
+        );
+        double protein = TextFieldUtils.getPositiveDoubleFromField(
+                proteinField, proteinLabel, positiveDoubleFieldProperty
+        );
+        double fat = TextFieldUtils.getPositiveDoubleFromField(
+                fatField, fatLabel, positiveDoubleFieldProperty
+        );
+        double carbs = TextFieldUtils.getPositiveDoubleFromField(
+                carbsField, carbsLabel, positiveDoubleFieldProperty
+        );
         ingredient.nutritionValues = new NutritionValues(protein, fat, carbs);
         recipeManager.setIngredient(ingredient);
+
         if (onShowIngredient != null) {
             onShowIngredient.accept(ingredient);
         }
+        resetIngredientToDefault();
     }
 }

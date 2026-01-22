@@ -38,9 +38,12 @@ public class SidebarListCtrl {
     private boolean removeMode = false;
     private boolean cloneMode = false;
     private boolean favouriteMode = false;
+    private boolean addMode = false;
     private java.util.function.Consumer<Recipe> onCloneRequest;
     private ESidebarMode currentMode = ESidebarMode.Recipe;
     private String currentSearchQuery = "";
+    private Runnable onAddRecipeRequest;
+    private Runnable onAddIngredientRequest;
 
 
 
@@ -132,64 +135,34 @@ public class SidebarListCtrl {
 
             }
         });
-
         // Handle remove-mode and clone-mode clicks in a single event filter.
         listView.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> {
             ListObject sel = listView.getSelectionModel().getSelectedItem();
-            if (sel == null
-                || (!removeMode && !cloneMode && !favouriteMode)) {
-                exitRemoveMode();
-                exitCloneMode();
-                exitFavouriteMode();
+            if (sel == null || (!removeMode && !cloneMode && !favouriteMode && !addMode)) {
+                exitAllModes();
                 return;
             }
+
             if (removeMode) {
-                switch (currentMode) {
-                    case ESidebarMode.Recipe ->{
-                        deleteRecipe(sel);
-                    }
-                    case ESidebarMode.Ingredient -> {
-                        int usageCount = recipeManager.ingredientUsedIn(sel.id());
-                        if (usageCount == 0)
-                            recipeManager.removeIngredient(sel.id());
-                        else {
-                            var alert = new Alert(Alert.AlertType.CONFIRMATION);
-                            alert.initModality(Modality.APPLICATION_MODAL);
-                            var text = localeManager
-                                            .getCurrentBundle()
-                                            .getString("txt.ingredient_deletion_confirmation")
-                                            .replace("$num", Integer.toString(usageCount));
-                            var label = new Label(text);
-                            label.setWrapText(true);
-                            alert.getDialogPane().setContent(label);
-                            alert.showAndWait();
-                            var result = alert.getResult().getButtonData().isDefaultButton();
-                            if (result)
-                                recipeManager.removeIngredient(sel.id());
-                        }
-                    }
-                }
-            }
-            else if (cloneMode && onCloneRequest != null && currentMode == ESidebarMode.Recipe)
-                onCloneRequest.accept(recipeManager.getRecipe(sel.id()));
-            else if (favouriteMode && currentMode == ESidebarMode.Recipe) {
-                recipeManager.toggleFavourite(sel.id());
-                listView.refresh(); // redraw star
-                updateFavourites(new HashSet<>(recipeManager
-                        .getFavouriteRecipesSnapshot()
-                        .stream()
-                        .map(id -> new FavoriteRecipe(id, recipeManager.getRecipe(id).title))
-                        .toList()));
-                exitFavouriteMode();
+                handleRemoveMode(sel);
+            } else if (cloneMode) {
+                handleCloneMode(sel);
+            } else if (favouriteMode) {
+                handleFavouriteMode(sel);
             }
 
-            exitRemoveMode();
-            exitFavouriteMode();
-            exitCloneMode();
+            exitAllModes();
             ev.consume();
             listView.getSelectionModel().clearSelection();
         });
+    }
 
+    private void handleRemoveMode(ListObject selected) {
+        if (currentMode == ESidebarMode.Recipe) {
+            deleteRecipe(selected);
+        } else if (currentMode == ESidebarMode.Ingredient) {
+            deleteIngredient(selected);
+        }
     }
 
     private void deleteRecipe(ListObject selected) {
@@ -215,6 +188,48 @@ public class SidebarListCtrl {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == deleteButton) {
             recipeManager.removeRecipe(selected.id());
+        }
+    }
+
+    private void deleteIngredient(ListObject selected) {
+        int usageCount = recipeManager.ingredientUsedIn(selected.id());
+        if (usageCount == 0) {
+            recipeManager.removeIngredient(selected.id());
+        } else {
+            var alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.initModality(Modality.APPLICATION_MODAL);
+            var text = localeManager
+                    .getCurrentBundle()
+                    .getString("txt.ingredient_deletion_confirmation")
+                    .replace("$num", Integer.toString(usageCount));
+            var label = new Label(text);
+            label.setWrapText(true);
+            alert.getDialogPane().setContent(label);
+            alert.showAndWait();
+
+            var result = alert.getResult().getButtonData().isDefaultButton();
+            if (result) {
+                recipeManager.removeIngredient(selected.id());
+            }
+        }
+    }
+
+    private void handleCloneMode(ListObject selected) {
+        if (currentMode == ESidebarMode.Recipe && onCloneRequest != null) {
+            onCloneRequest.accept(recipeManager.getRecipe(selected.id()));
+        }
+    }
+
+    private void handleFavouriteMode(ListObject selected) {
+        if (currentMode == ESidebarMode.Recipe) {
+            recipeManager.toggleFavourite(selected.id());
+            listView.refresh(); // redraw star
+            updateFavourites(new HashSet<>(recipeManager
+                    .getFavouriteRecipesSnapshot()
+                    .stream()
+                    .map(id -> new FavoriteRecipe(id, recipeManager.getRecipe(id).title))
+                    .toList()));
+            exitFavouriteMode();
         }
     }
 
@@ -421,13 +436,34 @@ public class SidebarListCtrl {
         setListViewSorted();
     }
 
+    public void enterAddMode() {
+        exitAllModes();
+
+        if (currentMode == ESidebarMode.Recipe) {
+            if (onAddRecipeRequest != null) onAddRecipeRequest.run();
+        } else if (currentMode == ESidebarMode.Ingredient) {
+            if (onAddIngredientRequest != null) onAddIngredientRequest.run();
+        }
+    }
+
+    public void exitAddMode() {
+        addMode = false;
+    }
+
+    public void setOnAddRecipeRequest(Runnable callback) {
+        this.onAddRecipeRequest = callback;
+    }
+
+    public void setOnAddIngredientRequest(Runnable callback) {
+        this.onAddIngredientRequest = callback;
+    }
+
     /**
      * Enables remove mode.
      * The next click on a list item will remove it instead of selecting it.
      */
     public void enterRemoveMode() {
-
-        cloneMode = false;
+        exitAllModes();
         removeMode = true;
         if (listView != null) listView.requestFocus();
     }
@@ -446,7 +482,7 @@ public class SidebarListCtrl {
     }
 
     public void enterCloneMode() {
-        removeMode = false;
+        exitAllModes();
         cloneMode = true;
         if (listView != null) listView.requestFocus();
     }
@@ -464,8 +500,7 @@ public class SidebarListCtrl {
     }
 
     public void enterFavouriteMode() {
-        removeMode = false;
-        cloneMode = false;
+        exitAllModes();
         favouriteMode = true;
         if (listView != null) listView.requestFocus();
     }
@@ -485,5 +520,12 @@ public class SidebarListCtrl {
         recipeSortUtils.setOnlyFavourites(!recipeSortUtils.isOnlyFavourites());
 
         setListViewSorted();
+    }
+
+    private void exitAllModes() {
+        exitAddMode();
+        exitRemoveMode();
+        exitCloneMode();
+        exitFavouriteMode();
     }
 }
