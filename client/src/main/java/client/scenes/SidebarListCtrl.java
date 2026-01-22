@@ -11,14 +11,12 @@ import commons.Recipe;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -147,8 +145,9 @@ public class SidebarListCtrl {
             }
             if (removeMode) {
                 switch (currentMode) {
-                    case ESidebarMode.Recipe ->
-                        recipeManager.removeRecipe(sel.id());
+                    case ESidebarMode.Recipe ->{
+                        deleteRecipe(sel);
+                    }
                     case ESidebarMode.Ingredient -> {
                         int usageCount = recipeManager.ingredientUsedIn(sel.id());
                         if (usageCount == 0)
@@ -191,6 +190,32 @@ public class SidebarListCtrl {
             listView.getSelectionModel().clearSelection();
         });
 
+    }
+
+    private void deleteRecipe(ListObject selected) {
+        var yesText = localeManager.getCurrentBundle().getString("txt.yes");
+        var noText = localeManager.getCurrentBundle().getString("txt.no");
+        ButtonType deleteButton = new ButtonType(
+                yesText, ButtonBar.ButtonData.OK_DONE
+        );
+        ButtonType cancelButton = new ButtonType(
+                noText, ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(
+                localeManager.getCurrentBundle().getString("txt.confirm_delete")
+        );
+        alert.setHeaderText(null);
+        alert.setContentText(
+                localeManager.getCurrentBundle().getString("txt.recipe_deletion_confirm")
+        );
+        alert.getButtonTypes().setAll(deleteButton, cancelButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == deleteButton) {
+            recipeManager.removeRecipe(selected.id());
+        }
     }
 
     /**

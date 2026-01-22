@@ -67,6 +67,9 @@ public class EditIngredientCtrl implements Internationalizable {
     @FXML
     private Button cancelButton;
 
+    private final StringProperty emptyFieldProperty = new SimpleStringProperty();
+    private final StringProperty positiveDoubleFieldProperty = new SimpleStringProperty();
+
     private Ingredient ingredient = new Ingredient("", new NutritionValues(0, 0, 0));
 
     private Consumer<Ingredient> onShowIngredient;
@@ -132,6 +135,8 @@ public class EditIngredientCtrl implements Internationalizable {
         gramsCarbsProperty.set(resourceBundle.getString("txt.grams_of_carbohydrates"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+        emptyFieldProperty.set(resourceBundle.getString("txt.empty_field_error"));
+        positiveDoubleFieldProperty.set(resourceBundle.getString("txt.positive_double_field_error"));
     }
 
     public void setIngredient(Ingredient ingredient) {
@@ -168,11 +173,11 @@ public class EditIngredientCtrl implements Internationalizable {
         if (ingredient != null) {
             webSocketService.unsubscribe("ingredient", ingredient.getId());
         }
-        ingredient.name = TextFieldUtils.getStringFromField(nameField, nameLabel);
-        // ... rest of the method
-        double protein = TextFieldUtils.getPositiveDoubleFromField(proteinField, proteinLabel);
-        double fat = TextFieldUtils.getPositiveDoubleFromField(fatField, fatLabel);
-        double carbs = TextFieldUtils.getPositiveDoubleFromField(carbsField, carbsLabel);
+        ingredient.name = TextFieldUtils.getStringFromField(nameField, nameLabel, emptyFieldProperty);
+        double protein = TextFieldUtils.getPositiveDoubleFromField(proteinField, proteinLabel,
+                positiveDoubleFieldProperty);
+        double fat = TextFieldUtils.getPositiveDoubleFromField(fatField, fatLabel, positiveDoubleFieldProperty);
+        double carbs = TextFieldUtils.getPositiveDoubleFromField(carbsField, carbsLabel, positiveDoubleFieldProperty);
         ingredient.nutritionValues = new NutritionValues(protein, fat, carbs);
         recipeManager.setIngredient(ingredient);
         if (onShowIngredient != null) {

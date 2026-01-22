@@ -93,6 +93,14 @@ public class AddRecipeCtrl implements Internationalizable {
     private final StringProperty editProperty = new SimpleStringProperty();
     private final StringProperty saveProperty = new SimpleStringProperty();
 
+    private final StringProperty emptyFieldProperty = new SimpleStringProperty();
+    private final StringProperty positiveFieldProperty = new SimpleStringProperty();
+    private final StringProperty failSaveIngredientProperty = new SimpleStringProperty();
+    private final StringProperty addIngredientProperty = new SimpleStringProperty();
+    private final StringProperty editIngredientProperty = new SimpleStringProperty();
+    private final StringProperty unsavedChangesProperty = new SimpleStringProperty();
+    private final StringProperty pleaseProperty = new SimpleStringProperty();
+
     private Recipe editingRecipe;
 
     private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
@@ -128,15 +136,6 @@ public class AddRecipeCtrl implements Internationalizable {
     @FXML
     private void initialize() {
         bindElementsProperties();
-        /*
-         * For UI testing purposes, since we don't have a button
-         * for language selection just yet, change this line
-         * if you want to visualize language changes.
-         * Parameter choices:
-         * EN: DEFAULT_LOCALE
-         * DE: Locale.GERMAN
-         * NL: Locale.forLanguageTag("nl-NL")
-         */
         setLocale(localeManager.getCurrentLocale());
 
         refreshSelectLanguage();
@@ -213,7 +212,7 @@ public class AddRecipeCtrl implements Internationalizable {
                 var scene = new Scene(addIngredientRoot);
                 scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
                 Stage addIngredientStage = new Stage();
-                addIngredientStage.setTitle("Add Ingredient");
+                addIngredientStage.setTitle(addIngredientProperty.get());
                 addIngredientStage.initModality(Modality.APPLICATION_MODAL);
                 addIngredientStage.setScene(scene);
                 addIngredientStage.setResizable(false);
@@ -259,8 +258,6 @@ public class AddRecipeCtrl implements Internationalizable {
         servingsField.promptTextProperty().bind(portionsProperty);
         doneButton.textProperty().bind(doneProperty);
         cancelButton.textProperty().bind(cancelProperty);
-        // addIngredientButton.textProperty().bind(addProperty);
-        // addPreparationButton.textProperty().bind(addProperty);
     }
 
     /**
@@ -284,6 +281,13 @@ public class AddRecipeCtrl implements Internationalizable {
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
         editProperty.set(resourceBundle.getString("txt.edit"));
         saveProperty.set(resourceBundle.getString("txt.save"));
+        emptyFieldProperty.set(resourceBundle.getString("txt.empty_field_error"));
+        positiveFieldProperty.set(resourceBundle.getString("txt.positive_field_error"));
+        failSaveIngredientProperty.set(resourceBundle.getString("txt.save_ingredient_error"));
+        addIngredientProperty.set(resourceBundle.getString("txt.title"));
+        editIngredientProperty.set(resourceBundle.getString("txt.edit_ingredient"));
+        unsavedChangesProperty.set(resourceBundle.getString("txt.unsaved_changes"));
+        pleaseProperty.set(resourceBundle.getString("txt.please"));
 
         refreshSelectLanguage();
     }
@@ -309,9 +313,11 @@ public class AddRecipeCtrl implements Internationalizable {
 
         if (isEditing) {
             var alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Unsaved Changes");
+            alert.setTitle(unsavedChangesProperty.get());
             alert.setHeaderText(null);
-            alert.setContentText("Please save or cancel your preparation step before finishing.");
+            var label = new Label(pleaseProperty.get());
+            label.setWrapText(true);
+            alert.getDialogPane().setContent(label);
             alert.showAndWait();
             return;
         }
@@ -319,9 +325,7 @@ public class AddRecipeCtrl implements Internationalizable {
         Recipe r;
         try {
             r = getRecipe();
-
             recipeManager.setRecipe(r);
-            // server.setRecipe(r);
 
             if (editingRecipe == null) {
                 recipeManager.addRecipeOptimistic(r);
@@ -391,10 +395,11 @@ public class AddRecipeCtrl implements Internationalizable {
      * @return a new Recipe with user input
      */
     private Recipe getRecipe() {
-        String name = TextFieldUtils.getStringFromField(nameField, nameLabel);
+        String name = TextFieldUtils.getStringFromField(nameField, nameLabel, emptyFieldProperty);
         Language language = getLanguage();
         List<String> preparations = getPreparations();
-        int servings = TextFieldUtils.getPositiveIntFromField(servingsField, servingsLabel);
+        int servings = TextFieldUtils.getPositiveIntFromField(
+                servingsField, servingsLabel, positiveFieldProperty);
         if (editingRecipe == null) {
             // new recipe
             return new Recipe(name, ingredients, preparations, servings, language);
@@ -456,7 +461,7 @@ public class AddRecipeCtrl implements Internationalizable {
                 } catch (Exception e) {
                     new Alert(
                             Alert.AlertType.ERROR,
-                            "Failed to save ingredient to server").show();
+                            failSaveIngredientProperty.get()).show();
                 }
             });
         });
@@ -464,7 +469,7 @@ public class AddRecipeCtrl implements Internationalizable {
         scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
 
         Stage addIngredientStage = new Stage();
-        addIngredientStage.setTitle("Add Ingredient");
+        addIngredientStage.setTitle(addIngredientProperty.get());
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
         addIngredientStage.setScene(scene);
         addIngredientStage.setResizable(false);
@@ -495,7 +500,7 @@ public class AddRecipeCtrl implements Internationalizable {
         scene.setOnKeyPressed(addIngredientCtrl::keyPressed);
 
         Stage addIngredientStage = new Stage();
-        addIngredientStage.setTitle("Edit Ingredient");
+        addIngredientStage.setTitle(editIngredientProperty.get());
         addIngredientStage.initModality(Modality.APPLICATION_MODAL);
         addIngredientStage.setScene(scene);
         addIngredientStage.setResizable(false);
@@ -522,7 +527,8 @@ public class AddRecipeCtrl implements Internationalizable {
         HBox.setHgrow(textFlow, Priority.ALWAYS);
 
         Button delete = new Button("-");
-        Button edit = new Button("Edit");
+        Button edit = new Button();
+        edit.textProperty().bind(editProperty);
 
         HBox buttonGroup = new HBox(5, delete, edit);
         buttonGroup.setAlignment(Pos.CENTER_RIGHT);
