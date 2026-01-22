@@ -601,23 +601,18 @@ public class MainApplicationCtrl implements Internationalizable {
 
     private void addIngredient() {
         var bundle = localeManager.getCurrentBundle();
-        Pair<AddIngredientCtrl, Parent> pair = fxml.load(AddIngredientCtrl.class, bundle,
-                "client", "scenes", "AddIngredient.fxml");
+        Pair<EditIngredientCtrl, Parent> pair = fxml.load(EditIngredientCtrl.class, bundle,
+                "client", "scenes", "EditIngredient.fxml");
 
-        AddIngredientCtrl ctrl = pair.getKey();
+        EditIngredientCtrl ctrl = pair.getKey();
         Parent root = pair.getValue();
 
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle(bundle.getString("txt.title"));
-        stage.setScene(new Scene(root));
+        contentPane.getChildren().setAll(root);
 
-        ctrl.setIngredientAddedCb(recipeIngredient -> {
+        ctrl.setSaveCallback(recipeIngredient -> {
             // showIngredient(recipeManager.getIngredient(recipeIngredient.getIngredientRef()));
             refresh();
         });
-
-        stage.showAndWait();
     }
 
     private void showRecipe(Recipe recipe) {
@@ -681,6 +676,8 @@ public class MainApplicationCtrl implements Internationalizable {
     public void showRecipeViewer(Recipe recipe) {
         showRecipe(recipe);
     }
+
+    public void showIngredientViewer(Ingredient ingredient) { showIngredient(ingredient);}
 
     /**
      * Search field for users to search up items/recipes from ist

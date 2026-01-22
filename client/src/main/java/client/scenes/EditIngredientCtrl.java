@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.application.Platform;
+import javafx.stage.Stage;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -26,6 +27,8 @@ public class EditIngredientCtrl implements Internationalizable {
     private final LocaleManager localeManager;
     private final WebSocketService webSocketService;
     private final MainApplicationCtrl mainCtrl;
+
+    private Consumer<Ingredient> onSaveCallback;
 
     private final StringProperty nameProperty = new SimpleStringProperty();
     @FXML
@@ -167,21 +170,35 @@ public class EditIngredientCtrl implements Internationalizable {
         if (onShowIngredient != null) {
             onShowIngredient.accept(ingredient);
         }
+
+        mainCtrl.showMainScreen();
     }
 
     public void clickDone() {
         if (ingredient != null) {
             webSocketService.unsubscribe("ingredient", ingredient.getId());
         }
-        ingredient.name = TextFieldUtils.getStringFromField(nameField, nameLabel, emptyFieldProperty);
-        double protein = TextFieldUtils.getPositiveDoubleFromField(proteinField, proteinLabel,
-                positiveDoubleFieldProperty);
-        double fat = TextFieldUtils.getPositiveDoubleFromField(fatField, fatLabel, positiveDoubleFieldProperty);
-        double carbs = TextFieldUtils.getPositiveDoubleFromField(carbsField, carbsLabel, positiveDoubleFieldProperty);
+        ingredient.name = TextFieldUtils.getStringFromField(
+                nameField, nameLabel, emptyFieldProperty
+        );
+        double protein = TextFieldUtils.getPositiveDoubleFromField(
+                proteinField, proteinLabel, positiveDoubleFieldProperty
+        );
+        double fat = TextFieldUtils.getPositiveDoubleFromField(
+                fatField, fatLabel, positiveDoubleFieldProperty
+        );
+        double carbs = TextFieldUtils.getPositiveDoubleFromField(
+                carbsField, carbsLabel, positiveDoubleFieldProperty
+        );
         ingredient.nutritionValues = new NutritionValues(protein, fat, carbs);
         recipeManager.setIngredient(ingredient);
         if (onShowIngredient != null) {
             onShowIngredient.accept(ingredient);
         }
+        mainCtrl.showIngredientViewer(ingredient);
+    }
+
+    public void setSaveCallback(Consumer<Ingredient> cb) {
+        this.onSaveCallback = cb;
     }
 }
