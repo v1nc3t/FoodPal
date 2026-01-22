@@ -607,12 +607,9 @@ public class MainApplicationCtrl implements Internationalizable {
         EditIngredientCtrl ctrl = pair.getKey();
         Parent root = pair.getValue();
 
-        contentPane.getChildren().setAll(root);
+        ctrl.setOnShowIngredient(this::showIngredient);
 
-        ctrl.setSaveCallback(recipeIngredient -> {
-            // showIngredient(recipeManager.getIngredient(recipeIngredient.getIngredientRef()));
-            refresh();
-        });
+        contentPane.getChildren().setAll(root);
     }
 
     private void showRecipe(Recipe recipe) {
@@ -676,8 +673,6 @@ public class MainApplicationCtrl implements Internationalizable {
     public void showRecipeViewer(Recipe recipe) {
         showRecipe(recipe);
     }
-
-    public void showIngredientViewer(Ingredient ingredient) { showIngredient(ingredient);}
 
     /**
      * Search field for users to search up items/recipes from ist
