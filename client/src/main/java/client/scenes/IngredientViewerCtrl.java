@@ -1,7 +1,9 @@
 package client.scenes;
 
 import client.services.LocaleManager;
+import client.services.WebSocketService;
 import client.services.RecipeManager;
+
 import com.google.inject.Inject;
 import commons.Ingredient;
 import javafx.beans.property.SimpleStringProperty;
@@ -55,9 +57,14 @@ public class IngredientViewerCtrl implements Internationalizable {
     @Inject
     LocaleManager localeManager;
     @Inject
+    WebSocketService webSocketService;
+    @Inject
+    MainApplicationCtrl mainCtrl;
+    @Inject
     RecipeManager recipeManager;
 
     private Consumer<Ingredient> onIngredientEdit;
+
     public void setOnIngredientEdit(Consumer<Ingredient> cb) {
         onIngredientEdit = cb;
     }
@@ -74,6 +81,28 @@ public class IngredientViewerCtrl implements Internationalizable {
     }
 
     public void setIngredient(Ingredient ingredient) {
+        if (ingredient == null) {
+            titleLabel.setText("");
+            return;
+        }
+
+        if (this.ingredient != null && !this.ingredient.getId().equals(ingredient.getId())) {
+            webSocketService.unsubscribe("ingredient", this.ingredient.getId());
+        }
+
+        if (this.ingredient == null || !this.ingredient.getId().equals(ingredient.getId())) {
+            webSocketService.subscribe("ingredient", ingredient.getId(), response -> {
+                javafx.application.Platform.runLater(() -> {
+                    if (response.type() == commons.WebSocketTypes.UPDATE) {
+                        Ingredient updated = webSocketService.convertData(response.data(), Ingredient.class);
+                        setIngredient(updated);
+                    } else if (response.type() == commons.WebSocketTypes.DELETE) {
+                        mainCtrl.showMainScreen();
+                    }
+                });
+            });
+        }
+
         this.ingredient = ingredient;
         titleLabel.setText(ingredient.getName());
         var nv = ingredient.getNutritionValues();
@@ -102,21 +131,20 @@ public class IngredientViewerCtrl implements Internationalizable {
         carbsProperty.set(resourceBundle.getString("txt.carbs") + ": ");
         nutritionalValueProperty.set(resourceBundle.getString("txt.nutritional_values") + " (100g)");
         editButtonProperty.set(resourceBundle.getString("txt.edit"));
-        kcalEstimateProperty.set(resourceBundle.getString("txt.calories_per_100g_estimate") + ":");
-        usedInRecipesProperty.set(resourceBundle.getString("txt.ingredient_used_in") + ":");
+        kcalEstimateProperty.set(resourceBundle.getString("txt.calories_per_100g_estimate") + ": ");
+        usedInRecipesProperty.set(resourceBundle.getString("txt.ingredient_used_in") + ": ");
         if (ingredient != null)
             usedInRecipesValue.setText(
-                    recipeManager.ingredientUsedIn(ingredient.id) + " " + resourceBundle.getString("txt.recipes")
-            );
+                    recipeManager.ingredientUsedIn(ingredient.id) + " " + resourceBundle.getString("txt.recipes"));
     }
 
     void updateEstimatedKcal() {
-        if (ingredient == null) return;
+        if (ingredient == null)
+            return;
         var calories = ingredient.getNutritionValues().calcKcalPer100g();
         DecimalFormat formatter = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
         kcalEstimateValue.setText(formatter.format(calories) + " kcal");
     }
-
 
     public void clickEdit(ActionEvent _action) {
         if (ingredient != null && onIngredientEdit != null) {

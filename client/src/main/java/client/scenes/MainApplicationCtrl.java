@@ -5,9 +5,9 @@ import client.config.Config;
 import client.config.FavoriteRecipe;
 import client.services.LocaleManager;
 import client.services.RecipeManager;
+import client.services.WebSocketService;
 import client.utils.ServerUtils;
-import commons.Ingredient;
-import commons.Language;
+import commons.*;
 import com.google.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -125,6 +125,8 @@ public class MainApplicationCtrl implements Internationalizable {
     private RecipeManager recipeManager;
     @Inject
     private ServerUtils serverUtils;
+    @Inject
+    private WebSocketService webSocketService;
 
     @Inject
     public MainApplicationCtrl(MyFXML fxml, LocaleManager localeManager) {
@@ -282,11 +284,38 @@ public class MainApplicationCtrl implements Internationalizable {
 
         sidebarListCtrl.propagateFavouritesNoConfig(
                 new HashSet<>(localeManager.getConfigManager().getConfig()
-                    .getFavoriteRecipes()
-                    .stream()
-                    .map(FavoriteRecipe::id)
-                    .toList())
-        );
+                        .getFavoriteRecipes()
+                        .stream()
+                        .map(FavoriteRecipe::id)
+                        .toList()));
+
+        initializeWebSockets();
+    }
+
+    private void initializeWebSockets() {
+        webSocketService.connect();
+
+        // Listen for individual recipe updates/deletes to keep list consistent
+        webSocketService.subscribe("recipe", null, response -> {
+            if (response.type() == WebSocketTypes.UPDATE) {
+                Recipe recipe = webSocketService.convertData(response.data(), Recipe.class);
+                recipeManager.applyRecipeUpdate(recipe);
+            } else if (response.type() == WebSocketTypes.DELETE) {
+                UUID id = UUID.fromString((String) response.data());
+                recipeManager.applyRecipeDelete(id);
+            }
+        });
+
+        // Listen for individual ingredient updates/deletes
+        webSocketService.subscribe("ingredient", null, response -> {
+            if (response.type() == WebSocketTypes.UPDATE) {
+                Ingredient ingredient = webSocketService.convertData(response.data(), Ingredient.class);
+                recipeManager.applyIngredientUpdate(ingredient);
+            } else if (response.type() == WebSocketTypes.DELETE) {
+                UUID id = UUID.fromString((String) response.data());
+                recipeManager.applyIngredientDelete(id);
+            }
+        });
     }
 
     private void prepareToggleTheme() {
@@ -313,6 +342,7 @@ public class MainApplicationCtrl implements Internationalizable {
      * Shows an alert to the user, describing that a recipe that was previously
      * saved as favorite was deleted, it uses that recipes last saved name in
      * the prompt
+     * 
      * @param recipe the recipe that was deleted
      */
     public void showDeletedRecipePrompt(FavoriteRecipe recipe) {
@@ -472,8 +502,7 @@ public class MainApplicationCtrl implements Internationalizable {
                             boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
-                                    .anyMatch(r ->
-                                            java.util.Objects.equals(r.getId(), currentlyShownId));
+                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownId));
                             if (!stillPresent) {
                                 javafx.application.Platform.runLater(() -> {
                                     showMainScreen();
@@ -656,6 +685,7 @@ public class MainApplicationCtrl implements Internationalizable {
     public void refresh() {
         refresh(null);
     }
+
     /**
      * Refreshes db to get latest data
      */
@@ -770,8 +800,7 @@ public class MainApplicationCtrl implements Internationalizable {
         scene.getStylesheets().clear();
 
         scene.getStylesheets().add(
-                getClass().getResource(getStyleSheetPath()).toExternalForm()
-        );
+                getClass().getResource(getStyleSheetPath()).toExternalForm());
     }
 
     public String getStyleSheetPath() {
