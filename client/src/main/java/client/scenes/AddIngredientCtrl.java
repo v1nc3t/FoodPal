@@ -65,6 +65,9 @@ public class AddIngredientCtrl implements Internationalizable {
     private final StringProperty cancelProperty = new SimpleStringProperty();
     @FXML private Button cancelButton;
 
+    private final StringProperty emptyFieldProperty = new SimpleStringProperty();
+    private final StringProperty positiveDoubleFieldProperty = new SimpleStringProperty();
+
     private UUID ingredientId = UUID.randomUUID();
 
     private final ServerUtils server;
@@ -134,6 +137,8 @@ public class AddIngredientCtrl implements Internationalizable {
         selectUnitProperty.set(resourceBundle.getString("txt.select_unit"));
         doneProperty.set(resourceBundle.getString("txt.done"));
         cancelProperty.set(resourceBundle.getString("txt.cancel"));
+        emptyFieldProperty.set(resourceBundle.getString("txt.empty_field_error"));
+        positiveDoubleFieldProperty.set(resourceBundle.getString("txt.positive_double_field_error"));
 
         // Try to change the title only once initialization is done
         Platform.runLater(()->{
@@ -242,11 +247,17 @@ public class AddIngredientCtrl implements Internationalizable {
      * If editing, sets the existing ingredient, and returns the RecipeIngredient
      */
     private RecipeIngredient setRecipeIngredient() {
-        String name = TextFieldUtils.getStringFromField(nameField, nameLabel);
+        String name = TextFieldUtils.getStringFromField(nameField, nameLabel, emptyFieldProperty);
         Amount newAmount = getAmount();
-        double protein = TextFieldUtils.getPositiveDoubleFromField(proteinField, proteinLabel);
-        double fat = TextFieldUtils.getPositiveDoubleFromField(fatField, fatLabel);
-        double carbs = TextFieldUtils.getPositiveDoubleFromField(carbsField, carbsLabel);
+        double protein = TextFieldUtils.getPositiveDoubleFromField(
+                proteinField, proteinLabel, positiveDoubleFieldProperty
+        );
+        double fat = TextFieldUtils.getPositiveDoubleFromField(
+                fatField, fatLabel, positiveDoubleFieldProperty
+        );
+        double carbs = TextFieldUtils.getPositiveDoubleFromField(
+                carbsField, carbsLabel, positiveDoubleFieldProperty
+        );
 
         NutritionValues newValues = new NutritionValues(protein, fat, carbs);
 
@@ -261,17 +272,15 @@ public class AddIngredientCtrl implements Internationalizable {
      * @return a new Amount based on input
      */
     private Amount getAmount() {
-        double quantity = TextFieldUtils.getPositiveDoubleFromField(amountField, amountLabel);
+        double quantity = TextFieldUtils.getPositiveDoubleFromField(
+                amountField, amountLabel, positiveDoubleFieldProperty
+        );
         String input = unitComboBox.getEditor().getText().trim();
 
         if (input.isEmpty()) {
             throw new WebApplicationException("Unit or description cannot be empty.");
-            //return null;
-            //return new InformalAmount(quantity, "");
         }
 
-        //Unit unit = null;
-        // try to interpret input as a Unit
         try {
             Unit unit = Unit.valueOf(input.toUpperCase());
             return new Amount(quantity, unit);

@@ -6,17 +6,17 @@ import com.google.inject.Inject;
 import commons.Amount;
 import commons.Ingredient;
 import commons.RecipeIngredient;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class ShoppingListCtrl implements Internationalizable {
@@ -30,7 +30,24 @@ public class ShoppingListCtrl implements Internationalizable {
     @FXML
     private Button printButton;
     @FXML
-    private Button addManualButton; // Future extension
+    private Button addManualButton;
+
+    private final StringProperty titleProperty = new SimpleStringProperty();
+    private final StringProperty clearProperty = new SimpleStringProperty();
+    private final StringProperty addManualProperty = new SimpleStringProperty();
+    private final StringProperty printProperty = new SimpleStringProperty();
+    private final StringProperty nameProperty = new SimpleStringProperty();
+    private final StringProperty amountProperty = new SimpleStringProperty();
+    private final StringProperty editProperty = new SimpleStringProperty();
+    private final StringProperty itemProperty = new SimpleStringProperty();
+    private final StringProperty confirmDeleteProperty = new SimpleStringProperty();
+    private final StringProperty shoppingListProperty = new SimpleStringProperty();
+    private final StringProperty sureProperty = new SimpleStringProperty();
+    private final StringProperty yesProperty = new SimpleStringProperty();
+    private final StringProperty noProperty = new SimpleStringProperty();
+
+    private String addItemDialogHeader;
+    private String addAmountDialogHeader;
 
     private final ShoppingListManager shoppingListManager;
     private final RecipeManager recipeManager;
@@ -48,6 +65,7 @@ public class ShoppingListCtrl implements Internationalizable {
 
     @FXML
     public void initialize() {
+        bindProperties();
         shoppingListView.setItems(shoppingListManager.getItems());
         shoppingListView.setCellFactory(param -> new ShoppingListCell());
 
@@ -56,7 +74,25 @@ public class ShoppingListCtrl implements Internationalizable {
 
     @FXML
     public void clearList() {
-        shoppingListManager.clear();
+        ButtonType deleteButton = new ButtonType(
+                yesProperty.get(), ButtonBar.ButtonData.OK_DONE
+        );
+        ButtonType cancelButton = new ButtonType(
+                noProperty.get(), ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(confirmDeleteProperty.get());
+        alert.setHeaderText(clearProperty.get() + " " + shoppingListProperty.get());
+        alert.setContentText(sureProperty.get());
+
+        alert.getButtonTypes().setAll(deleteButton, cancelButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == deleteButton) {
+            shoppingListManager.clear();
+        }
     }
 
     @FXML
@@ -77,16 +113,16 @@ public class ShoppingListCtrl implements Internationalizable {
     public void addManualItem() {
         javafx.scene.control.TextInputDialog nameDialog =
                 new javafx.scene.control.TextInputDialog();
-        nameDialog.setTitle("Add Item");
-        nameDialog.setHeaderText("Enter item name:");
-        nameDialog.setContentText("Name:");
+        nameDialog.setTitle(addManualProperty.get());
+        nameDialog.setHeaderText(addItemDialogHeader);
+        nameDialog.setContentText(nameProperty.get() + ":");
 
         nameDialog.showAndWait().ifPresent(name -> {
             javafx.scene.control.TextInputDialog amountDialog =
                     new javafx.scene.control.TextInputDialog("1");
-            amountDialog.setTitle("Add Item");
-            amountDialog.setHeaderText("Enter amount (e.g., '1 kg', '2 pieces'):");
-            amountDialog.setContentText("Amount:");
+            amountDialog.setTitle(addManualProperty.get());
+            amountDialog.setHeaderText(addAmountDialogHeader);
+            amountDialog.setContentText(amountProperty.get() + ":");
 
             amountDialog.showAndWait().ifPresent(amountStr -> {
                 double quantity = 1;
@@ -114,18 +150,33 @@ public class ShoppingListCtrl implements Internationalizable {
         });
     }
 
+    private void bindProperties() {
+        titleLabel.textProperty().bind(titleProperty);
+        clearButton.textProperty().bind(clearProperty);
+        addManualButton.textProperty().bind(addManualProperty);
+        printButton.textProperty().bind(printProperty);
+    }
+
     @Override
     public void setLocale(Locale locale) {
         ResourceBundle bundle = ResourceBundle.getBundle(localeManager.getBundleName(), locale);
-        titleLabel.setText(bundle.getString("txt.shopping_list"));
-        clearButton.setText(bundle.getString("txt.clear"));
-        addManualButton.setText(bundle.getString("txt.add_item"));
+        titleProperty.set(bundle.getString("txt.shopping_list"));
+        clearProperty.set(bundle.getString("txt.clear"));
+        addManualProperty.set(bundle.getString("txt.add_item"));
+        printProperty.set(bundle.getString("txt.print"));
+        nameProperty.set(bundle.getString("txt.name"));
+        amountProperty.set(bundle.getString("txt.amount"));
+        editProperty.set(bundle.getString("txt.edit"));
+        itemProperty.set(bundle.getString("txt.item"));
+        confirmDeleteProperty.set(bundle.getString("txt.confirm_delete"));
+        shoppingListProperty.set(bundle.getString("txt.shopping_list"));
+        sureProperty.set(bundle.getString("txt.sure"));
+        yesProperty.set(bundle.getString("txt.yes"));
+        noProperty.set(bundle.getString("txt.no"));
 
-        if (bundle.containsKey("txt.print")) {
-            printButton.setText(bundle.getString("txt.print"));
-        } else {
-            printButton.setText("Print");
-        }
+        addItemDialogHeader = bundle.getString("txt.add_item_dialog_header");
+        addAmountDialogHeader = bundle.getString("txt.add_amount_dialog_header");
+
         shoppingListView.refresh();
     }
 
@@ -166,7 +217,7 @@ public class ShoppingListCtrl implements Internationalizable {
 
                 ResourceBundle bundle = ResourceBundle.getBundle(localeManager.getBundleName(),
                         localeManager.getCurrentLocale());
-                Button editBtn = new Button(bundle.getString("txt.edit"));
+                Button editBtn = new Button(editProperty.get());
                 editBtn.setOnAction(e -> editItem(item));
 
                 Button removeBtn = new Button("-");
@@ -183,9 +234,11 @@ public class ShoppingListCtrl implements Internationalizable {
 
         javafx.scene.control.TextInputDialog nameDialog = new javafx.scene.control.TextInputDialog(
                 currentName != null ? currentName : "");
-        nameDialog.setTitle("Edit Item");
-        nameDialog.setHeaderText("Edit item name:");
-        nameDialog.setContentText("Name:");
+        nameDialog.setTitle(editProperty.get() + " " + itemProperty.get());
+        nameDialog.setHeaderText(
+                editProperty.get() + " " + itemProperty.get() + " " + nameProperty.get() + ":"
+        );
+        nameDialog.setContentText(nameProperty.get() + ":");
 
         nameDialog.showAndWait().ifPresent(newName -> showAmountDialog(item, currentName, newName));
     }
@@ -204,9 +257,9 @@ public class ShoppingListCtrl implements Internationalizable {
 
         javafx.scene.control.TextInputDialog amountDialog =
                 new javafx.scene.control.TextInputDialog(currentAmount);
-        amountDialog.setTitle("Edit Item");
-        amountDialog.setHeaderText("Edit amount:");
-        amountDialog.setContentText("Amount:");
+        amountDialog.setTitle(editProperty.get() + " " + itemProperty.get());
+        amountDialog.setHeaderText(editProperty.get() + " " + amountProperty.get() + ":");
+        amountDialog.setContentText(amountProperty.get() + ":");
 
         amountDialog.showAndWait()
                 .ifPresent(newAmountStr ->

@@ -102,6 +102,12 @@ public class MainApplicationCtrl implements Internationalizable {
     private final StringProperty ingredientToggleTextProperty = new SimpleStringProperty();
     private final ToggleGroup categoryToggleGroup = new ToggleGroup();
 
+    private final StringProperty syncProperty = new SimpleStringProperty();
+    private final StringProperty cloneRecipeProperty = new SimpleStringProperty();
+    private final StringProperty cloningProperty = new SimpleStringProperty();
+    private final StringProperty enterCloneNameProperty = new SimpleStringProperty();
+    private final StringProperty copyProperty = new SimpleStringProperty();
+
     @FXML
     private ToggleButton themeToggle;
 
@@ -166,9 +172,13 @@ public class MainApplicationCtrl implements Internationalizable {
         onlyShowFavouritesProperty.set(resourceBundle.getString("txt.only_favourites"));
         recipeToggleTextProperty.set(resourceBundle.getString("txt.recipe"));
         ingredientToggleTextProperty.set(resourceBundle.getString("txt.ingredient"));
-
+        syncProperty.set(resourceBundle.getString("txt.sync_error"));
         alphabeticalProperty.set(resourceBundle.getString("txt.alphabetical"));
         reverseAlphabeticalProperty.set(resourceBundle.getString("txt.reverse_alphabetical"));
+        cloneRecipeProperty.set(resourceBundle.getString("txt.clone_recipe"));
+        cloningProperty.set(resourceBundle.getString("txt.cloning"));
+        enterCloneNameProperty.set(resourceBundle.getString("txt.enter_clone_name"));
+        copyProperty.set(resourceBundle.getString("txt.copy"));
 
         if (orderBy != null) {
             int selectedIndex = orderBy.getSelectionModel().getSelectedIndex();
@@ -673,7 +683,7 @@ public class MainApplicationCtrl implements Internationalizable {
             task.getException().printStackTrace();
             new Alert(
                     Alert.AlertType.ERROR,
-                    "Sync failed: " + task.getException().getMessage()).show();
+                    syncProperty.get()+ ": " + task.getException().getMessage()).show();
         });
 
         new Thread(task).start();
@@ -688,10 +698,12 @@ public class MainApplicationCtrl implements Internationalizable {
      * @param original the recipe to be cloned (must not be null)
      */
     private void openClonePopup(Recipe original) {
-        TextInputDialog dialog = new TextInputDialog(original.getTitle() + " (Copy)");
-        dialog.setTitle("Clone Recipe");
-        dialog.setHeaderText("Cloning: " + original.getTitle());
-        dialog.setContentText("Enter a name for the cloned recipe:");
+        TextInputDialog dialog = new TextInputDialog(
+                original.getTitle() + " (" + copyProperty.get() + ")"
+        );
+        dialog.setTitle(cloneRecipeProperty.get());
+        dialog.setHeaderText(cloningProperty.get() + ": " + original.getTitle());
+        dialog.setContentText(enterCloneNameProperty.get() + ": ");
 
         var result = dialog.showAndWait();
         if (result.isEmpty())
