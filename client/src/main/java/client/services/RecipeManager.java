@@ -105,7 +105,8 @@ public class RecipeManager {
      * <br>
      * - If recipe exists, the name is updated
      * <br>
-     * - If recipe does not exist, it optionally calls a previously set onFavoriteRecipeDeleted consumer.
+     * - If recipe does not exist, it optionally calls a
+     * previously set onFavoriteRecipeDeleted consumer.
      *   This can be used to show the user a prompt that this happened.
      */
     public void refreshFavoriteRecipes() {
@@ -126,9 +127,13 @@ public class RecipeManager {
                                     pair.getValue().title))
                     .toList()
         );
-        favouriteRecipes = new HashSet<>(
-                configManager.getConfig().getFavoriteRecipes().stream().map(FavoriteRecipe::id).toList()
-        );
+        favouriteRecipes = new HashSet<>(configManager.getConfig()
+                .getFavoriteRecipes()
+                .stream()
+                .map(FavoriteRecipe::id)
+                .toList());
+
+        configManager.save();
     }
 
 

@@ -189,7 +189,8 @@ public class Recipe {
                 this.language
         );
     }
-    public double calcTotalCalories(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+
+    public double calcTotalCalories(Function<UUID, Ingredient> ingredientResolver) {
         double total = 0.0;
 
         if (ingredients == null) return 0.0;
@@ -207,10 +208,83 @@ public class Recipe {
         return total;
     }
 
-    public double calcCaloriesPerPortion(java.util.function.Function<UUID, Ingredient> ingredientResolver) {
+    /**
+     * Calculates the total protein of the recipe.
+     * @param ingredientResolver function to get the ingredient
+     *                           (and thus its nutritional values) from its id
+     * @return the total protein of the recipe in grams
+     */
+    public double calcTotalProtein(Function<UUID, Ingredient> ingredientResolver) {
+        double total = 0.0;
+
+        if (ingredients == null) return 0.0;
+
+        for (RecipeIngredient ri : ingredients) {
+            Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
+            if (ingredient == null) continue;
+
+            double grams = ri.getAmount().toGrams();
+            double proteinPer100g = ingredient.getNutritionValues().protein();
+
+            total += (grams / 100.0) * proteinPer100g;
+        }
+
+        return total;
+    }
+
+    /**
+     * Calculates the total fat of the recipe.
+     * @param ingredientResolver function to get the ingredient
+     *                           (and thus its nutritional values) from its id
+     * @return the total fat of the recipe in grams
+     */
+    public double calcTotalFat(Function<UUID, Ingredient> ingredientResolver) {
+        double total = 0.0;
+
+        if (ingredients == null) return 0.0;
+
+        for (RecipeIngredient ri : ingredients) {
+            Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
+            if (ingredient == null) continue;
+
+            double grams = ri.getAmount().toGrams();
+            double fatPer100g = ingredient.getNutritionValues().fat();
+
+            total += (grams / 100.0) * fatPer100g;
+        }
+
+        return total;
+    }
+
+    /**
+     * Calculates the total carbohydrates of the recipe.
+     * @param ingredientResolver function to get the ingredient
+     *                           (and thus its nutritional values) from its id
+     * @return the total carbohydrates of the recipe in grams
+     */
+    public double calcTotalCarbs(Function<UUID, Ingredient> ingredientResolver) {
+        double total = 0.0;
+
+        if (ingredients == null) return 0.0;
+
+        for (RecipeIngredient ri : ingredients) {
+            Ingredient ingredient = ingredientResolver.apply(ri.getIngredientRef());
+            if (ingredient == null) continue;
+
+            double grams = ri.getAmount().toGrams();
+            double carbsPer100g = ingredient.getNutritionValues().carbs();
+
+            total += (grams / 100.0) * carbsPer100g;
+        }
+
+        return total;
+    }
+
+    public double calcCaloriesPerPortion(Function<UUID, Ingredient> ingredientResolver) {
         if (portions <= 0) return 0.0;
         return calcTotalCalories(ingredientResolver) / portions;
     }
+
     public double calcTotalWeightInGrams() {
         if (ingredients == null) return 0.0;
 
@@ -218,6 +292,7 @@ public class Recipe {
                 .mapToDouble(ri -> ri.getAmount().toGrams())
                 .sum();
     }
+
     public double calcKcalPer100g(Function<UUID, Ingredient> ingredientResolver) {
         double totalGrams = calcTotalWeightInGrams();
         if (totalGrams <= 0) return 0.0;

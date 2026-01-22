@@ -1,6 +1,5 @@
 package client.scenes;
 
-import client.Main;
 import client.MyFXML;
 import client.config.Config;
 import client.config.FavoriteRecipe;
@@ -277,8 +276,16 @@ public class MainApplicationCtrl implements Internationalizable {
         filterUponSelection(sidebarListCtrl);
 
         recipeManager.setOnFavoriteRecipeDeleted(this::showDeletedRecipePrompt);
-        Platform.runLater(() ->
-            refresh(recipeManager::refreshFavoriteRecipes)
+        Platform.runLater(() -> {
+            refresh(recipeManager::refreshFavoriteRecipes);
+        });
+
+        sidebarListCtrl.propagateFavouritesNoConfig(
+                new HashSet<>(localeManager.getConfigManager().getConfig()
+                    .getFavoriteRecipes()
+                    .stream()
+                    .map(FavoriteRecipe::id)
+                    .toList())
         );
     }
 
@@ -465,7 +472,8 @@ public class MainApplicationCtrl implements Internationalizable {
                             boolean stillPresent = recipeManager
                                     .getObservableRecipes()
                                     .stream()
-                                    .anyMatch(r -> java.util.Objects.equals(r.getId(), currentlyShownId));
+                                    .anyMatch(r ->
+                                            java.util.Objects.equals(r.getId(), currentlyShownId));
                             if (!stillPresent) {
                                 javafx.application.Platform.runLater(() -> {
                                     showMainScreen();
