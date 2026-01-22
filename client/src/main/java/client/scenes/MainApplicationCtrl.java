@@ -243,6 +243,8 @@ public class MainApplicationCtrl implements Internationalizable {
 
         sidebarListCtrl.setListView(sidebarListView);
 
+        sidebarListCtrl.setOnAddRecipeRequest(this::addRecipe);
+        sidebarListCtrl.setOnAddIngredientRequest(this::addIngredient);
         sidebarListCtrl.setOnRecipeCloneRequest(this::openClonePopup);
         // open viewer on double-click, and ignore clicks when in remove mode
         sidebarListView.setOnMouseClicked(evt -> {
@@ -269,6 +271,7 @@ public class MainApplicationCtrl implements Internationalizable {
             }
         });
 
+        addButton.setOnAction(_ -> sidebarListCtrl.enterAddMode());
         cloneButton.setOnAction(_ -> sidebarListCtrl.enterCloneMode());
         removeButton.setOnAction(_ -> sidebarListCtrl.enterRemoveMode());
         favouriteButton.setOnAction(e -> sidebarListCtrl.enterFavouriteMode());
@@ -585,7 +588,6 @@ public class MainApplicationCtrl implements Internationalizable {
     /**
      * Loads Recipe panel
      */
-    @FXML
     private void addRecipe() {
         var bundle = localeManager.getCurrentBundle();
         Pair<AddRecipeCtrl, Parent> pair = fxml.load(AddRecipeCtrl.class, bundle,
@@ -595,6 +597,27 @@ public class MainApplicationCtrl implements Internationalizable {
         Parent addRecipeRoot = pair.getValue();
 
         contentPane.getChildren().setAll(addRecipeRoot);
+    }
+
+    private void addIngredient() {
+        var bundle = localeManager.getCurrentBundle();
+        Pair<AddIngredientCtrl, Parent> pair = fxml.load(AddIngredientCtrl.class, bundle,
+                "client", "scenes", "AddIngredient.fxml");
+
+        AddIngredientCtrl ctrl = pair.getKey();
+        Parent root = pair.getValue();
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle(bundle.getString("txt.title"));
+        stage.setScene(new Scene(root));
+
+        ctrl.setIngredientAddedCb(recipeIngredient -> {
+            // showIngredient(recipeManager.getIngredient(recipeIngredient.getIngredientRef()));
+            refresh();
+        });
+
+        stage.showAndWait();
     }
 
     private void showRecipe(Recipe recipe) {

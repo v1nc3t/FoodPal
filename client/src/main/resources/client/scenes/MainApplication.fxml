@@ -38,7 +38,7 @@
               <ListView fx:id="sidebarListView" maxWidth="Infinity" VBox.vgrow="ALWAYS" />
             <HBox alignment="CENTER_LEFT" spacing="8.0">
                <children>
-                    <Button fx:id="addButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#addRecipe" prefHeight="25.0" prefWidth="25.0" text="+" wrapText="true" />
+                    <Button fx:id="addButton" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="+" wrapText="true" />
                     <Button fx:id="removeButton" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="-" />
                     <Button fx:id="refreshButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#refresh" text="${controller.refreshProperty}" />
                     <Button fx:id="cloneButton" minWidth="-Infinity" mnemonicParsing="false" />
