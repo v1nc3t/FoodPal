@@ -17,14 +17,15 @@ public class Ingredient {
 
     /**
      * Constructor for Ingredient class. With an already specified id.
-     * @param id the id of the ingredient
-     * @param name the name of the ingredient
+     * 
+     * @param id              the id of the ingredient
+     * @param name            the name of the ingredient
      * @param nutritionValues the nutrition values of the ingredient
      */
     @JsonCreator
     public Ingredient(@JsonProperty("id") UUID id,
-                      @JsonProperty("name") String name,
-                      @JsonProperty("nutritionValues") NutritionValues nutritionValues) {
+            @JsonProperty("name") String name,
+            @JsonProperty("nutritionValues") NutritionValues nutritionValues) {
         this.id = id;
         this.name = name;
         this.nutritionValues = nutritionValues;
@@ -32,8 +33,10 @@ public class Ingredient {
 
     /**
      * Constructor for Ingredient class.
-     * The nutrition values are provided as separate parameters. And they are all for 100g.
-     * @param name the name of the ingredient
+     * The nutrition values are provided as separate parameters. And they are all
+     * for 100g.
+     * 
+     * @param name            the name of the ingredient
      * @param nutritionValues the nutrition values of the ingredient
      */
     public Ingredient(String name, NutritionValues nutritionValues) {
@@ -70,10 +73,12 @@ public class Ingredient {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
         Ingredient that = (Ingredient) obj;
-        return id == that.id && name.equals(that.name) && nutritionValues.equals(that.nutritionValues);
+        return Objects.equals(id, that.id) && name.equals(that.name) && nutritionValues.equals(that.nutritionValues);
     }
 
     @Override

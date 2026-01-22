@@ -44,6 +44,7 @@ public class MyModule implements Module {
         binder.bind(LocaleManager.class).in(Scopes.SINGLETON);
         binder.bind(RecipeManager.class).in(Scopes.SINGLETON);
         binder.bind(client.services.ShoppingListManager.class).in(Scopes.SINGLETON);
+        binder.bind(client.services.WebSocketService.class).in(Scopes.SINGLETON);
         binder.bind(client.config.ConfigManager.class).toInstance(configManager);
         binder.bind(IServerUtils.class).to(ServerUtils.class).in(Scopes.SINGLETON);
     }

@@ -1,10 +1,14 @@
 package client.scenes;
 
-import client.services.*;
+import client.services.LocaleManager;
+import client.services.RecipeManager;
+import client.services.RecipeTextFormatter;
+import client.services.ShoppingListManager;
+import client.services.TextFileExporter;
+import client.services.WebSocketService;
 import com.google.inject.Inject;
-import commons.Ingredient;
-import commons.Recipe;
-import commons.RecipeIngredient;
+import commons.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -96,11 +100,9 @@ public class RecipeViewerCtrl implements Internationalizable {
     private Label caloriesLabel;
     private final StringProperty caloriesLabelProperty = new SimpleStringProperty();
 
-
     private final StringProperty servingSizeProperty = new SimpleStringProperty();
     @FXML
     private Label servingSizeLabel;
-
 
     private final StringProperty servingSizeLabelProperty = new SimpleStringProperty();
     private final StringProperty servingSizeValueProperty = new SimpleStringProperty();
@@ -110,14 +112,17 @@ public class RecipeViewerCtrl implements Internationalizable {
 
     private final ShoppingListManager shoppingListManager;
     private final MainApplicationCtrl mainCtrl;
+    private final WebSocketService webSocketService;
 
     @Inject
     public RecipeViewerCtrl(MainApplicationCtrl mainCtrl, LocaleManager localeManager,
-            RecipeManager recipeManager, ShoppingListManager shoppingListManager) {
+            RecipeManager recipeManager, ShoppingListManager shoppingListManager,
+            WebSocketService webSocketService) {
         this.mainCtrl = mainCtrl;
         this.localeManager = localeManager;
         this.recipeManager = recipeManager;
         this.shoppingListManager = shoppingListManager;
+        this.webSocketService = webSocketService;
 
         localeManager.register(this);
     }
@@ -146,21 +151,20 @@ public class RecipeViewerCtrl implements Internationalizable {
         resetScaleButton.textProperty().bind(resetProperty);
         ingredientsLabel.textProperty().bind(ingredientsProperty);
         nutritionalValueLabel.textProperty().bind(nutritionalValueProperty.concat(" ")
-                        .concat(nutritionalValueKcalProperty)
-                        .concat(" kcal, ")
-                        .concat(proteinProperty)
-                        .concat(" ")
-                        .concat(proteinValueProperty)
-                        .concat(" g, ")
-                        .concat(carbsProperty)
-                        .concat(" ")
-                        .concat(carbsValueProperty)
-                        .concat(" g, ")
-                        .concat(fatProperty)
-                        .concat(" ")
-                        .concat(fatValueProperty)
-                        .concat(" g")
-        );
+                .concat(nutritionalValueKcalProperty)
+                .concat(" kcal, ")
+                .concat(proteinProperty)
+                .concat(" ")
+                .concat(proteinValueProperty)
+                .concat(" g, ")
+                .concat(carbsProperty)
+                .concat(" ")
+                .concat(carbsValueProperty)
+                .concat(" g, ")
+                .concat(fatProperty)
+                .concat(" ")
+                .concat(fatValueProperty)
+                .concat(" g"));
         preparationLabel.textProperty().bind(preparationProperty);
         editButton.textProperty().bind(editProperty);
         printButton.textProperty().bind(printProperty);
@@ -207,10 +211,27 @@ public class RecipeViewerCtrl implements Internationalizable {
     public void setRecipe(Recipe recipe) {
         if (recipe == null) {
             titleProperty.set("");
-            ingredientsList.getItems().clear();
             preparationList.getItems().clear();
             return;
         }
+
+        if (currentRecipe != null && !currentRecipe.getId().equals(recipe.getId())) {
+            webSocketService.unsubscribe("recipe", currentRecipe.getId());
+        }
+
+        if (currentRecipe == null || !currentRecipe.getId().equals(recipe.getId())) {
+            webSocketService.subscribe("recipe", recipe.getId(), response -> {
+                Platform.runLater(() -> {
+                    if (response.type() == WebSocketTypes.UPDATE) {
+                        Recipe updated = webSocketService.convertData(response.data(), Recipe.class);
+                        setRecipe(updated);
+                    } else if (response.type() == WebSocketTypes.DELETE) {
+                        mainCtrl.showMainScreen();
+                    }
+                });
+            });
+        }
+
         this.currentRecipe = recipe;
         Function<UUID, Ingredient> ingredientFactory = recipeManager::getIngredient;
         DecimalFormat df = new DecimalFormat("0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
@@ -327,17 +348,12 @@ public class RecipeViewerCtrl implements Internationalizable {
                         .getIngredient(new RecipeIngredient(id, null))
                         .getName(),
                 ResourceBundle.getBundle(
-                        localeManager.getBundleName(), localeManager.getCurrentLocale()
-                )
-        );
+                        localeManager.getBundleName(), localeManager.getCurrentLocale()));
 
         TextFileExporter.save(
                 text,
-                titleLabel.getScene().getWindow()
-        );
+                titleLabel.getScene().getWindow());
     }
-
-
 
     @FXML
     private void addToShoppingList() {
