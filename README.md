@@ -18,14 +18,18 @@ installed on your local system (`mvn`) or you need to use the Maven wrapper (`mv
 
     mvn -pl server -am spring-boot:run
 
-to run the server and
+to run the server,
+  
+    mvn -pl client -am javafx:run
 
-	mvn -pl client -am javafx:run
+to run the client,
 
-to run the client. 
+    mvn -B -ntp clean verify
+
+to run the full test suite/pipeline.
 
 Optionally, since the client uses a local config file to persist its configuration and client state,
-e.g., server URL, list of favorite recipes, etc., you are able to define a custom path to the config file. 
+e.g., server URL, list of favourite recipes, etc., you are able to define a custom path to the config file. 
 This is done by passing it as a parameter to the client via a command-line argument in the following format:
 
     mvn -pl client -am javafx:run -Djavafx.args=--cfg=C:\Users\x\.foodpal\config.json
@@ -35,8 +39,18 @@ Moreover, if no path is specified via the command line, this is the default path
 >Keep in mind that the path must be valid: it must be a path to a **file** on the user's system 
 that exists and is writable, as opposed to a directory.
 
+>*Note*: To start with a fresh database, delete all the `h2-database.mv.db` and `h2-database.trace.db` files from the project, then restart the server. The schema will be automatically recreated.
+
+
+## Project structure
+The codebase layout is the following:
+- `server/` contains the server-side code/Spring Boot backend
+- `client/` contains the client-side code/JavaFX frontend
+- `commons/` contains common code shared between the server and client
+- `docs/` contains documentation
+
 ## Importing the project into your IDE
-If you want to contribute to the project, you can try importing the project into your favorite IDE. 
+If you want to contribute to the project, you can try importing the project into your favourite IDE. 
 The client may be a bit more tricky to set up in an IDE due to the dependency on a JavaFX SDK.
 However, to help you get started, you can find additional instructions in the corresponding 
 [README](client/README.md) of the client project.
@@ -49,35 +63,41 @@ or if you simply want to learn more about all the subtleties of the app, the fol
 
 ### Basic recipe and ingredient management
 
-- By pressing the `+` button at the bottom left, you can add a new recipe to your list at any time. You can select:
+- By pressing either the `Recipes` or `Ingredients` tab at the top of the list on the left, you can switch between 
+viewing either recipes or ingredients.
+  - Viewing the recipe list enables all the functionality.
+  - Viewing the ingredient list disables filtering by language and favourites, cloning, and entering favourite mode, as these are 
+intended for recipes only.
+- By pressing the `+` button at the bottom left, you can add a new recipe or ingredient to your list at any time. 
+In case the recipe tab is selected, a recipe will be added. A page will open on the right where you can select:
   - the title
   - the language
   - the ingredients:
     - if there are any previously used ingredients, you can select them from the drop-down to the right.
-    - if what you want to add is not there, you can click on the '+' to add a new ingredient. You will be prompted to enter
+    - if what you want to add is not there, you can click on the `+` to the right of the drop-down to add a new ingredient 
+directly, without having to navigate to the ingredients tab. 
+    - in both cases (however, if an already existing ingredient was selected, it will be pre-filled), you will be prompted to enter 
 the name, amount, unit, and nutritional values (per 100 grams) for the ingredient. Once you save, it will be added to the ingredient
 list of the recipe. Make sure to use positive numbers for the values. For the units you can either choose one from the drop-down to the
 right of the input field (considered format units) or enter your own custom unit, which will be considered informal and won't be considered in
 nutritional calculations.
-    - you can edit individual ingredients by clicking 'Edit' to the far right.
+    - you can edit individual ingredients by clicking `Edit` to the far right.
   - the preparation steps:
-    - you can edit individual preparation steps by clicking 'Edit' to the far right. You can then save changes by clicking 'Save'.
-    - you can delete individual preparation steps by clicking '-' to the far right.
+    - you can edit individual preparation steps by clicking `Edit` to the far right. You can then save changes by clicking `Save`.
+    - you can delete individual preparation steps by clicking `-` to the far right.
     - you can change the step order by using the up and down arrows to the far right of the preparation step.
   - the portions. Make sure to enter a positive whole number.
-  - click 'Done' to save the recipe, or 'Cancel' to discard the changes.
-- By pressing the '-' button at the bottom left, you enter 'remove mode' and clicking on a recipe will remove it from your list, after
+  - click `Done` to save the recipe, or `Cancel` to discard the changes.
+- In case the ingredient tab is selected, an ingredient will be added. A page will open on the right where you can select:
+  - the name
+  - the nutritional values (per 100 grams) for the ingredient.
+- By pressing the `-` button at the bottom left, you enter 'remove mode' and clicking on a recipe will remove it from your list, after
 confirmation. If you change your mind, you can cancel the removal by clicking on a recipe and pressing cancel. If you want to delete an
-ingredient, do the same but on the ingredients tab. Do keep in mind there will be no confirmation by default! 
+ingredient, do the same but on the ingredients tab. Keep in mind that there will be no confirmation for unused ingredients! 
 However, in case an ingredient is used in recipes, you will have to confirm you want to delete it by considering how many recipes it's used in 
 to avoid accidental changes to recipes.
-- By pressing the 'Clone' button at the bottom left, you enter 'clone mode' and clicking on a recipe will clone it;
+- By pressing the `Clone` button at the bottom left, you enter 'clone mode' and clicking on a recipe will clone it;
 you can change the name of the cloned recipe in the confirmation screen, or, by default, (Copy) will be appended to the name.
-- By pressing either the 'Recipes' or 'Ingredients' tab at the top of the list on the left, you can switch between 
-viewing either recipes or ingredients.
-  - Viewing the recipe list enables all the functionality described below.
-  - Viewing the ingredient list disables filtering by language and favourites, cloning, and entering favourite mode, as these are 
-intended for recipes only.
 - You can view the recipe details by double-clicking on a recipe in the list. Similarly, you can view ingredient details 
 by double-clicking on an ingredient.
 - Once you view a recipe, details about the recipe are shown in the right section of the screen. Here you will see:
@@ -89,33 +109,36 @@ by double-clicking on an ingredient.
   - the preparation steps
   - the recipe language
   - the recipe portions
+- By clicking `Edit` at the bottom right of the recipe details, you will be able to edit a recipe. This will display
+a screen familiar to adding a recipe, so look for the instructions above in case you need help.
+- By clicking `Print` at the bottom right of the recipe details, you can print the recipe to bring to the kitchen.
+This will save it to a `.txt` file in your desired location that you can print out.
 - Once you view an ingredient, details about the ingredient are shown in the right section of the screen. 
 Here you will see:
   - The ingredient name
   - The nutritional values (protein, carbohydrates, fat) per 100 grams
   - Estimated calories per 100 grams
   - How many recipes the ingredient is used in
-- By clicking 'Edit' at the middle bottom of the ingredient details, you will be able to edit the ingredient name,
+- By clicking `Edit` at the middle bottom of the ingredient details, you will be able to edit the ingredient name,
 protein, carbs, and fat values for 100 grams. Make sure you use a positive number for each value.
-- By clicking 'Edit' at the bottom right of the recipe details, you will be able to edit a recipe. This will enter
-a screen familiar to adding a recipe, so look for the instructions above.
-- By clicking 'Print' at the bottom right of the recipe details, you can print the recipe to bring to the kitchen.
-This will save it to a .txt file in your desired location that you can print out.
 
 ### Automated change synchronization
-- Modernizes the application with auto-updates, eliminating the need for manual refreshes.
+- The application is modernized with auto-updates, eliminating the need for manual refreshes.
 - Changes are auto-propagated across all clients.
 - Recipes, ingredients, and their details are updated in real-time.
-- Uses web sockets to subscribe for changes.
+- Web sockets are used to subscribe for changes.
+> *Note*: there is still a manual `Refresh` button in the bottom left of the application that can be used to force a refresh.
+However, this should generally not be necessary as most changes should be automatically propagated. 
+Notwithstanding, if you encounter any issues with synchronization, try manually syncing changes.
 
 ### Nutritional values
 
-- By clicking the '+,' '-' or 'Reset' buttons at the bottom to the right of the 'Portions' count, you can scale the recipe.
-  - The '+' button will increase the portions by 1.
-  - The '-' button will decrease the portions by 1, if possible.
-  - The 'Reset' button will reset the portions to what the author of the recipe specified. You can at a glance tell
+- By clicking the `+`, `-` or `Reset` buttons at the bottom to the right of the `Portions` count, you can scale the recipe.
+  - The `+` button will increase the portions by 1.
+  - The `-` button will decrease the portions by 1, if possible.
+  - The `Reset` button will reset the portions to what the author of the recipe specified. You can at a glance tell
 when a recipe is scaled by either:
-    - Looking at the portions count - a scaled recipe will feature a ~ symbol next to it.
+    - Looking at the portions count - a scaled recipe will feature a `~` symbol next to it.
     - The reset button is only enabled when the recipe is scaled; otherwise, it will be greyed out.
   - Keep in mind this does not change the actual number of portions in the recipe. This applies a scale to the recipe
 to be able to adapt recipes to individual needs, e.g., making a recipe for twice the people the author designed the recipe
@@ -127,71 +150,75 @@ large values easier.
     - The serving size (calories / portion) and inferred calories per 100 grams will NOT change because the ratio
 of calories / portion or calories / 100 grams remains the same.
 - Many of the features described in [Basic recipe and ingredient management](#basic-recipe-and-ingredient-management)
+are associated with the topic of nutritional values.
 
 
 ### Recipe organization
 - By changing the sort order of the list (to the right of the search bar), you can sort the item list (both ingredients
 and recipes) by their name either in alphabetical or reverse alphabetical order.
-- By pressing the 'Favourite/Unfavourite' button at the bottom left, you enter 'favourite mode' and clicking on a recipe 
+- By pressing the `Favourite/Unfavourite` button at the bottom left, you enter 'favourite mode' and clicking on a recipe 
 will toggle its favourite status. You are easily able to see which recipes are favourite by looking at the star icon 
 next to their name.
-- By toggling the 'Only show favourite recipes' checkbox, you will only see your favourite recipes in the list.
+- By toggling the `Only show favourite recipes` checkbox, you will only see your favourite recipes in the list.
   - Keep in mind this option only affects recipes and not ingredients, as ingredients cannot be favourite. That's why
 you won't be able to toggle the favourite checkbox for ingredients.
 - Favourite recipes are saved in the config file and persisted through a restart of the application.
 - In case a favourite recipe gets deleted by someone else, you will be notified (either upon client initialization 
 or while using the application) that the recipe has been removed.
-- By entering a query into the search bar at the top left, you can filter the recipe list by their title, included ingredients,
+- By entering a query into the search bar at the top left, you can filter both recipes and ingredients. For recipes, it searches their title, included ingredients,
 and featured preparation steps. If you are viewing the ingredients, the search bar will also filter the ingredient list, based 
 on the names.
   - You can combine your search terms with spaces, which will then show all results that feature all the terms.
-  - You can cancel your search at any time by pressing 'Escape' on your keyboard.
+  - You can cancel your search at any time by pressing `Escape` on your keyboard.
   - Bonus functionality: searching returns a list sorted by relevance of your search, e.g., a matching query in the title or name
   will result in an item appearing higher in the list than if an ingredient or preparation step matches.
-  - Bonus functionality: you can append a '-' in front of terms in your search query to show all items that exclude the term.
+  - Bonus functionality: you can append a `-` in front of terms in your search query to show all items that exclude the term.
 
 ### Shopping list
 
 - By pressing the shopping cart icon at the bottom left, you can view your shopping list at any time. Inside, you will see
 the list of ingredients added to the shopping list (if there are any).
-  - By pressing the 'Edit' button to the right of an ingredient in the shopping list, you can edit the name or amount 
+  - By pressing the `Edit` button to the right of an ingredient in the shopping list, you can edit the name or amount 
 of the ingredient you want to buy. Make sure not to forget the units for the amount as well.
-  - You can remove items from the shopping list by clicking '-' to the far right of the ingredient name.
-  - By pressing the 'Add Item' button at the bottom middle, you can add an ingredient to your shopping list by hand. Adding 
+  - You can remove items from the shopping list by clicking `-` to the far right of the ingredient name.
+  - By pressing the `Add Item` button at the bottom middle, you can add an ingredient to your shopping list by hand. Adding 
 an item will prompt you to enter the name of the ingredient and amount of the ingredient. Make sure not to forget the 
 units for the amount as well.
-  - By pressing the 'Print' button at the bottom middle, you can print your shopping list to bring to the store. This will
+  - By pressing the `Print` button at the bottom middle, you can print your shopping list to bring to the store. This will
 save a .txt file in your desired location that you can print out.
-  - You can also remove all items from the shopping list at once by clicking 'Clear List.' This will ask for a confirmation,
+  - You can also remove all items from the shopping list at once by clicking `Clear List`. This will ask for a confirmation,
 just to make sure you don't accidentally clear your entire shopping list.
-- By clicking the 'Add to Shopping List' button above the ingredient list while viewing a recipe, you can add all ingredients in the recipe 
+  - Ingredients added to the shopping list from recipes automatically will have the source recipe name
+next to them, so you know what you wanted them for.
+- By clicking the `Add to Shopping List` button above the ingredient list while viewing a recipe, you can add all ingredients in the recipe 
 to your shopping list.
   - Once you click this button, you will be prompted with an overview of the ingredients you are about to add to your shopping list.
-  - You can make changes to the list by clicking 'Add Item,' 'Remove Item,' or make changes to the existing ingredients
-by double-clicking on their name or amount.
+  - You can make changes to the list by clicking `Add Item`, `Remove Item`, or make changes to the existing ingredients
+inline by double-clicking on their name or amount.
   - You will see that ingredients filled from the recipe have a source recipe name next to them (which you cannot
 edit), so you don't forget which ingredient you needed for what.
   - Adding an item will prompt you to enter the name of the ingredient and amount of the ingredient. Make sure not to forget
 the units for the amount as well.
-  - If you change your mind, you can click 'Cancel' to cancel the addition of ingredients to your shopping list.
-  - If you are happy with the ingredient overview, you can click 'Add to Shopping List' to 
+  - If you change your mind, you can click `Cancel` to cancel the addition of ingredients to your shopping list.
+  - If you are happy with the ingredient overview, you can click `Add to Shopping List` to 
 add all ingredients to your shopping list.
 
 ### Live language switch
 
 - By clicking the flag icon next to the search bar at the top left, you can choose what language you want to see
 the client in. FoodPal supports English, Dutch, and German. Keep in mind that you can change the language anytime and
-can tell at a glance which language you are currently using by looking at the flag icon.
-- By toggling the language checkboxes shown next to 'Show recipes in,' you can filter which recipes you see in the list based on their
-language. A selected language means that recipes will be shown in that language, so if you select all languages,
-all results will be shown, if you unselect all, there will be no results.
+can tell at a glance which language you are using by looking at the flag icon, which displays the currently
+selected language.
+- By toggling the language checkboxes shown next to `Show recipes in`, you can filter which recipes you see in the list 
+based on their language. A selected language means that recipes will be shown in that language, so if you select all 
+languages, all results will be shown, if you unselect all, there will be no results.
   - Keep in mind this option only affects recipes and not ingredients, as ingredients don't have a language associated with them.
 That's why you won't be able to toggle the language checkboxes for ingredients.
 - The language selection and filters are saved in the config file and persisted through a restart of the application.
 
-### Miscellaneous
+### Miscellaneous extensions
 - By clicking the sun/moon icon at the top left, to the right of the sort options, you can toggle between light and dark mode.
-
+The sun icon indicates that light mode is selected, and the moon represents dark mode.
 
 ## Licensing
 The project and application are licensed under the Apache License, Version 2.0.
