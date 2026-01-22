@@ -1,5 +1,8 @@
 package server.websocket;
 
+import commons.WebSocketResponse;
+import commons.WebSocketTypes;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -18,10 +21,11 @@ public class WebSocketHub {
     private final ObjectMapper mapper = new ObjectMapper();
 
     private final CopyOnWriteArrayList<WebSocketSession> stateSubscribers = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<WebSocketSession> globalRecipeSubscribers = new CopyOnWriteArrayList<>();
     private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> recipeSubscribers = new ConcurrentHashMap<>();
     private final Map<UUID, CopyOnWriteArrayList<WebSocketSession>> ingredientSubscribers = new ConcurrentHashMap<>();
+    private final CopyOnWriteArrayList<WebSocketSession> globalIngredientSubscribers = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<WebSocketSession> ingredientStateSubscribers = new CopyOnWriteArrayList<>();
-
 
     public int getTitleSubscribersCount() {
         return stateSubscribers.size();
@@ -34,13 +38,25 @@ public class WebSocketHub {
     }
 
     public void subscribeRecipe(WebSocketSession session, UUID recipeId) {
-        recipeSubscribers.computeIfAbsent(
-                recipeId, _ -> new CopyOnWriteArrayList<>()).addIfAbsent(session);
+        if (recipeId == null) {
+            if (!globalRecipeSubscribers.contains(session)) {
+                globalRecipeSubscribers.add(session);
+            }
+        } else {
+            recipeSubscribers.computeIfAbsent(
+                    recipeId, _ -> new CopyOnWriteArrayList<>()).addIfAbsent(session);
+        }
     }
 
     public void subscribeIngredient(WebSocketSession session, UUID ingredientId) {
-        ingredientSubscribers.computeIfAbsent(
-                ingredientId, _ -> new CopyOnWriteArrayList<>()).addIfAbsent(session);
+        if (ingredientId == null) {
+            if (!globalIngredientSubscribers.contains(session)) {
+                globalIngredientSubscribers.add(session);
+            }
+        } else {
+            ingredientSubscribers.computeIfAbsent(
+                    ingredientId, _ -> new CopyOnWriteArrayList<>()).addIfAbsent(session);
+        }
     }
 
     public void unsubscribeState(WebSocketSession session) {
@@ -48,23 +64,31 @@ public class WebSocketHub {
     }
 
     public void unsubscribeRecipe(WebSocketSession session, UUID recipeId) {
-        List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
-        if (sessions != null) {
-            sessions.remove(session);
+        if (recipeId == null) {
+            globalRecipeSubscribers.remove(session);
+        } else {
+            List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
+            if (sessions != null) {
+                sessions.remove(session);
 
-            if (sessions.isEmpty()) {
-                recipeSubscribers.remove(recipeId);
+                if (sessions.isEmpty()) {
+                    recipeSubscribers.remove(recipeId);
+                }
             }
         }
     }
 
     public void unsubscribeIngredient(WebSocketSession session, UUID ingredientId) {
-        List<WebSocketSession> sessions = ingredientSubscribers.get(ingredientId);
-        if (sessions != null) {
-            sessions.remove(session);
+        if (ingredientId == null) {
+            globalIngredientSubscribers.remove(session);
+        } else {
+            List<WebSocketSession> sessions = ingredientSubscribers.get(ingredientId);
+            if (sessions != null) {
+                sessions.remove(session);
 
-            if (sessions.isEmpty()) {
-                ingredientSubscribers.remove(ingredientId);
+                if (sessions.isEmpty()) {
+                    ingredientSubscribers.remove(ingredientId);
+                }
             }
         }
     }
@@ -78,39 +102,53 @@ public class WebSocketHub {
     }
 
     public void broadcastRecipeUpdate(UUID recipeId, Object recipeData) {
+        WebSocketResponse response = new WebSocketResponse(
+                WebSocketTypes.UPDATE,
+                "recipe",
+                recipeData);
+
+        // Send to specific subscribers
         List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
         if (sessions != null && !sessions.isEmpty()) {
-            WebSocketResponse response = new WebSocketResponse(
-                    WebSocketTypes.UPDATE,
-                    "recipe",
-                    recipeData);
             broadcast(sessions, response);
         }
+
+        // Send to global subscribers
+        broadcast(globalRecipeSubscribers, response);
     }
 
     public void broadcastRecipeDelete(UUID recipeId) {
+        WebSocketResponse response = new WebSocketResponse(
+                WebSocketTypes.DELETE,
+                "recipe",
+                recipeId);
+
+        // Send to specific subscribers
         List<WebSocketSession> sessions = recipeSubscribers.get(recipeId);
         if (sessions != null && !sessions.isEmpty()) {
-            WebSocketResponse response = new WebSocketResponse(
-                    WebSocketTypes.DELETE,
-                    "recipe",
-                    recipeId);
             broadcast(sessions, response);
-
             // The recipe is gone, so remove the subscribers as well
             recipeSubscribers.remove(recipeId);
         }
+
+        // Send to global subscribers
+        broadcast(globalRecipeSubscribers, response);
     }
 
     public void broadcastIngredientUpdate(UUID ingredientId, Object ingredientData) {
+        WebSocketResponse response = new WebSocketResponse(
+                WebSocketTypes.UPDATE,
+                "ingredient",
+                ingredientData);
+
+        // Send to specific subscribers
         List<WebSocketSession> sessions = ingredientSubscribers.get(ingredientId);
         if (sessions != null && !sessions.isEmpty()) {
-            WebSocketResponse response = new WebSocketResponse(
-                    WebSocketTypes.UPDATE,
-                    "ingredient",
-                    ingredientData);
             broadcast(sessions, response);
         }
+
+        // Send to global subscribers
+        broadcast(globalIngredientSubscribers, response);
     }
 
     private void broadcast(List<WebSocketSession> sessions, WebSocketResponse response) {
@@ -139,6 +177,9 @@ public class WebSocketHub {
 
     public synchronized void removeSessionEverywhere(WebSocketSession session) {
         stateSubscribers.remove(session);
+        globalRecipeSubscribers.remove(session);
+        globalIngredientSubscribers.remove(session);
+        ingredientStateSubscribers.remove(session);
 
         recipeSubscribers.values().forEach(sessions -> sessions.remove(session));
         recipeSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);
@@ -146,18 +187,24 @@ public class WebSocketHub {
         ingredientSubscribers.values().forEach(sessions -> sessions.remove(session));
         ingredientSubscribers.values().removeIf(CopyOnWriteArrayList::isEmpty);
     }
+
     public void broadcastIngredientDelete(UUID ingredientId) {
+        WebSocketResponse response = new WebSocketResponse(
+                WebSocketTypes.DELETE,
+                "ingredient",
+                ingredientId);
+
+        // Send to specific subscribers
         List<WebSocketSession> sessions = ingredientSubscribers.get(ingredientId);
         if (sessions != null && !sessions.isEmpty()) {
-            WebSocketResponse response = new WebSocketResponse(
-                    WebSocketTypes.DELETE,
-                    "ingredient",
-                    ingredientId
-            );
             broadcast(sessions, response);
             ingredientSubscribers.remove(ingredientId);
         }
+
+        // Send to global subscribers
+        broadcast(globalIngredientSubscribers, response);
     }
+
     public void subscribeIngredientState(WebSocketSession session) {
         if (!ingredientStateSubscribers.contains(session)) {
             ingredientStateSubscribers.add(session);
@@ -167,14 +214,13 @@ public class WebSocketHub {
     public void unsubscribeIngredientState(WebSocketSession session) {
         ingredientStateSubscribers.remove(session);
     }
+
     public void broadcastIngredientStateUpdate(Object allIngredients) {
         WebSocketResponse response = new WebSocketResponse(
                 WebSocketTypes.UPDATE,
                 "ingredient-state",
-                allIngredients
-        );
+                allIngredients);
         broadcast(ingredientStateSubscribers, response);
     }
-
 
 }

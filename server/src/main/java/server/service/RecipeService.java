@@ -58,7 +58,6 @@ public class RecipeService implements IRecipeService {
         recipeRepository.save(recipe);
 
         webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
-        webSocketHub.broadcastStateUpdate(getState());
     }
 
     @Override
@@ -73,12 +72,9 @@ public class RecipeService implements IRecipeService {
         // also broadcast changes to relevant recipes
         recipes.values().stream().filter(
                 recipe -> recipe.getIngredients()
-                                .stream()
-                                .anyMatch(ri -> ri.getIngredientRef().equals(ingredient.getId())))
+                        .stream()
+                        .anyMatch(ri -> ri.getIngredientRef().equals(ingredient.getId())))
                 .forEach(recipe -> webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe));
-
-        webSocketHub.broadcastStateUpdate(getState());
-        webSocketHub.broadcastIngredientStateUpdate(ingredients.values());
 
     }
 
@@ -88,7 +84,6 @@ public class RecipeService implements IRecipeService {
             recipeRepository.deleteById(recipeId);
 
             webSocketHub.broadcastRecipeDelete(recipeId);
-            webSocketHub.broadcastStateUpdate(getState());
         }
     }
 
@@ -99,15 +94,12 @@ public class RecipeService implements IRecipeService {
             webSocketHub.broadcastIngredientDelete(ingredientId);
         }
         for (Recipe recipe : recipes.values()) {
-            boolean wasModified = recipe.getIngredients().removeIf(ir ->
-                    Objects.equals(ir.getIngredientRef(), ingredientId));
+            boolean wasModified = recipe.getIngredients()
+                    .removeIf(ir -> Objects.equals(ir.getIngredientRef(), ingredientId));
             if (wasModified) {
                 recipeRepository.save(recipe);
                 webSocketHub.broadcastRecipeUpdate(recipe.getId(), recipe);
             }
         }
-        webSocketHub.broadcastStateUpdate(getState());
-        webSocketHub.broadcastIngredientStateUpdate(ingredients.values());
-
     }
 }

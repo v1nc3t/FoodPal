@@ -2,7 +2,7 @@ package client.scenes;
 
 import client.MyFXML;
 import client.services.LocaleManager;
-import client.utils.ServerUtils;
+import client.services.WebSocketService;
 import client.utils.TextFieldUtils;
 import commons.*;
 import jakarta.inject.Inject;
@@ -32,45 +32,63 @@ import client.services.RecipeManager;
 public class AddRecipeCtrl implements Internationalizable {
 
     private final StringProperty nameProperty = new SimpleStringProperty();
-    @FXML private Label nameLabel;
+    @FXML
+    private Label nameLabel;
 
     private final StringProperty recipeNameFieldProperty = new SimpleStringProperty();
-    @FXML private TextField nameField;
+    @FXML
+    private TextField nameField;
 
     private final StringProperty languageProperty = new SimpleStringProperty();
-    @FXML private Label languageLabel;
+    @FXML
+    private Label languageLabel;
 
-    @FXML private ChoiceBox<String> languageChoiceBox;
+    @FXML
+    private ChoiceBox<String> languageChoiceBox;
 
     private final StringProperty ingredientsProperty = new SimpleStringProperty();
-    @FXML private Label ingredientsLabel;
+    @FXML
+    private Label ingredientsLabel;
 
     private final StringProperty selectIngredientProperty = new SimpleStringProperty();
-    @FXML private ComboBox<Ingredient> ingredientsComboBox;
+    @FXML
+    private ComboBox<Ingredient> ingredientsComboBox;
 
-    @FXML private Button addIngredientButton;
-    @FXML private ScrollPane ingredientsScrollPane;
-    @FXML private VBox ingredientsList;
+    @FXML
+    private Button addIngredientButton;
+    @FXML
+    private ScrollPane ingredientsScrollPane;
+    @FXML
+    private VBox ingredientsList;
 
     private final StringProperty preparationProperty = new SimpleStringProperty();
-    @FXML private Label preparationLabel;
+    @FXML
+    private Label preparationLabel;
 
     private final StringProperty addPreparationStepProperty = new SimpleStringProperty();
-    @FXML private TextArea preparationField;
+    @FXML
+    private TextArea preparationField;
 
-    @FXML private Button addPreparationButton;
-    @FXML private ScrollPane preparationScrollPane;
-    @FXML private VBox preparationList;
+    @FXML
+    private Button addPreparationButton;
+    @FXML
+    private ScrollPane preparationScrollPane;
+    @FXML
+    private VBox preparationList;
 
     private final StringProperty portionsProperty = new SimpleStringProperty();
-    @FXML private Label servingsLabel;
-    @FXML private TextField servingsField;
+    @FXML
+    private Label servingsLabel;
+    @FXML
+    private TextField servingsField;
 
     private final StringProperty doneProperty = new SimpleStringProperty();
-    @FXML private Button doneButton;
+    @FXML
+    private Button doneButton;
 
     private final StringProperty cancelProperty = new SimpleStringProperty();
-    @FXML private Button cancelButton;
+    @FXML
+    private Button cancelButton;
 
     private final StringProperty editProperty = new SimpleStringProperty();
     private final StringProperty saveProperty = new SimpleStringProperty();
@@ -86,25 +104,25 @@ public class AddRecipeCtrl implements Internationalizable {
     private Recipe editingRecipe;
 
     private ArrayList<RecipeIngredient> ingredients = new ArrayList<>();
-    private final ServerUtils server;
     private final MainApplicationCtrl mainCtrl;
     private final MyFXML fxml;
     private final LocaleManager localeManager;
     @Inject
     private RecipeManager recipeManager;
+    @Inject
+    private WebSocketService webSocketService;
 
     // callback so MainApplicationCtrl can be notified when a recipe is added
     private java.util.function.Consumer<Recipe> onRecipeAdded;
+
     public void setOnRecipeAdded(java.util.function.Consumer<Recipe> onRecipeAdded) {
         this.onRecipeAdded = onRecipeAdded;
     }
 
     @Inject
-    public AddRecipeCtrl(ServerUtils server,
-                         MainApplicationCtrl mainCtrl,
-                         MyFXML fxml,
-                         LocaleManager localeManager) {
-        this.server = server;
+    public AddRecipeCtrl(MainApplicationCtrl mainCtrl,
+            MyFXML fxml,
+            LocaleManager localeManager) {
         this.mainCtrl = mainCtrl;
         this.fxml = fxml;
         this.localeManager = localeManager;
@@ -127,11 +145,13 @@ public class AddRecipeCtrl implements Internationalizable {
 
         ingredientsScrollPane.setFitToWidth(true);
         ingredientsList.setSpacing(5);
-        /* Custom tab behavior: when focus is on preparation text-area,
-        pressing tab will focus the add-preparation button */
+        /*
+         * Custom tab behavior: when focus is on preparation text-area,
+         * pressing tab will focus the add-preparation button
+         */
         preparationField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.TAB) {
-                event.consume();          
+                event.consume();
                 addPreparationButton.requestFocus();
             }
         });
@@ -165,14 +185,15 @@ public class AddRecipeCtrl implements Internationalizable {
             }
         });
         ingredientsComboBox.valueProperty().addListener((_, _, ingredient) -> {
-            if (ingredient == null) return;
+            if (ingredient == null)
+                return;
             Platform.runLater(() -> {
                 ingredientsComboBox.getSelectionModel().clearSelection();
                 ingredientsComboBox.setValue(null);
 
                 var bundle = localeManager.getCurrentBundle();
                 Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
-                        bundle,"client", "scenes", "AddIngredient.fxml");
+                        bundle, "client", "scenes", "AddIngredient.fxml");
 
                 AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
                 var recipeIngredient = new RecipeIngredient(ingredient.getId(), new Amount(0, Unit.GRAM));
@@ -181,7 +202,8 @@ public class AddRecipeCtrl implements Internationalizable {
 
                 // waits for new ingredient to be made in popup
                 addIngredientCtrl.setIngredientAddedCb(newIngredient -> {
-                    if (newIngredient == null) return;
+                    if (newIngredient == null)
+                        return;
                     Platform.runLater(() -> {
                         ingredients.add(newIngredient);
                         refreshIngredientsList();
@@ -213,8 +235,7 @@ public class AddRecipeCtrl implements Internationalizable {
                 Language.DE.proper(), Language.NL.proper());
         if (editingRecipe != null) {
             languageChoiceBox.getSelectionModel().select(editingRecipe.getLanguage().proper());
-        }
-        else {
+        } else {
             languageChoiceBox.getSelectionModel().select(0);
         }
     }
@@ -242,6 +263,7 @@ public class AddRecipeCtrl implements Internationalizable {
     /**
      * Dynamically updates properties of UI elements to the language
      * of a corresponding locale
+     * 
      * @param locale provided locale/language for UI elements
      */
     @Override
@@ -308,7 +330,8 @@ public class AddRecipeCtrl implements Internationalizable {
             if (editingRecipe == null) {
                 recipeManager.addRecipeOptimistic(r);
 
-                if (onRecipeAdded != null) onRecipeAdded.accept(r);
+                if (onRecipeAdded != null)
+                    onRecipeAdded.accept(r);
             } else {
                 if (!recipeManager.setRecipe(r)) {
                     System.out.println("Failed to add recipe " + r);
@@ -324,16 +347,23 @@ public class AddRecipeCtrl implements Internationalizable {
         }
 
         clearFields();
+        if (editingRecipe != null) {
+            webSocketService.unsubscribe("recipe", editingRecipe.getId());
+        }
         editingRecipe = null;
         mainCtrl.showRecipeViewer(r);
     }
 
     /**
-     * Closes the recipe viewer by discarding all changes. If changes should be saved, call
+     * Closes the recipe viewer by discarding all changes. If changes should be
+     * saved, call
      * clickDone() instead.
      */
     private void closeView() {
         Recipe justSaved = editingRecipe;
+        if (editingRecipe != null) {
+            webSocketService.unsubscribe("recipe", editingRecipe.getId());
+        }
         clearFields();
 
         if (justSaved != null) {
@@ -361,16 +391,16 @@ public class AddRecipeCtrl implements Internationalizable {
 
     /**
      * Get all inputs from fields
+     * 
      * @return a new Recipe with user input
      */
     private Recipe getRecipe() {
-        String name = TextFieldUtils.getStringFromField(nameField,nameLabel, emptyFieldProperty);
+        String name = TextFieldUtils.getStringFromField(nameField, nameLabel, emptyFieldProperty);
         Language language = getLanguage();
         List<String> preparations = getPreparations();
         int servings = TextFieldUtils.getPositiveIntFromField(
-                servingsField, servingsLabel, positiveFieldProperty
-        );
-        if(editingRecipe == null){
+                servingsField, servingsLabel, positiveFieldProperty);
+        if (editingRecipe == null) {
             // new recipe
             return new Recipe(name, ingredients, preparations, servings, language);
         } else {
@@ -384,6 +414,7 @@ public class AddRecipeCtrl implements Internationalizable {
      * Gets preparation steps of recipe from user
      * Go through the vertical box
      * From each horizontal box we extract the string from the textflow
+     * 
      * @return list of string - steps
      */
     private List<String> getPreparations() {
@@ -396,6 +427,7 @@ public class AddRecipeCtrl implements Internationalizable {
 
     /**
      * Gets the language enum from the language choice-box
+     * 
      * @return {@link Language} enum
      */
     private Language getLanguage() {
@@ -410,7 +442,7 @@ public class AddRecipeCtrl implements Internationalizable {
     public void clickAddIngredient() {
         var bundle = localeManager.getCurrentBundle();
         Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
-                bundle,"client", "scenes", "AddIngredient.fxml");
+                bundle, "client", "scenes", "AddIngredient.fxml");
 
         AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
         Parent addIngredientRoot = addIngredientPair.getValue();
@@ -420,8 +452,7 @@ public class AddRecipeCtrl implements Internationalizable {
             Platform.runLater(() -> {
                 try {
                     Ingredient base = recipeManager.getIngredient(
-                            newRecipeIngredient.ingredientRef
-                    );
+                            newRecipeIngredient.ingredientRef);
 
                     recipeManager.setIngredient(base);
 
@@ -430,8 +461,7 @@ public class AddRecipeCtrl implements Internationalizable {
                 } catch (Exception e) {
                     new Alert(
                             Alert.AlertType.ERROR,
-                            failSaveIngredientProperty.get()
-                    ).show();
+                            failSaveIngredientProperty.get()).show();
                 }
             });
         });
@@ -453,7 +483,7 @@ public class AddRecipeCtrl implements Internationalizable {
     public void clickEditIngredient(RecipeIngredient recipeIngredient) {
         var bundle = localeManager.getCurrentBundle();
         Pair<AddIngredientCtrl, Parent> addIngredientPair = fxml.load(AddIngredientCtrl.class,
-                bundle,"client", "scenes", "AddIngredient.fxml");
+                bundle, "client", "scenes", "AddIngredient.fxml");
 
         AddIngredientCtrl addIngredientCtrl = addIngredientPair.getKey();
         addIngredientCtrl.setIngredient(recipeIngredient);
@@ -479,6 +509,7 @@ public class AddRecipeCtrl implements Internationalizable {
 
     /**
      * A new item which consist of the name of an ingredient and a delete button:
+     * 
      * @param recipeIngredient user input of ingredient
      * @return a horizontal box with the ingredient name and delete button
      */
@@ -496,7 +527,7 @@ public class AddRecipeCtrl implements Internationalizable {
         HBox.setHgrow(textFlow, Priority.ALWAYS);
 
         Button delete = new Button("-");
-        Button edit =  new Button();
+        Button edit = new Button();
         edit.textProperty().bind(editProperty);
 
         HBox buttonGroup = new HBox(5, delete, edit);
@@ -520,7 +551,7 @@ public class AddRecipeCtrl implements Internationalizable {
      * Field is cleared for next step
      */
     public void clickAddPreparation() {
-        String step =  preparationField.getText().trim();
+        String step = preparationField.getText().trim();
         if (step.isEmpty()) {
             return;
         }
@@ -534,6 +565,7 @@ public class AddRecipeCtrl implements Internationalizable {
     /**
      * A new item which consist of a text and three buttons:
      * move up, move down, remove
+     * 
      * @param text user input of preparation step
      * @return a horizontal box with the text and three buttons
      */
@@ -598,12 +630,31 @@ public class AddRecipeCtrl implements Internationalizable {
 
     /**
      * Loads an existing recipe into the Add Recipe form for editing.
+     * 
      * @param recipe the recipe to edit
      */
     public void loadRecipe(Recipe recipe) {
-        if (recipe == null) return;
+        if (recipe == null)
+            return;
+
+        if (this.editingRecipe != null) {
+            webSocketService.unsubscribe("recipe", this.editingRecipe.getId());
+        }
 
         this.editingRecipe = recipe;
+
+        webSocketService.subscribe("recipe", recipe.getId(), response -> {
+            if (response.type() == WebSocketTypes.DELETE) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Recipe Deleted");
+                    alert.setHeaderText(null);
+                    alert.setContentText("The recipe you are editing was deleted by another user.");
+                    alert.showAndWait();
+                    mainCtrl.showMainScreen();
+                });
+            }
+        });
 
         nameField.setText(recipe.getTitle());
 
@@ -611,7 +662,7 @@ public class AddRecipeCtrl implements Internationalizable {
 
         servingsField.setText(String.valueOf(recipe.getPortions()));
 
-        //needs to be changed once server side is done.
+        // needs to be changed once server side is done.
         ingredients.clear();
         if (editingRecipe != null)
             ingredients.addAll(recipe.getIngredients());
@@ -626,6 +677,7 @@ public class AddRecipeCtrl implements Internationalizable {
 
     /**
      * Moves the item up the list
+     * 
      * @param item preparation step
      */
     private void moveUp(HBox item) {
@@ -638,6 +690,7 @@ public class AddRecipeCtrl implements Internationalizable {
 
     /**
      * Moves the item down the list
+     * 
      * @param item preparation step
      */
     private void moveDown(HBox item) {
@@ -650,13 +703,15 @@ public class AddRecipeCtrl implements Internationalizable {
 
     /**
      * Certain key presses can do things
+     * 
      * @param e specific key presses
      */
     public void keyPressed(KeyEvent e) {
         switch (e.getCode()) {
             case ENTER -> clickDone();
             case ESCAPE -> clickCancel();
-            default -> {}
+            default -> {
+            }
         }
     }
 }
