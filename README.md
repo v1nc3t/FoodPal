@@ -41,7 +41,6 @@ that exists and is writable, as opposed to a directory.
 
 >*Note*: To start with a fresh database, delete all the `h2-database.mv.db` and `h2-database.trace.db` files from the project, then restart the server. The schema will be automatically recreated.
 
-
 ## Project structure
 The codebase layout is the following:
 - `server/` contains the server-side code/Spring Boot backend
@@ -54,6 +53,12 @@ If you want to contribute to the project, you can try importing the project into
 The client may be a bit more tricky to set up in an IDE due to the dependency on a JavaFX SDK.
 However, to help you get started, you can find additional instructions in the corresponding 
 [README](client/README.md) of the client project.
+
+## AI disclaimer
+As it is stated in the *Code of Conduct* of Team 45, at the start of the project, it was decided by all members that **AI/LLMs
+should/will not be used to generate code** unless explicitly stated. This still holds true, and for total transparency's sake, 
+AI has only been used for a small part of [WebSocketTest.class](server/src/test/java/server/websocket/WebSocketTest.java). 
+See the file for more information.
 
 ## Features and user-guide
 
@@ -163,8 +168,9 @@ next to their name.
   - Keep in mind this option only affects recipes and not ingredients, as ingredients cannot be favourite. That's why
 you won't be able to toggle the favourite checkbox for ingredients.
 - Favourite recipes are saved in the config file and persisted through a restart of the application.
-- In case a favourite recipe gets deleted by someone else, you will be notified (either upon client initialization 
-or while using the application) that the recipe has been removed.
+- In case you yourself delete a favourite recipe or one gets deleted by someone else, you will be notified (either upon client initialization 
+or while using the application) that the recipe has been removed. Thus, in both cases, perhaps the first one especially, you can properly 
+say goodbye to a recipe and get closure.
 - By entering a query into the search bar at the top left, you can filter both recipes and ingredients. For recipes, it searches their title, included ingredients,
 and featured preparation steps. If you are viewing the ingredients, the search bar will also filter the ingredient list, based 
 on the names.
