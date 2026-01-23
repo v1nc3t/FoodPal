@@ -346,10 +346,10 @@ public class AddRecipeCtrl implements Internationalizable {
             return;
         }
 
-        clearFields();
         if (editingRecipe != null) {
             webSocketService.unsubscribe("recipe", editingRecipe.getId());
         }
+        clearFields();
         editingRecipe = null;
         mainCtrl.showRecipeViewer(r);
     }

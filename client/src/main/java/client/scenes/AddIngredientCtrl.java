@@ -78,15 +78,6 @@ public class AddIngredientCtrl implements Internationalizable {
     @FXML
     private void initialize() {
         bindElementsProperties();
-
-        /* For UI testing purposes, since we don't have a button
-         for language selection just yet, change this line
-         if you want to visualize language changes.
-         Parameter choices:
-         EN: DEFAULT_LOCALE
-         DE: Locale.GERMAN
-         NL: Locale.forLanguageTag("nl-NL")
-        */
         setLocale(localeManager.getCurrentLocale());
 
         for (Unit unit : Unit.values()) {
