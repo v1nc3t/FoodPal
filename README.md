@@ -168,8 +168,9 @@ next to their name.
   - Keep in mind this option only affects recipes and not ingredients, as ingredients cannot be favourite. That's why
 you won't be able to toggle the favourite checkbox for ingredients.
 - Favourite recipes are saved in the config file and persisted through a restart of the application.
-- In case a favourite recipe gets deleted by someone else, you will be notified (either upon client initialization 
-or while using the application) that the recipe has been removed.
+- In case you yourself delete a favourite recipe or one gets deleted by someone else, you will be notified (either upon client initialization 
+or while using the application) that the recipe has been removed. Thus, in both cases, perhaps the first one especially, you can properly 
+say goodbye to a recipe and get closure.
 - By entering a query into the search bar at the top left, you can filter both recipes and ingredients. For recipes, it searches their title, included ingredients,
 and featured preparation steps. If you are viewing the ingredients, the search bar will also filter the ingredient list, based 
 on the names.
