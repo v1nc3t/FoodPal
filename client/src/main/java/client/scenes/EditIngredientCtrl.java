@@ -153,11 +153,6 @@ public class EditIngredientCtrl implements Internationalizable {
             webSocketService.subscribe("ingredient", ingredient.getId(), response -> {
                 if (response.type() == WebSocketTypes.DELETE) {
                     Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Ingredient Deleted");
-                        alert.setHeaderText(null);
-                        alert.setContentText("The ingredient you are editing was deleted by another user.");
-                        alert.showAndWait();
                         mainCtrl.showMainScreen();
                     });
                 }
